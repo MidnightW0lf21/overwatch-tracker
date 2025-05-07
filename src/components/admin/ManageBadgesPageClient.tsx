@@ -1,15 +1,14 @@
-
 'use client';
 
 import type React from 'react';
 import { useState, useEffect, useCallback } from 'react';
 import type { StoredHero, StoredHeroChallenge } from '@/types/overwatch';
-import { initialHeroesData, hydrateHeroes, dehydrateHeroes, calculateTotalXP, calculateLevelDetails } from '@/lib/overwatch-utils';
+import { initialHeroesData } from '@/lib/overwatch-utils'; // Removed hydrateHeroes, dehydrateHeroes, calculateTotalXP, calculateLevelDetails as they are not used here
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { PlusCircleIcon, EditIcon, Trash2Icon, UsersIcon, ShieldCheckIcon, ArrowLeftIcon } from 'lucide-react';
+import { PlusCircleIcon, EditIcon, Trash2Icon, UsersIcon, ShieldCheckIcon, ArrowLeftIcon, ArrowUpIcon, ArrowDownIcon } from 'lucide-react';
 import HeroFormDialog from './HeroFormDialog';
 import BadgeFormDialog from './BadgeFormDialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
@@ -31,13 +30,28 @@ export default function ManageBadgesPageClient() {
     const storedData = localStorage.getItem(LOCAL_STORAGE_KEY);
     if (storedData) {
       try {
-        setAllHeroes(JSON.parse(storedData));
+        const parsedData: StoredHero[] = JSON.parse(storedData);
+        // Ensure all badges have a level, default to 1 if missing
+        const sanitizedData = parsedData.map(hero => ({
+          ...hero,
+          challenges: hero.challenges.map(challenge => ({
+            ...challenge,
+            level: challenge.level ?? 1 // Default to level 1 if undefined
+          }))
+        }));
+        setAllHeroes(sanitizedData);
       } catch (error) {
         console.error("Failed to parse hero data from localStorage", error);
-        setAllHeroes(initialHeroesData);
+        setAllHeroes(initialHeroesData.map(hero => ({ // Use initialHeroesData which is StoredHero[]
+            ...hero,
+            challenges: hero.challenges.map(challenge => ({...challenge, level: challenge.level ?? 1}))
+        })));
       }
     } else {
-      setAllHeroes(initialHeroesData);
+       setAllHeroes(initialHeroesData.map(hero => ({
+        ...hero,
+        challenges: hero.challenges.map(challenge => ({...challenge, level: challenge.level ?? 1}))
+      })));
     }
   }, []);
 
@@ -48,7 +62,6 @@ export default function ManageBadgesPageClient() {
   const saveHeroes = useCallback((updatedHeroes: StoredHero[]) => {
     setAllHeroes(updatedHeroes);
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedHeroes));
-    // If the currently selected hero was deleted, deselect it
     if (selectedHeroId && !updatedHeroes.find(h => h.id === selectedHeroId)) {
         setSelectedHeroId(null);
     }
@@ -56,7 +69,7 @@ export default function ManageBadgesPageClient() {
 
   const handleHeroSelect = (heroId: string) => {
     setSelectedHeroId(heroId);
-    setEditingBadge(null); // Clear badge editing state when hero changes
+    setEditingBadge(null); 
   };
 
   const handleOpenAddHeroDialog = () => {
@@ -84,7 +97,6 @@ export default function ManageBadgesPageClient() {
       updatedHeroes = allHeroes.map(h => h.id === heroData.id ? heroData : h);
       toast({ title: "Hero Updated", description: `${heroData.name} has been updated.` });
     } else {
-      // Check for duplicate ID
       if (allHeroes.some(h => h.id === heroData.id)) {
         toast({ title: "Error", description: `Hero ID "${heroData.id}" already exists. Please use a unique ID.`, variant: "destructive" });
         return;
@@ -95,7 +107,7 @@ export default function ManageBadgesPageClient() {
     saveHeroes(updatedHeroes);
     setIsHeroDialogOpen(false);
     setEditingHero(null);
-    if (!editingHero) setSelectedHeroId(heroData.id); // Select new hero
+    if (!editingHero) setSelectedHeroId(heroData.id); 
   };
 
   const handleOpenAddBadgeDialog = () => {
@@ -133,7 +145,6 @@ export default function ManageBadgesPageClient() {
           updatedChallenges = hero.challenges.map(b => b.id === badgeData.id ? badgeData : b);
           toast({ title: "Badge Updated", description: `Badge "${badgeData.title}" has been updated.` });
         } else {
-          // Check for duplicate badge ID within the current hero
           if (hero.challenges.some(b => b.id === badgeData.id)) {
              toast({ title: "Error", description: `Badge ID "${badgeData.id}" already exists for this hero. Please use a unique ID.`, variant: "destructive" });
              return;
@@ -148,6 +159,33 @@ export default function ManageBadgesPageClient() {
     saveHeroes(updatedHeroes);
     setIsBadgeDialogOpen(false);
     setEditingBadge(null);
+  };
+
+  const handleMoveBadge = (badgeId: string, direction: 'up' | 'down') => {
+    if (!selectedHeroId) return;
+
+    const updatedHeroes = allHeroes.map(hero => {
+      if (hero.id === selectedHeroId) {
+        const challenges = [...hero.challenges];
+        const badgeIndex = challenges.findIndex(b => b.id === badgeId);
+
+        if (badgeIndex === -1) return hero; // Badge not found
+
+        if (direction === 'up' && badgeIndex > 0) {
+          // Swap with previous element
+          [challenges[badgeIndex], challenges[badgeIndex - 1]] = [challenges[badgeIndex - 1], challenges[badgeIndex]];
+        } else if (direction === 'down' && badgeIndex < challenges.length - 1) {
+          // Swap with next element
+          [challenges[badgeIndex], challenges[badgeIndex + 1]] = [challenges[badgeIndex + 1], challenges[badgeIndex]];
+        } else {
+          return hero; // Cannot move further
+        }
+        toast({ title: "Badge Reordered", description: `Badge "${challenges[direction === 'up' ? badgeIndex -1 : badgeIndex + 1].title}" has been moved.`})
+        return { ...hero, challenges };
+      }
+      return hero;
+    });
+    saveHeroes(updatedHeroes);
   };
   
   const selectedHero = allHeroes.find(h => h.id === selectedHeroId);
@@ -184,13 +222,13 @@ export default function ManageBadgesPageClient() {
             </Button>
             {selectedHero && (
               <>
-                <Button onClick={() => handleOpenEditHeroDialog(selectedHero)} variant="outline" size="icon">
+                <Button onClick={() => handleOpenEditHeroDialog(selectedHero)} variant="outline" size="icon" aria-label="Edit Hero">
                   <EditIcon className="h-4 w-4" />
                   <span className="sr-only">Edit Hero</span>
                 </Button>
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <Button variant="destructive" size="icon">
+                    <Button variant="destructive" size="icon" aria-label="Delete Hero">
                       <Trash2Icon className="h-4 w-4" />
                       <span className="sr-only">Delete Hero</span>
                     </Button>
@@ -218,7 +256,7 @@ export default function ManageBadgesPageClient() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2"><ShieldCheckIcon /> Badges for {selectedHero.name}</CardTitle>
-            <CardDescription>Manage the badges available for this hero. Badge levels are edited on the main tracker page.</CardDescription>
+            <CardDescription>Manage the badges available for this hero. Badge levels are edited on the main tracker page. You can reorder badges using the arrow buttons.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <Button onClick={handleOpenAddBadgeDialog} variant="outline">
@@ -226,20 +264,44 @@ export default function ManageBadgesPageClient() {
             </Button>
             {selectedHero.challenges.length > 0 ? (
               <ul className="space-y-2">
-                {selectedHero.challenges.map(badge => (
+                {selectedHero.challenges.map((badge, index) => (
                   <li key={badge.id} className="flex items-center justify-between p-3 bg-card-foreground/5 rounded-md">
-                    <div>
-                      <p className="font-semibold">{badge.title} <span className="text-xs text-muted-foreground">(ID: {badge.id})</span></p>
-                      <p className="text-sm text-muted-foreground">Icon: {badge.iconName}, XP/Lvl: {badge.xpPerLevel}</p>
+                    <div className="flex items-center gap-2">
+                        <div className="flex flex-col">
+                            <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                onClick={() => handleMoveBadge(badge.id, 'up')}
+                                disabled={index === 0}
+                                aria-label="Move badge up"
+                                className="h-6 w-6"
+                            >
+                                <ArrowUpIcon className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                onClick={() => handleMoveBadge(badge.id, 'down')}
+                                disabled={index === selectedHero.challenges.length - 1}
+                                aria-label="Move badge down"
+                                className="h-6 w-6"
+                            >
+                                <ArrowDownIcon className="h-4 w-4" />
+                            </Button>
+                        </div>
+                        <div>
+                        <p className="font-semibold">{badge.title} <span className="text-xs text-muted-foreground">(ID: {badge.id})</span></p>
+                        <p className="text-sm text-muted-foreground">Icon: {badge.iconName}, XP/Lvl: {badge.xpPerLevel}, Initial Lvl: {badge.level}</p>
+                        </div>
                     </div>
                     <div className="flex gap-2">
-                      <Button onClick={() => handleOpenEditBadgeDialog(badge)} variant="outline" size="icon">
+                      <Button onClick={() => handleOpenEditBadgeDialog(badge)} variant="outline" size="icon" aria-label="Edit Badge">
                         <EditIcon className="h-4 w-4" />
                          <span className="sr-only">Edit Badge</span>
                       </Button>
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
-                          <Button variant="destructive" size="icon">
+                          <Button variant="destructive" size="icon" aria-label="Delete Badge">
                             <Trash2Icon className="h-4 w-4" />
                             <span className="sr-only">Delete Badge</span>
                           </Button>
