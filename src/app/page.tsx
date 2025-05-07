@@ -231,7 +231,7 @@ export default function Home() {
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 2xl:grid-cols-8 3xl:grid-cols-10 gap-4">
         {heroes.length === 0 ? (
           <div className="text-center py-10 col-span-full">
             <p className="text-xl text-muted-foreground">Loading hero data...</p>

@@ -9,6 +9,9 @@ export default {
   ],
   theme: {
   	extend: {
+      screens: {
+        '3xl': '1920px', // Added 3xl breakpoint
+      },
       fontFamily: {
         sans: ["var(--font-inter)", "sans-serif"], // Use Inter as primary sans-serif font
       },
