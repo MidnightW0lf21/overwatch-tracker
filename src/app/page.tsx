@@ -4,10 +4,18 @@
 import type React from 'react';
 import { useState, useEffect, useCallback } from 'react';
 import HeroCard from '@/components/overwatch/HeroCard';
-// BadgeInputFlyout is removed
 import HeroChallengeCard from '@/components/overwatch/HeroChallengeCard';
-import type { Hero, HeroCalculated, HeroChallenge } from '@/types/overwatch';
-import { initialHeroesData, calculateTotalXP, calculateLevelDetails, XP_PER_HERO_TYPE_BADGE_LEVEL, XP_PER_WIN_TYPE_BADGE_LEVEL, XP_PER_TIME_TYPE_BADGE_LEVEL } from '@/lib/overwatch-utils';
+import type { Hero, HeroCalculated, StoredHero } from '@/types/overwatch';
+import { 
+  initialHeroesData, 
+  calculateTotalXP, 
+  calculateLevelDetails, 
+  XP_PER_HERO_TYPE_BADGE_LEVEL, 
+  XP_PER_WIN_TYPE_BADGE_LEVEL, 
+  XP_PER_TIME_TYPE_BADGE_LEVEL,
+  hydrateHeroes,
+  dehydrateHeroes
+} from '@/lib/overwatch-utils';
 import { Toaster } from '@/components/ui/toaster';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
@@ -21,17 +29,16 @@ import {
 } from "@/components/ui/tooltip"
 
 
-const LOCAL_STORAGE_KEY = 'overwatchProgressionData_v2'; // New key for new data structure
+const LOCAL_STORAGE_KEY = 'overwatchProgressionData_v3'; // Incremented key for new data structure with iconName
 
 export default function Home() {
   const [heroes, setHeroes] = useState<HeroCalculated[]>([]);
   const [selectedHero, setSelectedHero] = useState<HeroCalculated | null>(null);
-  // isFlyoutOpen state is removed
   const { toast } = useToast();
 
   const calculateAndSetHeroes = useCallback((heroesData: Hero[]) => {
     const calculatedHeroes = heroesData.map(hero => {
-      const totalXp = calculateTotalXP(hero.challenges); // Pass challenges array
+      const totalXp = calculateTotalXP(hero.challenges);
       const levelDetails = calculateLevelDetails(totalXp);
       return { ...hero, totalXp, ...levelDetails };
     });
@@ -40,18 +47,21 @@ export default function Home() {
   
   useEffect(() => {
     const storedData = localStorage.getItem(LOCAL_STORAGE_KEY);
+    const hydratedInitialData = hydrateHeroes(initialHeroesData); // Hydrate initial data
+
     if (storedData) {
       try {
-        const parsedData = JSON.parse(storedData) as Hero[]; // Expecting new Hero structure
-        calculateAndSetHeroes(parsedData);
+        const parsedData = JSON.parse(storedData) as StoredHero[]; // Expecting StoredHero structure
+        const hydratedRuntimeData = hydrateHeroes(parsedData); // Hydrate stored data
+        calculateAndSetHeroes(hydratedRuntimeData);
       } catch (error) {
         console.error("Failed to parse hero data from localStorage", error);
-        calculateAndSetHeroes(initialHeroesData);
-        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(initialHeroesData)); 
+        calculateAndSetHeroes(hydratedInitialData); // Use hydrated initial data on error
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(initialHeroesData)); // Store initial data in StoredHero format
       }
     } else {
-      calculateAndSetHeroes(initialHeroesData);
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(initialHeroesData));
+      calculateAndSetHeroes(hydratedInitialData); // Use hydrated initial data if no stored data
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(initialHeroesData)); // Store initial data in StoredHero format
     }
   }, [calculateAndSetHeroes]);
 
@@ -59,12 +69,6 @@ export default function Home() {
     const fullHeroData = heroes.find(h => h.id === hero.id);
     setSelectedHero(fullHeroData || hero);
   };
-  
-  // openEditFlyout handler is removed as flyout is removed
-
-  // handleCloseFlyout handler is removed
-
-  // handleSaveHero (flyout save) is removed
   
   const handleBadgeLevelChange = (heroId: string, challengeId: string, newLevel: number) => {
     const updatedHeroesList = heroes.map(h => {
@@ -79,11 +83,13 @@ export default function Home() {
       return h;
     });
 
-    setHeroes(updatedHeroesList.sort((a, b) => b.totalXp - a.totalXp));
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedHeroesList.map(
-      // Destructure to save only the base Hero structure, not calculated fields
+    const dehydratedHeroesForStorage = dehydrateHeroes(updatedHeroesList.map(
+      // Destructure to remove calculated fields before dehydration
       ({ totalXp, level, xpTowardsNextLevel, xpNeededForNextLevel, currentLevelBaseXp, nextLevelBaseXp, ...rest }) => rest
-    )));
+    ));
+    
+    setHeroes(updatedHeroesList.sort((a, b) => b.totalXp - a.totalXp));
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dehydratedHeroesForStorage));
     
     const updatedSelectedHero = updatedHeroesList.find(h => h.id === heroId);
     if (updatedSelectedHero && selectedHero && selectedHero.id === heroId) {
@@ -103,8 +109,9 @@ export default function Home() {
 
   const handleResetData = () => {
     if(window.confirm("Are you sure you want to reset all hero data to default? This cannot be undone.")) {
-      calculateAndSetHeroes(initialHeroesData);
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(initialHeroesData));
+      const hydratedInitialData = hydrateHeroes(initialHeroesData);
+      calculateAndSetHeroes(hydratedInitialData);
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(initialHeroesData)); // Store initial data (StoredHero format)
       setSelectedHero(null); 
       toast({
         title: "Data Reset",
@@ -114,6 +121,9 @@ export default function Home() {
     }
   };
   
+  // Use initialHeroesData for rankTitle source as it's static.
+  // It's cast to `any` because `rankTitle` is not part of the defined StoredHero type.
+  // This might be something to formalize in the type if it's consistently used.
   const selectedHeroRank = selectedHero ? (initialHeroesData.find(h => h.id === selectedHero.id) as any)?.rankTitle : "";
   const personalGoalProgress = selectedHero ? (selectedHero.totalXp / selectedHero.personalGoalXP) * 100 : 0;
 
@@ -169,7 +179,6 @@ export default function Home() {
                   key={hero.id} 
                   hero={hero} 
                   onSelectHero={handleSelectHero}
-                  // onEditHero is removed
                   isSelected={selectedHero?.id === hero.id} 
                 />
               ))
@@ -221,8 +230,6 @@ export default function Home() {
           )}
         </div>
       </div>
-
-      {/* BadgeInputFlyout is removed */}
       <Toaster />
     </div>
   );

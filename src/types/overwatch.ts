@@ -1,12 +1,22 @@
 
 import type React from 'react';
 
+// Runtime version used by components
 export interface HeroChallenge {
   id: string;
   title: string;
-  icon: React.ElementType; // Expecting a Lucide icon component
-  level: number; // User-editable level for this specific badge
-  xpPerLevel: number; // XP awarded for each level of this badge
+  icon: React.ElementType; // Actual component for rendering
+  level: number;
+  xpPerLevel: number;
+}
+
+// Storage version (localStorage, initial data configuration)
+export interface StoredHeroChallenge {
+  id: string;
+  title: string;
+  iconName: string; // Name of the icon for serialization
+  level: number;
+  xpPerLevel: number;
 }
 
 export interface Hero {
@@ -14,15 +24,23 @@ export interface Hero {
   name: string;
   portraitUrl: string;
   personalGoalXP: number;
-  challenges: HeroChallenge[]; // Renamed from 'challenges?' to 'challenges' assuming all heroes have them
+  challenges: HeroChallenge[]; // Runtime uses actual components
+}
+
+export interface StoredHero {
+  id: string;
+  name: string;
+  portraitUrl: string;
+  personalGoalXP: number;
+  challenges: StoredHeroChallenge[]; // Storage uses icon names
 }
 
 export interface LevelDetails {
   level: number;
-  xpTowardsNextLevel: number; // XP earned within the current level bar
-  xpNeededForNextLevel: number; // Total XP for the current level bar (i.e. 5000 or 60000)
-  currentLevelBaseXp: number; // Cumulative XP at the start of this level
-  nextLevelBaseXp: number; // Cumulative XP to reach the next level (complete current)
+  xpTowardsNextLevel: number;
+  xpNeededForNextLevel: number;
+  currentLevelBaseXp: number;
+  nextLevelBaseXp: number;
   totalXp: number;
 }
 
