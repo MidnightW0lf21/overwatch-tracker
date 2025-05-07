@@ -226,7 +226,7 @@ export default function Home() {
           </div>
           <Progress value={globalProgressPercentage} className="h-3 w-full bg-accent/20 [&>div]:bg-accent" />
            <p className="text-xs text-muted-foreground mt-1 text-right">
-            {globalProgressPercentage.toFixed(2)}% towards all heroes maxed
+            {globalProgressPercentage.toFixed(4)}% towards all heroes maxed
           </p>
         </CardContent>
       </Card>
