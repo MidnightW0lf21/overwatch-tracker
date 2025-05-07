@@ -2,6 +2,7 @@
 'use client';
 
 import type React from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import type { HeroCalculated } from '@/types/overwatch';
 import HeroChallengeCard from './HeroChallengeCard';
@@ -16,6 +17,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { XP_PER_TIME_TYPE_BADGE_LEVEL, calculateXpToReachLevel } from '@/lib/overwatch-utils';
+import { ClockIcon } from 'lucide-react';
 
 interface HeroBadgeEditorSheetProps {
   isOpen: boolean;
@@ -24,20 +27,62 @@ interface HeroBadgeEditorSheetProps {
   onClose: () => void;
 }
 
+const HERO_MAX_LEVEL = 500; // Defined max level for a hero
+
 const HeroBadgeEditorSheet: React.FC<HeroBadgeEditorSheetProps> = ({
   isOpen,
   hero,
   onBadgeLevelChange,
   onClose,
 }) => {
+  const [estimatedTimeToMax, setEstimatedTimeToMax] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (hero) {
+      const timeBadge = hero.challenges.find(
+        (c) => c.xpPerLevel === XP_PER_TIME_TYPE_BADGE_LEVEL
+      );
+
+      if (hero.level >= HERO_MAX_LEVEL) {
+        setEstimatedTimeToMax("Max level reached!");
+      } else if (timeBadge) {
+        const xpForMaxLevel = calculateXpToReachLevel(HERO_MAX_LEVEL + 1); // XP to complete level HERO_MAX_LEVEL
+        const xpRemaining = Math.max(0, xpForMaxLevel - hero.totalXp);
+
+        if (xpRemaining > 0 && XP_PER_TIME_TYPE_BADGE_LEVEL > 0) {
+          const timeBadgeLevelsNeeded = xpRemaining / XP_PER_TIME_TYPE_BADGE_LEVEL;
+          const totalMinutesNeeded = timeBadgeLevelsNeeded * 20; // 20 minutes per time badge level
+
+          const hours = Math.floor(totalMinutesNeeded / 60);
+          const minutes = Math.round(totalMinutesNeeded % 60);
+
+          if (hours === 0 && minutes === 0) {
+             // If calculation results in 0h 0m but hero is not max level, show ~1 min
+            setEstimatedTimeToMax("~1 min");
+          } else {
+            setEstimatedTimeToMax(`${hours}h ${minutes}m`);
+          }
+        } else {
+          // This case implies xpRemaining is 0, but level is not yet HERO_MAX_LEVEL (handled by first if),
+          // or XP_PER_TIME_TYPE_BADGE_LEVEL is 0 (which shouldn't happen).
+          // If xpRemaining is 0 and level is not max, it's likely a rounding to max level.
+           setEstimatedTimeToMax(null); // Or "Almost there!" or specific logic for very small remaining XP
+        }
+      } else {
+        setEstimatedTimeToMax("No time-based badge found to estimate.");
+      }
+    } else {
+      setEstimatedTimeToMax(null);
+    }
+  }, [hero]);
+
   if (!hero) {
     return null;
   }
 
-  // Rank title can be simplified or derived differently if needed, 
-  // for now, using a generic title based on level.
   const rankTitle = `Level ${hero.level} Hero`; 
-  const personalGoalProgress = hero.personalGoalXP > 0 ? (hero.totalXp / hero.personalGoalXP) * 100 : 0;
+  const personalGoalProgress = hero.personalGoalXP > 0 ? Math.min(100, (hero.totalXp / hero.personalGoalXP) * 100) : 0;
+
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -66,11 +111,26 @@ const HeroBadgeEditorSheet: React.FC<HeroBadgeEditorSheetProps> = ({
 
         <div className="px-6 py-4">
           <h3 className="text-md font-semibold text-foreground/90 mb-1">Personal Goal Progress</h3>
-          <Progress value={personalGoalProgress > 100 ? 100 : personalGoalProgress} className="h-3 bg-accent/20 [&>div]:bg-accent" />
+          <Progress value={personalGoalProgress} className="h-3 bg-accent/20 [&>div]:bg-accent" />
           <p className="text-xs text-muted-foreground mt-1 text-right">
-            {hero.totalXp.toLocaleString()} / {hero.personalGoalXP.toLocaleString()} XP ({Math.min(100, personalGoalProgress).toFixed(1)}%)
+            {hero.totalXp.toLocaleString()} / {hero.personalGoalXP.toLocaleString()} XP ({personalGoalProgress.toFixed(1)}%)
           </p>
         </div>
+
+        {estimatedTimeToMax && (
+          <div className="px-6 py-3 border-t border-border">
+            <h3 className="text-md font-semibold text-foreground/90 mb-1 flex items-center">
+              <ClockIcon className="h-4 w-4 mr-2 text-muted-foreground" />
+              Est. Time to Max Level ({HERO_MAX_LEVEL})
+            </h3>
+            <p className="text-sm text-muted-foreground ml-6">
+              {estimatedTimeToMax}
+            </p>
+            {hero.level < HERO_MAX_LEVEL && hero.challenges.some(c => c.xpPerLevel === XP_PER_TIME_TYPE_BADGE_LEVEL) && !estimatedTimeToMax?.includes("No time-based badge") && !estimatedTimeToMax?.includes("Max level reached!") && (
+                 <p className="text-xs text-muted-foreground/70 ml-6 mt-0.5">(Assuming a time badge level is earned every 20 mins of play)</p>
+            )}
+          </div>
+        )}
 
         <h3 className="text-xl font-semibold mb-3 text-foreground/90 px-6 border-t border-border pt-4">
           Hero Badges
