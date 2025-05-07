@@ -5,7 +5,7 @@ import type React from 'react';
 import { useState, useEffect, useCallback } from 'react';
 import HeroCard from '@/components/overwatch/HeroCard';
 import HeroBadgeEditorSheet from '@/components/overwatch/HeroBadgeEditorSheet';
-import type { Hero, HeroCalculated, StoredHero } from '@/types/overwatch';
+import type { Hero, HeroCalculated, StoredHero, StoredHeroChallenge } from '@/types/overwatch';
 import { 
   initialHeroesData, 
   calculateTotalXP, 
@@ -37,10 +37,10 @@ export default function Home() {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const { toast } = useToast();
 
-  const calculateAndSetHeroes = useCallback((heroesData: StoredHero[]) => { // Expect StoredHero[] for raw data
+  const calculateAndSetHeroes = useCallback((heroesData: StoredHero[]) => {
     const hydratedHeroesData = hydrateHeroes(heroesData);
     const calculatedHeroes = hydratedHeroesData.map(hero => {
-      const totalXp = calculateTotalXP(hero.challenges);
+      const totalXp = calculateTotalXP(hero.challenges as StoredHeroChallenge[]); // Ensure StoredHeroChallenge for totalXP calc
       const levelDetails = calculateLevelDetails(totalXp);
       return { ...hero, totalXp, ...levelDetails };
     });
@@ -48,22 +48,30 @@ export default function Home() {
   }, []);
   
   useEffect(() => {
-    const storedData = localStorage.getItem(LOCAL_STORAGE_KEY);
-    
-    if (storedData) {
-      try {
-        const parsedData = JSON.parse(storedData) as StoredHero[];
-        calculateAndSetHeroes(parsedData); // Pass StoredHero[]
-      } catch (error) {
-        console.error("Failed to parse hero data from localStorage", error);
-        calculateAndSetHeroes(initialHeroesData); // Pass StoredHero[]
-        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(initialHeroesData)); // Store StoredHero[]
+    try {
+      const storedData = localStorage.getItem(LOCAL_STORAGE_KEY);
+      
+      if (storedData) {
+        try {
+          const parsedData = JSON.parse(storedData) as StoredHero[];
+          calculateAndSetHeroes(parsedData); 
+        } catch (error) {
+          console.error("Failed to parse hero data from localStorage", error);
+          calculateAndSetHeroes(initialHeroesData); 
+          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dehydrateHeroes(initialHeroesData.map(h => ({...h, challenges: h.challenges.map(c => ({...c, level: c.level || 0})) } as Hero)))));
+        }
+      } else {
+        calculateAndSetHeroes(initialHeroesData); 
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dehydrateHeroes(initialHeroesData.map(h => ({...h, challenges: h.challenges.map(c => ({...c, level: c.level || 0})) } as Hero)))));
       }
-    } else {
-      calculateAndSetHeroes(initialHeroesData); // Pass StoredHero[]
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(initialHeroesData)); // Store StoredHero[]
+    } catch (e) {
+      console.error('Error during initial data load:', e);
+      // Fallback to initial data if any error occurs during localStorage access or processing
+      calculateAndSetHeroes(initialHeroesData);
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dehydrateHeroes(initialHeroesData.map(h => ({...h, challenges: h.challenges.map(c => ({...c, level: c.level || 0})) } as Hero)))));
     }
   }, [calculateAndSetHeroes]);
+
 
   const handleEditHeroBadges = (hero: HeroCalculated) => {
     const fullHeroData = heroes.find(h => h.id === hero.id);
@@ -73,8 +81,6 @@ export default function Home() {
 
   const handleSheetClose = () => {
     setIsSheetOpen(false);
-    // Optional: setEditingHero(null) if you want to clear it immediately,
-    // but Sheet's onOpenChange will handle it via isOpen.
   };
   
   const handleBadgeLevelChange = (heroId: string, challengeId: string, newLevel: number) => {
@@ -83,19 +89,23 @@ export default function Home() {
         const updatedChallenges = h.challenges.map(c => 
           c.id === challengeId ? { ...c, level: newLevel } : c
         );
-        const totalXp = calculateTotalXP(updatedChallenges);
+        // Calculate total XP using StoredHeroChallenge representation for consistency
+        const storedChallengesForXPCalc = updatedChallenges.map(c => ({
+          id: c.id,
+          title: c.title,
+          iconName: dehydrateHeroes([h] as Hero[])[0].challenges.find(sc => sc.id === c.id)?.iconName || 'ShieldQuestion', // Get iconName
+          level: c.level,
+          xpPerLevel: c.xpPerLevel,
+        }));
+
+        const totalXp = calculateTotalXP(storedChallengesForXPCalc);
         const levelDetails = calculateLevelDetails(totalXp);
         return { ...h, challenges: updatedChallenges, totalXp, ...levelDetails };
       }
       return h;
     });
     
-    // Dehydrate for storage: convert Hero[] back to StoredHero[]
-    // Remove calculated fields (totalXp, level, etc.) before dehydrating
-    const heroesForStorage = updatedHeroesList.map(
-      ({ totalXp, level, xpTowardsNextLevel, xpNeededForNextLevel, currentLevelBaseXp, nextLevelBaseXp, ...rest }) => rest
-    );
-    const dehydratedHeroesForStorage = dehydrateHeroes(heroesForStorage);
+    const dehydratedHeroesForStorage = dehydrateHeroes(updatedHeroesList);
     
     const sortedHeroes = updatedHeroesList.sort((a, b) => b.totalXp - a.totalXp);
     setHeroes(sortedHeroes);
@@ -103,7 +113,7 @@ export default function Home() {
     
     const updatedHeroInstance = sortedHeroes.find(h => h.id === heroId);
     if (updatedHeroInstance && editingHero && editingHero.id === heroId) {
-      setEditingHero(updatedHeroInstance); // Keep the sheet's hero data in sync
+      setEditingHero(updatedHeroInstance); 
     }
 
     const changedHero = updatedHeroesList.find(h=>h.id === heroId);
@@ -119,7 +129,7 @@ export default function Home() {
 
   const handleResetData = () => {
     if(window.confirm("Are you sure you want to reset all hero data to default? This cannot be undone.")) {
-      calculateAndSetHeroes(initialHeroesData); // Pass StoredHero[]
+      calculateAndSetHeroes(initialHeroesData);
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(initialHeroesData)); // Store StoredHero[]
       setEditingHero(null); 
       setIsSheetOpen(false);
@@ -160,18 +170,15 @@ export default function Home() {
               </TooltipTrigger>
               <TooltipContent className="max-w-xs bg-popover text-popover-foreground p-3 rounded-md shadow-lg text-sm" side="bottom" align="end">
                 <p className="font-semibold mb-1">How XP is Calculated:</p>
-                <p className="text-xs mb-2">XP is earned by leveling up individual hero badges. Each badge has an XP per level value:</p>
+                <p className="text-xs mb-2">XP is earned by leveling up individual hero badges (level 1 and above). Each badge has an XP per level value:</p>
                 <ul className="list-disc list-inside space-y-1 text-xs">
                   <li>Hero-specific Badges: {XP_PER_HERO_TYPE_BADGE_LEVEL} XP per level</li>
                   <li>Win Badges: {XP_PER_WIN_TYPE_BADGE_LEVEL} XP per level</li>
                   <li>Time Played Badges: {XP_PER_TIME_TYPE_BADGE_LEVEL} XP per level</li>
                 </ul>
                 <p className="mt-2 font-semibold mb-1">Hero Level Progression:</p>
-                <ul className="list-disc list-inside space-y-1 text-xs">
-                  <li>Levels 1-19: 5,000 XP per hero level</li>
-                  <li>Levels 20+: 60,000 XP per hero level</li>
-                </ul>
-                <p className="mt-3 text-xs">Click on a hero to edit their badges and see progress.</p>
+                 <p className="text-xs mb-2">Hero levels are based on total XP earned, following the Overwatch 2 progression system. XP requirements per level vary.</p>
+                <p className="mt-3 text-xs">Click on a hero to edit their badges and see progress. Badges at level 0 do not contribute XP.</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -206,8 +213,6 @@ export default function Home() {
           hero={editingHero}
           onBadgeLevelChange={handleBadgeLevelChange}
           onClose={handleSheetClose}
-          // Pass initialHeroesData (which is StoredHero[]) to find rankTitle if needed
-          // The sheet component might need adjustment if it expects Hero[] instead of StoredHero[] for this prop
           initialHeroesData={initialHeroesData} 
         />
       )}
@@ -215,3 +220,6 @@ export default function Home() {
     </div>
   );
 }
+
+
+    
