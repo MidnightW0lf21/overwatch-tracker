@@ -5,21 +5,16 @@ export interface HeroChallenge {
   id: string;
   title: string;
   icon: React.ElementType; // Expecting a Lucide icon component
-  level: number;
-  currentValue: number;
-  targetValue: number;
-  unit?: string; // e.g., "MIN" for time, or empty for counts
+  level: number; // User-editable level for this specific badge
+  xpPerLevel: number; // XP awarded for each level of this badge
 }
 
 export interface Hero {
   id: string;
   name: string;
   portraitUrl: string;
-  heroSubBadges: number;
-  winSubBadges: number;
-  timePlayedSubBadges: number;
   personalGoalXP: number;
-  challenges?: HeroChallenge[];
+  challenges: HeroChallenge[]; // Renamed from 'challenges?' to 'challenges' assuming all heroes have them
 }
 
 export interface LevelDetails {
