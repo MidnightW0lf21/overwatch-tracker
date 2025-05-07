@@ -1,6 +1,30 @@
 
 import type React from 'react';
-import { Shell, Crosshair, Skull, Shapes, HeartPulse, Eye, Clock, Trophy, Zap, ShieldQuestion, Sword } from 'lucide-react';
+import { 
+  Shell, 
+  Crosshair, 
+  Skull, 
+  Shapes, 
+  HeartPulse, 
+  Eye, 
+  Clock, 
+  Trophy, 
+  Zap, 
+  ShieldQuestion, 
+  Sword,
+  Swords, 
+  Target, 
+  Shield, 
+  Medal,  
+  Gauge,  
+  Timer,  
+  Bomb,   
+  Brain,  
+  Wand2,  
+  // Fist, // Fist icon does not exist, removing
+  Activity, 
+  UserCheck 
+} from 'lucide-react';
 
 // Add any new icons here if they are used in initialHeroesData or can be dynamically added
 export const iconNameMap: Record<string, React.ElementType> = {
@@ -15,6 +39,18 @@ export const iconNameMap: Record<string, React.ElementType> = {
   Zap,
   ShieldQuestion,
   Sword,
+  Swords,
+  Target,
+  Shield,
+  Medal,
+  Gauge,
+  Timer,
+  Bomb,
+  Brain,
+  Wand2,
+  // Fist, // Removing from map
+  Activity,
+  UserCheck
   // Add other icons used by heroes here, e.g., for Mercy, Reinhardt, Ana, Genji if they have unique ones.
   // For now, the provided initialHeroesData mostly reuses these.
 };
@@ -36,3 +72,4 @@ export function getIconComponent(iconName: string): React.ElementType {
 export function getIconName(iconComponent: React.ElementType): string | undefined {
   return componentToIconNameMap.get(iconComponent);
 }
+
