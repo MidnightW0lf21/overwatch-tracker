@@ -3,7 +3,7 @@
 
 import type React from 'react';
 import Image from 'next/image';
-import type { HeroCalculated, StoredHero } from '@/types/overwatch';
+import type { HeroCalculated } from '@/types/overwatch';
 import HeroChallengeCard from './HeroChallengeCard';
 import {
   Sheet,
@@ -22,7 +22,6 @@ interface HeroBadgeEditorSheetProps {
   hero: HeroCalculated | null;
   onBadgeLevelChange: (heroId: string, challengeId: string, newLevel: number) => void;
   onClose: () => void;
-  initialHeroesData: StoredHero[]; 
 }
 
 const HeroBadgeEditorSheet: React.FC<HeroBadgeEditorSheetProps> = ({
@@ -30,14 +29,14 @@ const HeroBadgeEditorSheet: React.FC<HeroBadgeEditorSheetProps> = ({
   hero,
   onBadgeLevelChange,
   onClose,
-  initialHeroesData,
 }) => {
   if (!hero) {
     return null;
   }
 
-  const heroStaticData = initialHeroesData.find(h => h.id === hero.id);
-  const rankTitle = (heroStaticData as any)?.rankTitle || `Level ${hero.level} Hero`; 
+  // Rank title can be simplified or derived differently if needed, 
+  // for now, using a generic title based on level.
+  const rankTitle = `Level ${hero.level} Hero`; 
   const personalGoalProgress = hero.personalGoalXP > 0 ? (hero.totalXp / hero.personalGoalXP) * 100 : 0;
 
   return (

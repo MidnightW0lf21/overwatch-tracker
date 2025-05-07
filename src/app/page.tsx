@@ -2,7 +2,7 @@
 'use client';
 
 import type React from 'react';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import HeroCard from '@/components/overwatch/HeroCard';
 import HeroBadgeEditorSheet from '@/components/overwatch/HeroBadgeEditorSheet';
 import type { Hero, HeroCalculated, StoredHero, StoredHeroChallenge } from '@/types/overwatch';
@@ -14,12 +14,13 @@ import {
   XP_PER_WIN_TYPE_BADGE_LEVEL, 
   XP_PER_TIME_TYPE_BADGE_LEVEL,
   hydrateHeroes,
-  dehydrateHeroes
+  dehydrateHeroes,
+  calculateXpToReachLevel
 } from '@/lib/overwatch-utils';
 import { Toaster } from '@/components/ui/toaster';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
-import { RefreshCwIcon, InfoIcon, SettingsIcon } from 'lucide-react';
+import { InfoIcon, SettingsIcon, StarIcon } from 'lucide-react';
 import Link from 'next/link';
 import {
   Tooltip,
@@ -27,9 +28,12 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Progress } from '@/components/ui/progress';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 
 const LOCAL_STORAGE_KEY = 'overwatchProgressionData_v3';
+const GLOBAL_MAX_LEVEL = 500;
 
 export default function Home() {
   const [heroes, setHeroes] = useState<HeroCalculated[]>([]);
@@ -40,7 +44,7 @@ export default function Home() {
   const calculateAndSetHeroes = useCallback((heroesData: StoredHero[]) => {
     const hydratedHeroesData = hydrateHeroes(heroesData);
     const calculatedHeroes = hydratedHeroesData.map(hero => {
-      const totalXp = calculateTotalXP(hero.challenges as StoredHeroChallenge[]); // Ensure StoredHeroChallenge for totalXP calc
+      const totalXp = calculateTotalXP(hero.challenges as StoredHeroChallenge[]); 
       const levelDetails = calculateLevelDetails(totalXp);
       return { ...hero, totalXp, ...levelDetails };
     });
@@ -54,21 +58,31 @@ export default function Home() {
       if (storedData) {
         try {
           const parsedData = JSON.parse(storedData) as StoredHero[];
-          calculateAndSetHeroes(parsedData); 
+          // Ensure all initial badges are at least level 1
+          const sanitizedData = parsedData.map(hero => ({
+            ...hero,
+            challenges: hero.challenges.map(challenge => ({
+              ...challenge,
+              level: Math.max(1, challenge.level || 1) 
+            }))
+          }));
+          calculateAndSetHeroes(sanitizedData); 
         } catch (error) {
           console.error("Failed to parse hero data from localStorage", error);
-          calculateAndSetHeroes(initialHeroesData); 
-          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dehydrateHeroes(initialHeroesData.map(h => ({...h, challenges: h.challenges.map(c => ({...c, level: c.level || 0})) } as Hero)))));
+          const defaultData = initialHeroesData.map(h => ({...h, challenges: h.challenges.map(c => ({...c, level: Math.max(1, c.level || 1)})) } as StoredHero));
+          calculateAndSetHeroes(defaultData); 
+          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dehydrateHeroes(hydrateHeroes(defaultData))));
         }
       } else {
-        calculateAndSetHeroes(initialHeroesData); 
-        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dehydrateHeroes(initialHeroesData.map(h => ({...h, challenges: h.challenges.map(c => ({...c, level: c.level || 0})) } as Hero)))));
+        const defaultData = initialHeroesData.map(h => ({...h, challenges: h.challenges.map(c => ({...c, level: Math.max(1, c.level || 1)})) } as StoredHero));
+        calculateAndSetHeroes(defaultData); 
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dehydrateHeroes(hydrateHeroes(defaultData))));
       }
     } catch (e) {
       console.error('Error during initial data load:', e);
-      // Fallback to initial data if any error occurs during localStorage access or processing
-      calculateAndSetHeroes(initialHeroesData);
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dehydrateHeroes(initialHeroesData.map(h => ({...h, challenges: h.challenges.map(c => ({...c, level: c.level || 0})) } as Hero)))));
+      const defaultData = initialHeroesData.map(h => ({...h, challenges: h.challenges.map(c => ({...c, level: Math.max(1, c.level || 1)})) } as StoredHero));
+      calculateAndSetHeroes(defaultData);
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dehydrateHeroes(hydrateHeroes(defaultData))));
     }
   }, [calculateAndSetHeroes]);
 
@@ -84,16 +98,17 @@ export default function Home() {
   };
   
   const handleBadgeLevelChange = (heroId: string, challengeId: string, newLevel: number) => {
+    const finalNewLevel = Math.max(1, newLevel); // Ensure level is at least 1
+
     const updatedHeroesList = heroes.map(h => {
       if (h.id === heroId) {
         const updatedChallenges = h.challenges.map(c => 
-          c.id === challengeId ? { ...c, level: newLevel } : c
+          c.id === challengeId ? { ...c, level: finalNewLevel } : c
         );
-        // Calculate total XP using StoredHeroChallenge representation for consistency
         const storedChallengesForXPCalc = updatedChallenges.map(c => ({
           id: c.id,
           title: c.title,
-          iconName: dehydrateHeroes([h] as Hero[])[0].challenges.find(sc => sc.id === c.id)?.iconName || 'ShieldQuestion', // Get iconName
+          iconName: dehydrateHeroes([h] as Hero[])[0].challenges.find(sc => sc.id === c.id)?.iconName || 'ShieldQuestion', 
           level: c.level,
           xpPerLevel: c.xpPerLevel,
         }));
@@ -121,25 +136,27 @@ export default function Home() {
 
     toast({
       title: "Badge Updated",
-      description: `${changedHero?.name}'s "${changedChallenge?.title}" badge level set to ${newLevel}.`,
+      description: `${changedHero?.name}'s "${changedChallenge?.title}" badge level set to ${finalNewLevel}.`,
       variant: "default",
     });
   };
 
+  const currentGlobalXp = useMemo(() => {
+    return heroes.reduce((sum, hero) => sum + hero.totalXp, 0);
+  }, [heroes]);
 
-  const handleResetData = () => {
-    if(window.confirm("Are you sure you want to reset all hero data to default? This cannot be undone.")) {
-      calculateAndSetHeroes(initialHeroesData);
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(initialHeroesData)); // Store StoredHero[]
-      setEditingHero(null); 
-      setIsSheetOpen(false);
-      toast({
-        title: "Data Reset",
-        description: "All hero data has been reset to default values.",
-        variant: "default",
-      });
-    }
-  };
+  const globalMaxXpForLevel500 = useMemo(() => {
+    return calculateXpToReachLevel(GLOBAL_MAX_LEVEL + 1);
+  }, []);
+
+  const globalLevelDetails = useMemo(() => {
+    return calculateLevelDetails(currentGlobalXp);
+  }, [currentGlobalXp]);
+
+  const globalProgressPercentage = useMemo(() => {
+    if (globalMaxXpForLevel500 === 0) return 0;
+    return Math.min((currentGlobalXp / globalMaxXpForLevel500) * 100, 100);
+  }, [currentGlobalXp, globalMaxXpForLevel500]);
   
   return (
     <div className="min-h-screen bg-background text-foreground p-4 sm:p-6 lg:p-8">
@@ -170,26 +187,43 @@ export default function Home() {
               </TooltipTrigger>
               <TooltipContent className="max-w-xs bg-popover text-popover-foreground p-3 rounded-md shadow-lg text-sm" side="bottom" align="end">
                 <p className="font-semibold mb-1">How XP is Calculated:</p>
-                <p className="text-xs mb-2">XP is earned by leveling up individual hero badges (level 1 and above). Each badge has an XP per level value:</p>
+                <p className="text-xs mb-2">XP is earned by leveling up individual hero badges. Badge level 1 is the base and grants no XP. XP is awarded for levels 2 and above (i.e., level N grants (N-1) * XP_PER_LEVEL).</p>
                 <ul className="list-disc list-inside space-y-1 text-xs">
-                  <li>Hero-specific Badges: {XP_PER_HERO_TYPE_BADGE_LEVEL} XP per level</li>
-                  <li>Win Badges: {XP_PER_WIN_TYPE_BADGE_LEVEL} XP per level</li>
-                  <li>Time Played Badges: {XP_PER_TIME_TYPE_BADGE_LEVEL} XP per level</li>
+                  <li>Hero-specific Badges: {XP_PER_HERO_TYPE_BADGE_LEVEL} XP per level above 1</li>
+                  <li>Win Badges: {XP_PER_WIN_TYPE_BADGE_LEVEL} XP per level above 1</li>
+                  <li>Time Played Badges: {XP_PER_TIME_TYPE_BADGE_LEVEL} XP per level above 1</li>
                 </ul>
                 <p className="mt-2 font-semibold mb-1">Hero Level Progression:</p>
                  <p className="text-xs mb-2">Hero levels are based on total XP earned, following the Overwatch 2 progression system. XP requirements per level vary.</p>
-                <p className="mt-3 text-xs">Click on a hero to edit their badges and see progress. Badges at level 0 do not contribute XP.</p>
+                <p className="mt-3 text-xs">Click on a hero to edit their badges and see progress. Badges must be level 2 or higher to contribute XP.</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
         </div>
       </header>
       
-      <div className="flex justify-end mb-4">
-        <Button onClick={handleResetData} variant="destructive" size="sm">
-          <RefreshCwIcon className="mr-2 h-4 w-4" /> Reset All Data
-        </Button>
-      </div>
+      <Card className="mb-6 shadow-lg">
+        <CardHeader className="pb-2 pt-4 px-4">
+          <CardTitle className="text-xl flex items-center gap-2 text-primary">
+            <StarIcon className="h-5 w-5" />
+            Overall Progression (Max Level {GLOBAL_MAX_LEVEL})
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="px-4 pb-4">
+          <div className="mb-1 flex justify-between items-baseline">
+            <span className="text-sm text-muted-foreground">
+              Global Level: <strong className="text-foreground">{globalLevelDetails.level}</strong>
+            </span>
+            <span className="text-xs text-muted-foreground">
+              {currentGlobalXp.toLocaleString()} / {globalMaxXpForLevel500.toLocaleString()} XP
+            </span>
+          </div>
+          <Progress value={globalProgressPercentage} className="h-3 w-full bg-accent/20 [&>div]:bg-accent" />
+           <p className="text-xs text-muted-foreground mt-1 text-right">
+            {globalProgressPercentage.toFixed(1)}% towards max level
+          </p>
+        </CardContent>
+      </Card>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         {heroes.length === 0 ? (
@@ -213,13 +247,9 @@ export default function Home() {
           hero={editingHero}
           onBadgeLevelChange={handleBadgeLevelChange}
           onClose={handleSheetClose}
-          initialHeroesData={initialHeroesData} 
         />
       )}
       <Toaster />
     </div>
   );
 }
-
-
-    
