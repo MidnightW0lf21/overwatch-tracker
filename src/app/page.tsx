@@ -4,7 +4,7 @@
 import type React from 'react';
 import { useState, useEffect, useCallback } from 'react';
 import HeroCard from '@/components/overwatch/HeroCard';
-import HeroChallengeCard from '@/components/overwatch/HeroChallengeCard';
+import HeroBadgeEditorSheet from '@/components/overwatch/HeroBadgeEditorSheet';
 import type { Hero, HeroCalculated, StoredHero } from '@/types/overwatch';
 import { 
   initialHeroesData, 
@@ -19,21 +19,21 @@ import {
 import { Toaster } from '@/components/ui/toaster';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
 import { RefreshCwIcon, InfoIcon } from 'lucide-react';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip"
+} from "@/components/ui/tooltip";
 
 
-const LOCAL_STORAGE_KEY = 'overwatchProgressionData_v3'; // Incremented key for new data structure with iconName
+const LOCAL_STORAGE_KEY = 'overwatchProgressionData_v3';
 
 export default function Home() {
   const [heroes, setHeroes] = useState<HeroCalculated[]>([]);
-  const [selectedHero, setSelectedHero] = useState<HeroCalculated | null>(null);
+  const [editingHero, setEditingHero] = useState<HeroCalculated | null>(null);
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
   const { toast } = useToast();
 
   const calculateAndSetHeroes = useCallback((heroesData: Hero[]) => {
@@ -47,27 +47,34 @@ export default function Home() {
   
   useEffect(() => {
     const storedData = localStorage.getItem(LOCAL_STORAGE_KEY);
-    const hydratedInitialData = hydrateHeroes(initialHeroesData); // Hydrate initial data
+    const hydratedInitialData = hydrateHeroes(initialHeroesData);
 
     if (storedData) {
       try {
-        const parsedData = JSON.parse(storedData) as StoredHero[]; // Expecting StoredHero structure
-        const hydratedRuntimeData = hydrateHeroes(parsedData); // Hydrate stored data
+        const parsedData = JSON.parse(storedData) as StoredHero[];
+        const hydratedRuntimeData = hydrateHeroes(parsedData);
         calculateAndSetHeroes(hydratedRuntimeData);
       } catch (error) {
         console.error("Failed to parse hero data from localStorage", error);
-        calculateAndSetHeroes(hydratedInitialData); // Use hydrated initial data on error
-        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(initialHeroesData)); // Store initial data in StoredHero format
+        calculateAndSetHeroes(hydratedInitialData);
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dehydrateHeroes(initialHeroesData)));
       }
     } else {
-      calculateAndSetHeroes(hydratedInitialData); // Use hydrated initial data if no stored data
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(initialHeroesData)); // Store initial data in StoredHero format
+      calculateAndSetHeroes(hydratedInitialData);
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dehydrateHeroes(initialHeroesData)));
     }
   }, [calculateAndSetHeroes]);
 
-  const handleSelectHero = (hero: HeroCalculated) => {
+  const handleEditHeroBadges = (hero: HeroCalculated) => {
     const fullHeroData = heroes.find(h => h.id === hero.id);
-    setSelectedHero(fullHeroData || hero);
+    setEditingHero(fullHeroData || hero);
+    setIsSheetOpen(true);
+  };
+
+  const handleSheetClose = () => {
+    setIsSheetOpen(false);
+    // Optional: setEditingHero(null) if you want to clear it immediately,
+    // but Sheet's onOpenChange will handle it via isOpen.
   };
   
   const handleBadgeLevelChange = (heroId: string, challengeId: string, newLevel: number) => {
@@ -84,16 +91,16 @@ export default function Home() {
     });
 
     const dehydratedHeroesForStorage = dehydrateHeroes(updatedHeroesList.map(
-      // Destructure to remove calculated fields before dehydration
       ({ totalXp, level, xpTowardsNextLevel, xpNeededForNextLevel, currentLevelBaseXp, nextLevelBaseXp, ...rest }) => rest
     ));
     
-    setHeroes(updatedHeroesList.sort((a, b) => b.totalXp - a.totalXp));
+    const sortedHeroes = updatedHeroesList.sort((a, b) => b.totalXp - a.totalXp);
+    setHeroes(sortedHeroes);
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dehydratedHeroesForStorage));
     
-    const updatedSelectedHero = updatedHeroesList.find(h => h.id === heroId);
-    if (updatedSelectedHero && selectedHero && selectedHero.id === heroId) {
-      setSelectedHero(updatedSelectedHero);
+    const updatedHeroInstance = sortedHeroes.find(h => h.id === heroId);
+    if (updatedHeroInstance && editingHero && editingHero.id === heroId) {
+      setEditingHero(updatedHeroInstance); // Keep the sheet's hero data in sync
     }
 
     const changedHero = updatedHeroesList.find(h=>h.id === heroId);
@@ -111,8 +118,9 @@ export default function Home() {
     if(window.confirm("Are you sure you want to reset all hero data to default? This cannot be undone.")) {
       const hydratedInitialData = hydrateHeroes(initialHeroesData);
       calculateAndSetHeroes(hydratedInitialData);
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(initialHeroesData)); // Store initial data (StoredHero format)
-      setSelectedHero(null); 
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dehydrateHeroes(initialHeroesData)));
+      setEditingHero(null); 
+      setIsSheetOpen(false);
       toast({
         title: "Data Reset",
         description: "All hero data has been reset to default values.",
@@ -121,13 +129,6 @@ export default function Home() {
     }
   };
   
-  // Use initialHeroesData for rankTitle source as it's static.
-  // It's cast to `any` because `rankTitle` is not part of the defined StoredHero type.
-  // This might be something to formalize in the type if it's consistently used.
-  const selectedHeroRank = selectedHero ? (initialHeroesData.find(h => h.id === selectedHero.id) as any)?.rankTitle : "";
-  const personalGoalProgress = selectedHero ? (selectedHero.totalXp / selectedHero.personalGoalXP) * 100 : 0;
-
-
   return (
     <div className="min-h-screen bg-background text-foreground p-4 sm:p-6 lg:p-8">
       <header className="mb-6 text-center relative">
@@ -153,7 +154,7 @@ export default function Home() {
                 <li>Levels 1-19: 5,000 XP per hero level</li>
                 <li>Levels 20+: 60,000 XP per hero level</li>
               </ul>
-               <p className="mt-3 text-xs">Click on a hero to see their badges. Edit badge levels directly in the right panel.</p>
+               <p className="mt-3 text-xs">Click on a hero to edit their badges and see progress.</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
@@ -165,71 +166,32 @@ export default function Home() {
         </Button>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-6">
-        {/* Left Column: Hero List */}
-        <div className="w-full lg:w-2/5 xl:w-1/3">
-          <div className="space-y-3 max-h-[calc(100vh-12rem)] overflow-y-auto pr-2">
-            {heroes.length === 0 ? (
-              <div className="text-center py-10">
-                <p className="text-xl text-muted-foreground">Loading hero data...</p>
-              </div>
-            ) : (
-              heroes.map(hero => (
-                <HeroCard 
-                  key={hero.id} 
-                  hero={hero} 
-                  onSelectHero={handleSelectHero}
-                  isSelected={selectedHero?.id === hero.id} 
-                />
-              ))
-            )}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+        {heroes.length === 0 ? (
+          <div className="text-center py-10 col-span-full">
+            <p className="text-xl text-muted-foreground">Loading hero data...</p>
           </div>
-        </div>
-
-        {/* Right Column: Selected Hero Badges */}
-        <div className="w-full lg:w-3/5 xl:w-2/3">
-          {selectedHero ? (
-            <div className="bg-card p-6 rounded-lg shadow-lg">
-              <h2 className="text-3xl font-bold mb-1 text-primary">{selectedHero.name}</h2>
-              {selectedHeroRank && <p className="text-sm text-accent font-semibold uppercase tracking-wider mb-1">{selectedHeroRank}</p>}
-              <p className="text-lg text-muted-foreground">Hero Level: {selectedHero.level}</p>
-              <div className="text-xs text-muted-foreground mb-2">
-                ({selectedHero.xpTowardsNextLevel.toLocaleString()} / {selectedHero.xpNeededForNextLevel.toLocaleString()} XP to next hero level)
-              </div>
-
-              <div className="mb-6">
-                <h3 className="text-md font-semibold text-foreground/90 mb-1">Personal Goal Progress</h3>
-                <Progress value={personalGoalProgress > 100 ? 100 : personalGoalProgress} className="h-3 bg-accent/20 [&>div]:bg-accent" />
-                <p className="text-xs text-muted-foreground mt-1 text-right">
-                  {selectedHero.totalXp.toLocaleString()} / {selectedHero.personalGoalXP.toLocaleString()} XP ({Math.min(100, personalGoalProgress).toFixed(1)}%)
-                </p>
-              </div>
-              
-              <h3 className="text-2xl font-semibold mb-4 text-foreground/90 border-b border-border pb-2">Hero Badges</h3>
-              {selectedHero.challenges && selectedHero.challenges.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 max-h-[calc(100vh-26rem)] overflow-y-auto pr-2">
-                  {selectedHero.challenges.map(challenge => (
-                    <HeroChallengeCard 
-                        key={challenge.id} 
-                        challenge={challenge} 
-                        heroId={selectedHero.id}
-                        onLevelChange={handleBadgeLevelChange} 
-                    />
-                  ))}
-                </div>
-              ) : (
-                <div className="flex items-center justify-center h-40 bg-background/50 rounded-md">
-                  <p className="text-muted-foreground">No badges tracked for {selectedHero.name}.</p>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="flex items-center justify-center h-full min-h-[300px] bg-card p-8 rounded-lg shadow-lg">
-              <p className="text-xl text-center text-muted-foreground">Select a hero from the list to view their badges and progress.</p>
-            </div>
-          )}
-        </div>
+        ) : (
+          heroes.map(hero => (
+            <HeroCard 
+              key={hero.id} 
+              hero={hero} 
+              onEditHeroBadges={handleEditHeroBadges}
+            />
+          ))
+        )}
       </div>
+      
+      {editingHero && (
+        <HeroBadgeEditorSheet
+          isOpen={isSheetOpen}
+          hero={editingHero}
+          onBadgeLevelChange={handleBadgeLevelChange}
+          onClose={handleSheetClose}
+          // Pass initialHeroesData to find rankTitle if needed
+          initialHeroesData={initialHeroesData}
+        />
+      )}
       <Toaster />
     </div>
   );

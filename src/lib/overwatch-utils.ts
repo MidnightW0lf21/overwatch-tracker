@@ -68,7 +68,7 @@ export const initialHeroesData: StoredHero[] = [
   { 
     id: 'soldier76', 
     name: 'Soldier: 76', 
-    portraitUrl: 'https://picsum.photos/seed/soldier/100/100', 
+    portraitUrl: 'https://static.wikia.nocookie.net/overwatch_gamepedia/images/2/2b/Icon-Soldier_76.png', 
     personalGoalXP: 200000,
     challenges: [
       { id: 's76_damage_dealt', title: 'Damage Dealt', iconName: 'Shell', level: 10, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
@@ -89,6 +89,7 @@ export const initialHeroesData: StoredHero[] = [
     challenges: [
       { id: 'tracer_pulse_kills', title: 'Pulse Bomb Kills', iconName: 'Zap', level: 3, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
       { id: 'tracer_recall_healed', title: 'Health Recalled', iconName: 'HeartPulse', level: 5, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
+      { id: 'tracer_time_played', title: 'Time Played', iconName: 'Clock', level: 1, xpPerLevel: XP_PER_TIME_TYPE_BADGE_LEVEL },
       { id: 'tracer_wins', title: 'Wins', iconName: 'Trophy', level: 2, xpPerLevel: XP_PER_WIN_TYPE_BADGE_LEVEL },
     ],
   },
