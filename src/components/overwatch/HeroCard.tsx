@@ -21,8 +21,8 @@ const HeroCard: React.FC<HeroCardProps> = ({ hero, onEditHeroBadges }) => {
     <Card 
       className={cn(
         "bg-card text-card-foreground shadow-md rounded-lg overflow-hidden transition-all duration-200 ease-in-out cursor-pointer",
-        "hover:shadow-xl hover:bg-card/90",
-        "ring-1 ring-transparent hover:ring-primary/50 flex flex-col" // Added flex flex-col to allow content to define height
+        "hover:shadow-2xl hover:scale-[1.02] hover:bg-card/80", // Enhanced shadow, slight scale, and bg adjustment
+        "ring-1 ring-transparent hover:ring-primary hover:ring-2 flex flex-col" // Added more prominent ring on hover
       )}
       data-testid={`hero-card-${hero.id}`}
       onClick={() => onEditHeroBadges(hero)}
@@ -62,3 +62,4 @@ const HeroCard: React.FC<HeroCardProps> = ({ hero, onEditHeroBadges }) => {
 };
 
 export default HeroCard;
+
