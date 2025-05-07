@@ -28,14 +28,14 @@ const HeroCard: React.FC<HeroCardProps> = ({ hero, onEditHeroBadges }) => {
       onClick={() => onEditHeroBadges(hero)}
     >
       <CardContent className="p-4 flex flex-col items-center text-center space-y-3 flex-grow">
-        {/* Image */}
-        <div className="flex-shrink-0">
+        {/* Image Container: Make it responsive, similar to progress bar container */}
+        <div className="w-full max-w-[90%] aspect-square relative">
           <Image
             src={hero.portraitUrl}
             alt={`${hero.name} Portrait`}
-            width={80} // Increased image size
-            height={80}
-            className="rounded-lg border-2 border-primary/80 shadow-md" // Enhanced image styling
+            fill={true} // Use fill to make image responsive within parent
+            sizes="(max-width: 640px) 45vw, (max-width: 768px) 30vw, (max-width: 1024px) 22vw, (max-width: 1280px) 18vw, 150px" // Provide sizes for optimization
+            className="rounded-lg border-2 border-primary/80 shadow-md object-cover" // object-cover to fill and crop
             data-ai-hint="hero portrait"
           />
         </div>
@@ -62,4 +62,3 @@ const HeroCard: React.FC<HeroCardProps> = ({ hero, onEditHeroBadges }) => {
 };
 
 export default HeroCard;
-
