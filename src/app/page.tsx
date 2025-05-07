@@ -20,7 +20,7 @@ import {
 import { Toaster } from '@/components/ui/toaster';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
-import { InfoIcon, SettingsIcon, StarIcon } from 'lucide-react';
+import { InfoIcon, SettingsIcon, StarIcon, ClockIcon } from 'lucide-react';
 import Link from 'next/link';
 import {
   Tooltip,
@@ -163,6 +163,87 @@ export default function Home() {
     if (globalMaxXpOverall === 0) return 0;
     return Math.min((currentGlobalXp / globalMaxXpOverall) * 100, 100);
   }, [currentGlobalXp, globalMaxXpOverall]);
+
+  const totalEstimatedTimeToMaxAllHeroesInMinutes = useMemo(() => {
+    let totalMinutes = 0;
+    heroes.forEach(hero => {
+        if (hero.level >= GLOBAL_MAX_LEVEL) {
+            return; 
+        }
+        const timeBadge = hero.challenges.find(c => c.xpPerLevel === XP_PER_TIME_TYPE_BADGE_LEVEL);
+        if (!timeBadge) {
+            return; 
+        }
+
+        const xpForMaxLevel = calculateXpToReachLevel(GLOBAL_MAX_LEVEL + 1);
+        const xpRemaining = Math.max(0, xpForMaxLevel - hero.totalXp);
+
+        if (xpRemaining > 0 && XP_PER_TIME_TYPE_BADGE_LEVEL > 0) {
+            const timeBadgeLevelsNeeded = xpRemaining / XP_PER_TIME_TYPE_BADGE_LEVEL;
+            totalMinutes += timeBadgeLevelsNeeded * 20; // 20 minutes per time badge level
+        }
+    });
+    return totalMinutes;
+  }, [heroes]);
+
+  const formatTotalTimeToMaxAllHeroes = useCallback((totalMinutesInput: number): string => {
+    if (totalMinutesInput < 0) totalMinutesInput = 0;
+
+    if (totalMinutesInput < 1 && totalMinutesInput > 0) return "~1 min";
+    if (Math.round(totalMinutesInput) === 0) return "0m";
+
+    const totalMinutes = Math.round(totalMinutesInput);
+
+    const minutesInHour = 60;
+    const hoursInDay = 24;
+    const daysInYear = 365; // Approximation
+
+    const years = Math.floor(totalMinutes / (minutesInHour * hoursInDay * daysInYear));
+    let remainingMinutes = totalMinutes % (minutesInHour * hoursInDay * daysInYear);
+
+    const days = Math.floor(remainingMinutes / (minutesInHour * hoursInDay));
+    remainingMinutes %= (minutesInHour * hoursInDay);
+
+    const hours = Math.floor(remainingMinutes / minutesInHour);
+    remainingMinutes %= minutesInHour;
+
+    const finalMinutes = remainingMinutes;
+
+    let parts: string[] = [];
+    if (years > 0) parts.push(`${years}y`);
+    if (days > 0) parts.push(`${days}d`);
+    if (hours > 0) parts.push(`${hours}h`);
+    if (finalMinutes > 0 || parts.length === 0) parts.push(`${finalMinutes}m`);
+
+    return parts.join(' ');
+  }, []);
+  
+  const formattedTotalTimeToMaxAllHeroes = useMemo(() => {
+    if (heroes.length === 0) return "Loading...";
+    if (heroes.every(h => h.level >= GLOBAL_MAX_LEVEL)) {
+        return "All heroes maxed!";
+    }
+    if (totalEstimatedTimeToMaxAllHeroesInMinutes === 0) {
+        let relevantHeroNeedsTime = false;
+        for (const hero of heroes) {
+            if (hero.level < GLOBAL_MAX_LEVEL) {
+                const timeBadge = hero.challenges.find(c => c.xpPerLevel === XP_PER_TIME_TYPE_BADGE_LEVEL);
+                if (timeBadge) {
+                    const xpForMaxLevel = calculateXpToReachLevel(GLOBAL_MAX_LEVEL + 1);
+                    const xpRemaining = Math.max(0, xpForMaxLevel - hero.totalXp);
+                    if (xpRemaining > 0 && XP_PER_TIME_TYPE_BADGE_LEVEL > 0) {
+                        relevantHeroNeedsTime = true;
+                        break;
+                    }
+                }
+            }
+        }
+        if (!relevantHeroNeedsTime) {
+            return "N/A (No time tracking for unmaxed heroes)";
+        }
+    }
+    return formatTotalTimeToMaxAllHeroes(totalEstimatedTimeToMaxAllHeroesInMinutes);
+  }, [totalEstimatedTimeToMaxAllHeroesInMinutes, heroes, formatTotalTimeToMaxAllHeroes]);
   
   return (
     <div className="min-h-screen bg-background text-foreground p-4 sm:p-6 lg:p-8">
@@ -228,6 +309,18 @@ export default function Home() {
            <p className="text-xs text-muted-foreground mt-1 text-right">
             {globalProgressPercentage.toFixed(4)}% towards all heroes maxed
           </p>
+          <div className="mt-3 border-t border-border pt-3">
+            <h4 className="text-sm font-semibold text-foreground/90 mb-1 flex items-center">
+              <ClockIcon className="h-4 w-4 mr-2 text-muted-foreground" />
+              Est. Total Time to Max All Heroes
+            </h4>
+            <p className="text-sm text-muted-foreground ml-6">
+              {formattedTotalTimeToMaxAllHeroes}
+            </p>
+            { !formattedTotalTimeToMaxAllHeroes.includes("All heroes maxed!") && !formattedTotalTimeToMaxAllHeroes.includes("Loading...") && !formattedTotalTimeToMaxAllHeroes.includes("N/A") && (
+                 <p className="text-xs text-muted-foreground/70 ml-6 mt-0.5">(Assuming a time badge level is earned every 20 mins of play per hero)</p>
+            )}
+          </div>
         </CardContent>
       </Card>
 

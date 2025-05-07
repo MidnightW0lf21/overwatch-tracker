@@ -39,37 +39,48 @@ const HeroBadgeEditorSheet: React.FC<HeroBadgeEditorSheetProps> = ({
 
   useEffect(() => {
     if (hero) {
-      const timeBadge = hero.challenges.find(
-        (c) => c.xpPerLevel === XP_PER_TIME_TYPE_BADGE_LEVEL
-      );
-
       if (hero.level >= HERO_MAX_LEVEL) {
         setEstimatedTimeToMax("Max level reached!");
-      } else if (timeBadge) {
-        const xpForMaxLevel = calculateXpToReachLevel(HERO_MAX_LEVEL + 1); // XP to complete level HERO_MAX_LEVEL
-        const xpRemaining = Math.max(0, xpForMaxLevel - hero.totalXp);
+      } else {
+        const timeBadge = hero.challenges.find(
+          (c) => c.xpPerLevel === XP_PER_TIME_TYPE_BADGE_LEVEL
+        );
 
-        if (xpRemaining > 0 && XP_PER_TIME_TYPE_BADGE_LEVEL > 0) {
-          const timeBadgeLevelsNeeded = xpRemaining / XP_PER_TIME_TYPE_BADGE_LEVEL;
-          const totalMinutesNeeded = timeBadgeLevelsNeeded * 20; // 20 minutes per time badge level
+        if (timeBadge) {
+          const xpForMaxLevel = calculateXpToReachLevel(HERO_MAX_LEVEL + 1); // XP to complete level HERO_MAX_LEVEL
+          const xpRemaining = Math.max(0, xpForMaxLevel - hero.totalXp);
 
-          const hours = Math.floor(totalMinutesNeeded / 60);
-          const minutes = Math.round(totalMinutesNeeded % 60);
+          if (xpRemaining > 0 && XP_PER_TIME_TYPE_BADGE_LEVEL > 0) {
+            const timeBadgeLevelsNeeded = xpRemaining / XP_PER_TIME_TYPE_BADGE_LEVEL;
+            const totalMinutesNeeded = timeBadgeLevelsNeeded * 20; // 20 minutes per time badge level
 
-          if (hours === 0 && minutes === 0) {
-             // If calculation results in 0h 0m but hero is not max level, show ~1 min
-            setEstimatedTimeToMax("~1 min");
-          } else {
-            setEstimatedTimeToMax(`${hours}h ${minutes}m`);
+            if (totalMinutesNeeded < 1 && totalMinutesNeeded > 0) {
+              setEstimatedTimeToMax("~1 min");
+            } else {
+              const roundedTotalMinutes = Math.round(totalMinutesNeeded);
+              if (roundedTotalMinutes === 0) {
+                setEstimatedTimeToMax(totalMinutesNeeded > 0 ? "~1 min" : null); // Should be null if truly 0
+              } else {
+                const days = Math.floor(roundedTotalMinutes / (60 * 24));
+                const remainingMinutesAfterDaysCalc = roundedTotalMinutes % (60 * 24);
+                const hours = Math.floor(remainingMinutesAfterDaysCalc / 60);
+                const minutes = remainingMinutesAfterDaysCalc % 60;
+
+                let timeStringParts: string[] = [];
+                if (days > 0) timeStringParts.push(`${days}d`);
+                if (hours > 0) timeStringParts.push(`${hours}h`);
+                if (minutes > 0) timeStringParts.push(`${minutes}m`);
+                
+                setEstimatedTimeToMax(timeStringParts.length > 0 ? timeStringParts.join(' ') : (roundedTotalMinutes > 0 ? "~1 min" : null) );
+              }
+            }
+          } else { // xpRemaining is 0 or XP_PER_TIME_TYPE_BADGE_LEVEL is 0
+             // If xpRemaining is 0, it means hero has enough XP for max level, should be caught by hero.level >= HERO_MAX_LEVEL
+            setEstimatedTimeToMax(null); 
           }
         } else {
-          // This case implies xpRemaining is 0, but level is not yet HERO_MAX_LEVEL (handled by first if),
-          // or XP_PER_TIME_TYPE_BADGE_LEVEL is 0 (which shouldn't happen).
-          // If xpRemaining is 0 and level is not max, it's likely a rounding to max level.
-           setEstimatedTimeToMax(null); // Or "Almost there!" or specific logic for very small remaining XP
+          setEstimatedTimeToMax("No time-based badge found to estimate.");
         }
-      } else {
-        setEstimatedTimeToMax("No time-based badge found to estimate.");
       }
     } else {
       setEstimatedTimeToMax(null);

@@ -94,49 +94,29 @@ export function calculateLevelDetails(totalXp: number): Omit<LevelDetails, 'tota
 
 export function calculateXpToReachLevel(targetLevel: number): number {
   if (targetLevel <= 0) return 0;
-  if (targetLevel === 1) return levelProgressionTiers[0].totalXpToReachThisLevel;
+  if (targetLevel === 1) return levelProgressionTiers[0].totalXpToReachThisLevel; // XP to *start* level 1 is 0
 
   const tier = levelProgressionTiers.find(t => t.level === targetLevel);
   if (tier) {
-    return tier.totalXpToReachThisLevel;
+    return tier.totalXpToReachThisLevel; // This is the XP needed to *start* this level
   }
 
-  // If targetLevel is beyond the defined table
-  const lastTierInTable = levelProgressionTiers[levelProgressionTiers.length - 1];
-  if (targetLevel > lastTierInTable.level) {
-    const xpAtEndOfTable = lastTierInTable.totalXpToReachThisLevel + lastTierInTable.xpToNextLevel; // XP to start level lastTierInTable.level + 1
-    const levelsBeyondTable = targetLevel - (lastTierInTable.level + 1);
-    if (levelsBeyondTable < 0) { // Should not happen if targetLevel > lastTierInTable.level, but as a safe guard
-        // This case means targetLevel is lastTierInTable.level + 1, so xpAtEndOfTable is correct
-        return xpAtEndOfTable;
-    }
-    const xpBeyondTable = levelsBeyondTable * XP_PER_LEVEL_AFTER_TABLE;
-    return xpAtEndOfTable + xpBeyondTable;
+  // If targetLevel is beyond the defined table (e.g., targetLevel 27)
+  // We need the XP to *start* level 26, then add XP for levels beyond that.
+  const lastTierInTable = levelProgressionTiers[levelProgressionTiers.length - 1]; // Level 25 entry
+  
+  // XP required to *start* the level after the last one in the table (e.g., start of Level 26)
+  const xpAtStartOfFirstLevelBeyondTable = lastTierInTable.totalXpToReachThisLevel + lastTierInTable.xpToNextLevel;
+
+  if (targetLevel === lastTierInTable.level + 1) { // e.g. targetLevel is 26
+      return xpAtStartOfFirstLevelBeyondTable;
   }
   
-  // Fallback for levels not directly in the table but less than or equal to max table level (should be covered by .find)
-  // This part should ideally not be reached if logic is correct.
-  // For safety, find the closest lower tier and extrapolate, but .find should handle this.
-  // If somehow we reach here, it means targetLevel is within the table's range but not explicitly listed (which shouldn't happen with current table)
-  // Or, targetLevel is one above the max level in the table.
-  let baseLevelXp = 0;
-  let lastLevelInProgression = 0;
-  for(const t of levelProgressionTiers) {
-      if (t.level < targetLevel) {
-          baseLevelXp = t.totalXpToReachThisLevel + t.xpToNextLevel;
-          lastLevelInProgression = t.level;
-      } else {
-          break;
-      }
-  }
-   // If targetLevel is just one above the last explicit entry, but not covered by the "beyond table" logic
-  if (targetLevel === lastLevelInProgression + 1) {
-      return baseLevelXp;
-  }
-  // If still not found, implies an issue or a level beyond the hardcoded max table length handled by the general rule
-  // This path should be rare.
-  const xpFromLastKnown = (targetLevel - (lastLevelInProgression + 1)) * XP_PER_LEVEL_AFTER_TABLE;
-  return baseLevelXp + xpFromLastKnown;
+  // For levels further beyond (e.g., targetLevel 27, 28, ...)
+  // levelsBeyondTablePlusOne means how many full 60k XP blocks we need *after* starting level 26
+  const levelsBeyondTablePlusOne = targetLevel - (lastTierInTable.level + 1);
+  const xpBeyondTable = levelsBeyondTablePlusOne * XP_PER_LEVEL_AFTER_TABLE;
+  return xpAtStartOfFirstLevelBeyondTable + xpBeyondTable;
 }
 
 
@@ -180,6 +160,7 @@ export const initialHeroesData: StoredHero[] = [
         { id: 'mercy_healing_done', title: 'Healing Done', iconName: 'HeartPulse', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
         { id: 'mercy_rez', title: 'Resurrections', iconName: 'Zap', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
         { id: 'mercy_wins', title: 'Wins', iconName: 'Trophy', level: 1, xpPerLevel: XP_PER_WIN_TYPE_BADGE_LEVEL },
+        { id: 'mercy_time_played', title: 'Time Played', iconName: 'Clock', level: 1, xpPerLevel: XP_PER_TIME_TYPE_BADGE_LEVEL },
     ],
   },
   { 
@@ -192,6 +173,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'rein_charge_pins', title: 'Charge Pins', iconName: 'Zap', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
       { id: 'rein_damage_blocked', title: 'Damage Blocked', iconName: 'ShieldQuestion', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
       { id: 'rein_wins', title: 'Wins', iconName: 'Trophy', level: 1, xpPerLevel: XP_PER_WIN_TYPE_BADGE_LEVEL },
+      { id: 'rein_time_played', title: 'Time Played', iconName: 'Clock', level: 1, xpPerLevel: XP_PER_TIME_TYPE_BADGE_LEVEL },
     ],
   },
   { 
@@ -204,6 +186,7 @@ export const initialHeroesData: StoredHero[] = [
         { id: 'ana_biotic_grenade_assists', title: 'Biotic Grenade Assists', iconName: 'HeartPulse', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
         { id: 'ana_nano_boosts', title: 'Nano Boosts Applied', iconName: 'Shapes', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
         { id: 'ana_wins', title: 'Wins', iconName: 'Trophy', level: 1, xpPerLevel: XP_PER_WIN_TYPE_BADGE_LEVEL },
+        { id: 'ana_time_played', title: 'Time Played', iconName: 'Clock', level: 1, xpPerLevel: XP_PER_TIME_TYPE_BADGE_LEVEL },
     ],
   },
   { 
@@ -215,6 +198,7 @@ export const initialHeroesData: StoredHero[] = [
        { id: 'genji_blade_kills', title: 'Dragonblade Kills', iconName: 'Sword', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
        { id: 'genji_deflect_damage', title: 'Damage Deflected', iconName: 'ShieldQuestion', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
        { id: 'genji_wins', title: 'Wins', iconName: 'Trophy', level: 1, xpPerLevel: XP_PER_WIN_TYPE_BADGE_LEVEL },
+       { id: 'genji_time_played', title: 'Time Played', iconName: 'Clock', level: 1, xpPerLevel: XP_PER_TIME_TYPE_BADGE_LEVEL },
     ],
   },
 ];
