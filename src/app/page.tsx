@@ -33,7 +33,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 
 const LOCAL_STORAGE_KEY = 'overwatchProgressionData_v3';
-const GLOBAL_MAX_LEVEL = 500;
+const GLOBAL_MAX_LEVEL = 500; // Max level for an individual hero
 
 export default function Home() {
   const [heroes, setHeroes] = useState<HeroCalculated[]>([]);
@@ -41,8 +41,8 @@ export default function Home() {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const { toast } = useToast();
 
-  const calculateAndSetHeroes = useCallback((heroesData: StoredHero[]) => {
-    const hydratedHeroesData = hydrateHeroes(heroesData);
+  const calculateAndSetHeroes = useCallback((storedHeroesData: StoredHero[]) => {
+    const hydratedHeroesData = hydrateHeroes(storedHeroesData);
     const calculatedHeroes = hydratedHeroesData.map(hero => {
       const totalXp = calculateTotalXP(hero.challenges as StoredHeroChallenge[]); 
       const levelDetails = calculateLevelDetails(totalXp);
@@ -68,21 +68,22 @@ export default function Home() {
           }));
           calculateAndSetHeroes(sanitizedData); 
         } catch (error) {
-          console.error("Failed to parse hero data from localStorage", error);
-          const defaultData = initialHeroesData.map(h => ({...h, challenges: h.challenges.map(c => ({...c, level: Math.max(1, c.level || 1)})) } as StoredHero));
-          calculateAndSetHeroes(defaultData); 
-          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dehydrateHeroes(hydrateHeroes(defaultData))));
+          console.error("Failed to parse hero data from localStorage, resetting to default:", error);
+          // Dehydrate initialHeroesData (which are Hero[]) to StoredHero[] before storing
+          const defaultStoredData = dehydrateHeroes(initialHeroesData.map(h => ({...h, challenges: h.challenges.map(c => ({...c, level: Math.max(1, c.level || 1), iconName: dehydrateHeroes([h] as Hero[])[0].challenges.find(sc => sc.id === c.id)?.iconName || 'ShieldQuestion'}))} as unknown as Hero)) );
+          calculateAndSetHeroes(defaultStoredData); 
+          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(defaultStoredData));
         }
       } else {
-        const defaultData = initialHeroesData.map(h => ({...h, challenges: h.challenges.map(c => ({...c, level: Math.max(1, c.level || 1)})) } as StoredHero));
-        calculateAndSetHeroes(defaultData); 
-        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dehydrateHeroes(hydrateHeroes(defaultData))));
+        const defaultStoredData = dehydrateHeroes(initialHeroesData.map(h => ({...h, challenges: h.challenges.map(c => ({...c, level: Math.max(1, c.level || 1), iconName: dehydrateHeroes([h] as Hero[])[0].challenges.find(sc => sc.id === c.id)?.iconName || 'ShieldQuestion'}))} as unknown as Hero)) );
+        calculateAndSetHeroes(defaultStoredData); 
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(defaultStoredData));
       }
     } catch (e) {
-      console.error('Error during initial data load:', e);
-      const defaultData = initialHeroesData.map(h => ({...h, challenges: h.challenges.map(c => ({...c, level: Math.max(1, c.level || 1)})) } as StoredHero));
-      calculateAndSetHeroes(defaultData);
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dehydrateHeroes(hydrateHeroes(defaultData))));
+      console.error('Error during initial data load, resetting to default:', e);
+      const defaultStoredData = dehydrateHeroes(initialHeroesData.map(h => ({...h, challenges: h.challenges.map(c => ({...c, level: Math.max(1, c.level || 1), iconName: dehydrateHeroes([h]as Hero[])[0].challenges.find(sc => sc.id === c.id)?.iconName || 'ShieldQuestion'}))} as unknown as Hero)) );
+      calculateAndSetHeroes(defaultStoredData);
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(defaultStoredData));
     }
   }, [calculateAndSetHeroes]);
 
@@ -105,16 +106,18 @@ export default function Home() {
         const updatedChallenges = h.challenges.map(c => 
           c.id === challengeId ? { ...c, level: finalNewLevel } : c
         );
-        const storedChallengesForXPCalc = updatedChallenges.map(c => ({
-          id: c.id,
-          title: c.title,
-          iconName: dehydrateHeroes([h] as Hero[])[0].challenges.find(sc => sc.id === c.id)?.iconName || 'ShieldQuestion', 
-          level: c.level,
-          xpPerLevel: c.xpPerLevel,
-        }));
+        // For XP calculation, we need StoredHeroChallenge format (with iconName)
+        const storedChallengesForXPCalc = dehydrateHeroes([h] as Hero[])[0].challenges.map(storedChallenge => {
+          const updatedChallenge = updatedChallenges.find(uc => uc.id === storedChallenge.id);
+          return {
+            ...storedChallenge,
+            level: updatedChallenge ? updatedChallenge.level : storedChallenge.level,
+          };
+        });
 
         const totalXp = calculateTotalXP(storedChallengesForXPCalc);
         const levelDetails = calculateLevelDetails(totalXp);
+        // The updatedChallenges here are HeroChallenge[], so this is correct for the state
         return { ...h, challenges: updatedChallenges, totalXp, ...levelDetails };
       }
       return h;
@@ -145,18 +148,21 @@ export default function Home() {
     return heroes.reduce((sum, hero) => sum + hero.totalXp, 0);
   }, [heroes]);
 
-  const globalMaxXpForLevel500 = useMemo(() => {
-    return calculateXpToReachLevel(GLOBAL_MAX_LEVEL + 1);
-  }, []);
+  const globalMaxXpOverall = useMemo(() => {
+    if (heroes.length === 0) return 0;
+    // XP required for one hero to complete level 500 (i.e., reach the start of level 501)
+    const xpForOneHeroMaxLevel = calculateXpToReachLevel(GLOBAL_MAX_LEVEL + 1); 
+    return xpForOneHeroMaxLevel * heroes.length;
+  }, [heroes.length]);
 
   const globalLevelDetails = useMemo(() => {
     return calculateLevelDetails(currentGlobalXp);
   }, [currentGlobalXp]);
 
   const globalProgressPercentage = useMemo(() => {
-    if (globalMaxXpForLevel500 === 0) return 0;
-    return Math.min((currentGlobalXp / globalMaxXpForLevel500) * 100, 100);
-  }, [currentGlobalXp, globalMaxXpForLevel500]);
+    if (globalMaxXpOverall === 0) return 0;
+    return Math.min((currentGlobalXp / globalMaxXpOverall) * 100, 100);
+  }, [currentGlobalXp, globalMaxXpOverall]);
   
   return (
     <div className="min-h-screen bg-background text-foreground p-4 sm:p-6 lg:p-8">
@@ -206,7 +212,7 @@ export default function Home() {
         <CardHeader className="pb-2 pt-4 px-4">
           <CardTitle className="text-xl flex items-center gap-2 text-primary">
             <StarIcon className="h-5 w-5" />
-            Overall Progression (Max Level {GLOBAL_MAX_LEVEL})
+            Overall Progression (All Heroes Max Level {GLOBAL_MAX_LEVEL})
           </CardTitle>
         </CardHeader>
         <CardContent className="px-4 pb-4">
@@ -215,12 +221,12 @@ export default function Home() {
               Global Level: <strong className="text-foreground">{globalLevelDetails.level}</strong>
             </span>
             <span className="text-xs text-muted-foreground">
-              {currentGlobalXp.toLocaleString()} / {globalMaxXpForLevel500.toLocaleString()} XP
+              {currentGlobalXp.toLocaleString()} / {globalMaxXpOverall.toLocaleString()} XP
             </span>
           </div>
           <Progress value={globalProgressPercentage} className="h-3 w-full bg-accent/20 [&>div]:bg-accent" />
            <p className="text-xs text-muted-foreground mt-1 text-right">
-            {globalProgressPercentage.toFixed(1)}% towards max level
+            {globalProgressPercentage.toFixed(1)}% towards all heroes maxed
           </p>
         </CardContent>
       </Card>
@@ -253,3 +259,4 @@ export default function Home() {
     </div>
   );
 }
+
