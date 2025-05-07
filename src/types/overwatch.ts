@@ -1,4 +1,16 @@
 
+import type React from 'react';
+
+export interface HeroChallenge {
+  id: string;
+  title: string;
+  icon: React.ElementType; // Expecting a Lucide icon component
+  level: number;
+  currentValue: number;
+  targetValue: number;
+  unit?: string; // e.g., "MIN" for time, or empty for counts
+}
+
 export interface Hero {
   id: string;
   name: string;
@@ -7,6 +19,7 @@ export interface Hero {
   winSubBadges: number;
   timePlayedSubBadges: number;
   personalGoalXP: number;
+  challenges?: HeroChallenge[];
 }
 
 export interface LevelDetails {
