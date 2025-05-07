@@ -19,7 +19,8 @@ import {
 import { Toaster } from '@/components/ui/toaster';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
-import { RefreshCwIcon, InfoIcon } from 'lucide-react';
+import { RefreshCwIcon, InfoIcon, SettingsIcon } from 'lucide-react';
+import Link from 'next/link';
 import {
   Tooltip,
   TooltipContent,
@@ -36,8 +37,9 @@ export default function Home() {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const { toast } = useToast();
 
-  const calculateAndSetHeroes = useCallback((heroesData: Hero[]) => {
-    const calculatedHeroes = heroesData.map(hero => {
+  const calculateAndSetHeroes = useCallback((heroesData: StoredHero[]) => { // Expect StoredHero[] for raw data
+    const hydratedHeroesData = hydrateHeroes(heroesData);
+    const calculatedHeroes = hydratedHeroesData.map(hero => {
       const totalXp = calculateTotalXP(hero.challenges);
       const levelDetails = calculateLevelDetails(totalXp);
       return { ...hero, totalXp, ...levelDetails };
@@ -47,21 +49,19 @@ export default function Home() {
   
   useEffect(() => {
     const storedData = localStorage.getItem(LOCAL_STORAGE_KEY);
-    const hydratedInitialData = hydrateHeroes(initialHeroesData);
-
+    
     if (storedData) {
       try {
         const parsedData = JSON.parse(storedData) as StoredHero[];
-        const hydratedRuntimeData = hydrateHeroes(parsedData);
-        calculateAndSetHeroes(hydratedRuntimeData);
+        calculateAndSetHeroes(parsedData); // Pass StoredHero[]
       } catch (error) {
         console.error("Failed to parse hero data from localStorage", error);
-        calculateAndSetHeroes(hydratedInitialData);
-        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dehydrateHeroes(initialHeroesData)));
+        calculateAndSetHeroes(initialHeroesData); // Pass StoredHero[]
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(initialHeroesData)); // Store StoredHero[]
       }
     } else {
-      calculateAndSetHeroes(hydratedInitialData);
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dehydrateHeroes(initialHeroesData)));
+      calculateAndSetHeroes(initialHeroesData); // Pass StoredHero[]
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(initialHeroesData)); // Store StoredHero[]
     }
   }, [calculateAndSetHeroes]);
 
@@ -89,10 +89,13 @@ export default function Home() {
       }
       return h;
     });
-
-    const dehydratedHeroesForStorage = dehydrateHeroes(updatedHeroesList.map(
+    
+    // Dehydrate for storage: convert Hero[] back to StoredHero[]
+    // Remove calculated fields (totalXp, level, etc.) before dehydrating
+    const heroesForStorage = updatedHeroesList.map(
       ({ totalXp, level, xpTowardsNextLevel, xpNeededForNextLevel, currentLevelBaseXp, nextLevelBaseXp, ...rest }) => rest
-    ));
+    );
+    const dehydratedHeroesForStorage = dehydrateHeroes(heroesForStorage);
     
     const sortedHeroes = updatedHeroesList.sort((a, b) => b.totalXp - a.totalXp);
     setHeroes(sortedHeroes);
@@ -116,9 +119,8 @@ export default function Home() {
 
   const handleResetData = () => {
     if(window.confirm("Are you sure you want to reset all hero data to default? This cannot be undone.")) {
-      const hydratedInitialData = hydrateHeroes(initialHeroesData);
-      calculateAndSetHeroes(hydratedInitialData);
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dehydrateHeroes(initialHeroesData)));
+      calculateAndSetHeroes(initialHeroesData); // Pass StoredHero[]
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(initialHeroesData)); // Store StoredHero[]
       setEditingHero(null); 
       setIsSheetOpen(false);
       toast({
@@ -134,30 +136,46 @@ export default function Home() {
       <header className="mb-6 text-center relative">
         <h1 className="text-4xl sm:text-5xl font-bold text-primary tracking-tight">Overwatch Progression Tracker</h1>
         <p className="text-lg text-muted-foreground mt-2">Track your hero badges, levels, and personal goals.</p>
-         <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" className="absolute top-0 right-0 text-muted-foreground hover:text-foreground">
-                <InfoIcon className="h-6 w-6" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent className="max-w-xs bg-popover text-popover-foreground p-3 rounded-md shadow-lg text-sm" side="bottom" align="end">
-              <p className="font-semibold mb-1">How XP is Calculated:</p>
-              <p className="text-xs mb-2">XP is earned by leveling up individual hero badges. Each badge has an XP per level value:</p>
-              <ul className="list-disc list-inside space-y-1 text-xs">
-                <li>Hero-specific Badges: {XP_PER_HERO_TYPE_BADGE_LEVEL} XP per level</li>
-                <li>Win Badges: {XP_PER_WIN_TYPE_BADGE_LEVEL} XP per level</li>
-                <li>Time Played Badges: {XP_PER_TIME_TYPE_BADGE_LEVEL} XP per level</li>
-              </ul>
-              <p className="mt-2 font-semibold mb-1">Hero Level Progression:</p>
-              <ul className="list-disc list-inside space-y-1 text-xs">
-                <li>Levels 1-19: 5,000 XP per hero level</li>
-                <li>Levels 20+: 60,000 XP per hero level</li>
-              </ul>
-               <p className="mt-3 text-xs">Click on a hero to edit their badges and see progress.</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        <div className="absolute top-0 right-0 flex space-x-2">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" asChild className="text-muted-foreground hover:text-foreground">
+                  <Link href="/admin/manage-badges">
+                    <SettingsIcon className="h-6 w-6" />
+                  </Link>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent className="max-w-xs bg-popover text-popover-foreground p-3 rounded-md shadow-lg text-sm" side="bottom" align="end">
+                <p>Manage Heroes & Badges</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
+                  <InfoIcon className="h-6 w-6" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent className="max-w-xs bg-popover text-popover-foreground p-3 rounded-md shadow-lg text-sm" side="bottom" align="end">
+                <p className="font-semibold mb-1">How XP is Calculated:</p>
+                <p className="text-xs mb-2">XP is earned by leveling up individual hero badges. Each badge has an XP per level value:</p>
+                <ul className="list-disc list-inside space-y-1 text-xs">
+                  <li>Hero-specific Badges: {XP_PER_HERO_TYPE_BADGE_LEVEL} XP per level</li>
+                  <li>Win Badges: {XP_PER_WIN_TYPE_BADGE_LEVEL} XP per level</li>
+                  <li>Time Played Badges: {XP_PER_TIME_TYPE_BADGE_LEVEL} XP per level</li>
+                </ul>
+                <p className="mt-2 font-semibold mb-1">Hero Level Progression:</p>
+                <ul className="list-disc list-inside space-y-1 text-xs">
+                  <li>Levels 1-19: 5,000 XP per hero level</li>
+                  <li>Levels 20+: 60,000 XP per hero level</li>
+                </ul>
+                <p className="mt-3 text-xs">Click on a hero to edit their badges and see progress.</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
       </header>
       
       <div className="flex justify-end mb-4">
@@ -188,8 +206,9 @@ export default function Home() {
           hero={editingHero}
           onBadgeLevelChange={handleBadgeLevelChange}
           onClose={handleSheetClose}
-          // Pass initialHeroesData to find rankTitle if needed
-          initialHeroesData={initialHeroesData}
+          // Pass initialHeroesData (which is StoredHero[]) to find rankTitle if needed
+          // The sheet component might need adjustment if it expects Hero[] instead of StoredHero[] for this prop
+          initialHeroesData={initialHeroesData} 
         />
       )}
       <Toaster />

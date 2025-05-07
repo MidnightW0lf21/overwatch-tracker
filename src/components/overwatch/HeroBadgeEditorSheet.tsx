@@ -21,7 +21,7 @@ interface HeroBadgeEditorSheetProps {
   hero: HeroCalculated | null;
   onBadgeLevelChange: (heroId: string, challengeId: string, newLevel: number) => void;
   onClose: () => void;
-  initialHeroesData: StoredHero[]; // To get static data like rankTitle
+  initialHeroesData: StoredHero[]; // This prop is StoredHero[] as passed from page.tsx
 }
 
 const HeroBadgeEditorSheet: React.FC<HeroBadgeEditorSheetProps> = ({
@@ -35,8 +35,12 @@ const HeroBadgeEditorSheet: React.FC<HeroBadgeEditorSheetProps> = ({
     return null;
   }
 
+  // initialHeroesData is StoredHero[], it doesn't have rankTitle.
+  // rankTitle was an ad-hoc property. For now, let's assume it's not critical or could be derived/fixed.
+  // If rankTitle is truly needed, it should be added to the StoredHero type and initialHeroesData.
+  // For now, we'll use a default or hero's name if rankTitle is not present.
   const heroStaticData = initialHeroesData.find(h => h.id === hero.id);
-  const rankTitle = (heroStaticData as any)?.rankTitle || "Aspirant Hero";
+  const rankTitle = (heroStaticData as any)?.rankTitle || `Level ${hero.level} Hero`; // Fallback
   const personalGoalProgress = hero.personalGoalXP > 0 ? (hero.totalXp / hero.personalGoalXP) * 100 : 0;
 
   return (
@@ -44,7 +48,8 @@ const HeroBadgeEditorSheet: React.FC<HeroBadgeEditorSheetProps> = ({
       <SheetContent className="sm:max-w-xl w-full flex flex-col" side="right">
         <SheetHeader className="px-6 pt-6 pb-4 border-b border-border">
           <SheetTitle className="text-2xl text-primary">{hero.name}</SheetTitle>
-          {rankTitle && <p className="text-sm text-accent font-semibold uppercase tracking-wider -mt-1">{rankTitle}</p>}
+          {/* Display calculated level instead of a static rankTitle if not available */}
+          <p className="text-sm text-accent font-semibold uppercase tracking-wider -mt-1">{rankTitle}</p>
           <SheetDescription>
             Level: {hero.level} ({hero.xpTowardsNextLevel.toLocaleString()} / {hero.xpNeededForNextLevel.toLocaleString()} XP to next)
           </SheetDescription>
@@ -76,6 +81,7 @@ const HeroBadgeEditorSheet: React.FC<HeroBadgeEditorSheetProps> = ({
           ) : (
             <div className="flex items-center justify-center h-32 bg-background/50 rounded-md">
               <p className="text-muted-foreground">No badges tracked for {hero.name}.</p>
+              <p className="text-xs mt-1">You can add badges in the Manage Heroes & Badges page.</p>
             </div>
           )}
         </ScrollArea>

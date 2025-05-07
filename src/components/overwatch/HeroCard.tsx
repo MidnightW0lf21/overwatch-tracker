@@ -15,16 +15,14 @@ interface HeroCardProps {
 const HeroCard: React.FC<HeroCardProps> = ({ hero, onEditHeroBadges }) => {
   const levelProgressPercentage = hero.xpNeededForNextLevel > 0 ? (hero.xpTowardsNextLevel / hero.xpNeededForNextLevel) * 100 : 0;
   
-  // Cast to any is a temporary workaround if rankTitle is not part of HeroCalculated type
-  // but exists on the initial data. Ideally, this should be part of the type.
-  const rankTitle = (hero as any).rankTitle || "Aspirant Hero"; 
+  // Display hero's current level instead of rankTitle, as rankTitle is not part of HeroCalculated or StoredHero.
+  const displayTitle = `Level ${hero.level}`; 
 
   return (
     <Card 
       className={cn(
         "bg-card text-card-foreground shadow-md rounded-lg overflow-hidden transition-all duration-200 ease-in-out cursor-pointer",
         "hover:shadow-xl hover:bg-card/90",
-        // Removed isSelected based styling, card is active when sheet is open for it.
         "ring-1 ring-transparent hover:ring-primary/50" 
       )}
       data-testid={`hero-card-${hero.id}`}
@@ -47,7 +45,8 @@ const HeroCard: React.FC<HeroCardProps> = ({ hero, onEditHeroBadges }) => {
             <div className="flex items-baseline space-x-2">
               <h3 className="text-lg font-bold truncate">{hero.name}</h3>
             </div>
-            <p className="text-xs text-accent font-semibold uppercase tracking-wide truncate">{rankTitle}</p>
+            {/* Display calculated level instead of rankTitle */}
+            <p className="text-xs text-accent font-semibold uppercase tracking-wide truncate">{displayTitle}</p>
             <div className="mt-1">
               <div className="flex justify-between items-baseline mb-0.5">
                 <span className="text-xs text-muted-foreground">
