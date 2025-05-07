@@ -11,6 +11,7 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: 'Overwatch Progression Tracker',
   description: 'Track your Overwatch 2 hero progression and sub-badges.',
+  manifest: '/manifest.json', // Added manifest link for PWA
 };
 
 export default function RootLayout({
@@ -20,6 +21,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={inter.variable}>
+      <head>
+        <meta name="theme-color" content="#1E2E4A" /> {/* Match background color for PWA */}
+      </head>
       <body className="antialiased font-sans"> {/* Use --font-inter through font-sans utility */}
         {children}
         <Toaster /> {/* Global Toaster for notifications */}
