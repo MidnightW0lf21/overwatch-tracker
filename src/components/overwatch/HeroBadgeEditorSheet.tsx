@@ -42,7 +42,7 @@ const HeroBadgeEditorSheet: React.FC<HeroBadgeEditorSheetProps> = ({
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <SheetContent className="sm:max-w-xl w-full flex flex-col" side="right">
+      <SheetContent className="sm:max-w-2xl w-full flex flex-col" side="right">
         <SheetHeader className="px-6 pt-6 pb-4 border-b border-border">
           <div className="flex items-center space-x-4">
             {hero.portraitUrl && (
