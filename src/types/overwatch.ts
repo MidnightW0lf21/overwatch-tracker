@@ -5,7 +5,8 @@ import type React from 'react';
 export interface HeroChallenge {
   id: string;
   title: string;
-  icon: React.ElementType; // Actual component for rendering
+  icon?: React.ElementType; // Actual Lucide component for rendering (optional)
+  customIconSvg?: string; // Custom SVG string (optional)
   level: number;
   xpPerLevel: number;
 }
@@ -14,7 +15,8 @@ export interface HeroChallenge {
 export interface StoredHeroChallenge {
   id: string;
   title: string;
-  iconName: string; // Name of the icon for serialization
+  iconName: string; // Name of the Lucide icon, or a special value like '_customSvg'
+  customIconSvg?: string; // SVG string, present if iconName indicates a custom SVG
   level: number;
   xpPerLevel: number;
 }
@@ -24,7 +26,7 @@ export interface Hero {
   name: string;
   portraitUrl: string;
   personalGoalXP: number;
-  challenges: HeroChallenge[]; // Runtime uses actual components
+  challenges: HeroChallenge[]; // Runtime uses actual components or SVG strings
 }
 
 export interface StoredHero {
@@ -32,7 +34,7 @@ export interface StoredHero {
   name: string;
   portraitUrl: string;
   personalGoalXP: number;
-  challenges: StoredHeroChallenge[]; // Storage uses icon names
+  challenges: StoredHeroChallenge[]; // Storage uses icon names or custom SVG indicators
 }
 
 export interface LevelDetails {

@@ -7,17 +7,17 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import type { HeroChallenge } from '@/types/overwatch';
-// import { cn } from '@/lib/utils'; // cn is not used in this file
 
 interface HeroChallengeCardProps {
   challenge: HeroChallenge;
-  heroId: string; // Needed to identify which hero this badge belongs to
+  heroId: string; 
   onLevelChange: (heroId: string, challengeId: string, newLevel: number) => void;
 }
 
 const HeroChallengeCard: React.FC<HeroChallengeCardProps> = ({ challenge, heroId, onLevelChange }) => {
   const IconComponent = challenge.icon;
-  const [currentLevel, setCurrentLevel] = useState(String(challenge.level)); // Store as string for input field
+  const customSvg = challenge.customIconSvg;
+  const [currentLevel, setCurrentLevel] = useState(String(challenge.level));
 
   useEffect(() => {
     setCurrentLevel(String(challenge.level));
@@ -30,13 +30,12 @@ const HeroChallengeCard: React.FC<HeroChallengeCardProps> = ({ challenge, heroId
   const processLevelChange = () => {
     let newLevelNum = parseInt(currentLevel, 10);
     if (isNaN(newLevelNum) || newLevelNum < 1) {
-      newLevelNum = 1; // Default to 1 if invalid or less than 1
+      newLevelNum = 1; 
     }
     
     if (newLevelNum !== challenge.level) {
       onLevelChange(heroId, challenge.id, newLevelNum);
     }
-    // Update local state to reflect the potentially coerced value, ensuring it's a string
     setCurrentLevel(String(newLevelNum)); 
   };
 
@@ -47,16 +46,27 @@ const HeroChallengeCard: React.FC<HeroChallengeCardProps> = ({ challenge, heroId
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       processLevelChange();
-      (e.target as HTMLInputElement).blur(); // Optionally blur the input
+      (e.target as HTMLInputElement).blur(); 
     }
   };
-
 
   return (
     <Card className="bg-card text-card-foreground shadow-md rounded-lg overflow-hidden flex flex-col h-full">
       <CardHeader className="p-3 pb-2">
         <div className="flex items-center space-x-3">
-          {IconComponent && <IconComponent className="h-7 w-7 text-primary flex-shrink-0" strokeWidth={1.5} />}
+          {IconComponent && (
+            <IconComponent className="h-7 w-7 text-primary flex-shrink-0" strokeWidth={1.5} />
+          )}
+          {customSvg && !IconComponent && (
+            <div 
+              className="h-7 w-7 text-primary flex-shrink-0 [&>svg]:h-full [&>svg]:w-full" 
+              dangerouslySetInnerHTML={{ __html: customSvg }} 
+            />
+          )}
+          {/* Fallback if neither is provided, though this should be prevented by form validation */}
+          {!IconComponent && !customSvg && (
+             <div className="h-7 w-7 bg-muted rounded flex items-center justify-center text-muted-foreground text-xs">?</div>
+          )}
           <div className="flex-1 min-w-0">
             <h3 className="text-sm font-semibold uppercase tracking-wider truncate" title={challenge.title}>
               {challenge.title}
@@ -72,12 +82,12 @@ const HeroChallengeCard: React.FC<HeroChallengeCardProps> = ({ challenge, heroId
           </Label>
           <Input
             id={`${heroId}-${challenge.id}-level`}
-            type="number" // Keep type number for native browser validation/controls
-            value={currentLevel} // Bind to string state
+            type="number"
+            value={currentLevel}
             onChange={handleInputChange}
             onBlur={handleInputBlur}
             onKeyPress={handleKeyPress}
-            min="1" // HTML5 min attribute
+            min="1"
             className="h-9 text-sm bg-input w-full"
             placeholder="1"
           />
