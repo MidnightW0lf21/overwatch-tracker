@@ -1,4 +1,3 @@
-
 import type { Hero, HeroChallenge, LevelDetails, StoredHero, StoredHeroChallenge } from '@/types/overwatch';
 import { getIconComponent, getIconName } from './icon-utils';
 
@@ -42,6 +41,7 @@ const levelProgressionTiers: LevelTier[] = [
 ];
 
 const XP_PER_LEVEL_AFTER_TABLE = 60000; // For levels beyond L25
+const CUSTOM_SVG_ICON_NAME = '_customSvg';
 
 export function calculateTotalXP(heroChallenges: StoredHeroChallenge[]): number {
   return heroChallenges.reduce((total, challenge) => {
@@ -133,7 +133,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 's76_critical_hits', title: 'Critical Hits', iconName: 'Crosshair', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
       { id: 's76_helix_direct', title: 'Helix Rocket Direct Hits', iconName: 'Skull', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
       { id: 's76_helix_final_blows', title: 'Helix Rocket Final Blows', iconName: 'Shapes', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
-      { id: 's76_biotic_healing', title: 'Biotic Field Healing', iconName: 'HeartPulse', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
+      { id: 's76_biotic_healing', title: 'Biotic Field Healing', iconName: 'Activity', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
       { id: 's76_visor_kills', title: 'Tactical Visor Kills', iconName: 'Eye', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
       { id: 's76_time_played', title: 'Time Played', iconName: 'Clock', level: 1, xpPerLevel: XP_PER_TIME_TYPE_BADGE_LEVEL },
       { id: 's76_wins', title: 'Wins', iconName: 'Trophy', level: 1, xpPerLevel: XP_PER_WIN_TYPE_BADGE_LEVEL },
@@ -205,34 +205,56 @@ export const initialHeroesData: StoredHero[] = [
 
 // Helper to convert StoredHero[] to Hero[] (hydrating icons)
 export function hydrateHeroes(storedHeroes: StoredHero[]): Hero[] {
-  return storedHeroes.map(sh => ({
-    ...sh,
-    challenges: sh.challenges.map((sc: StoredHeroChallenge) => ({
-      ...sc,
-      icon: getIconComponent(sc.iconName),
-    })),
-  }));
+  return storedHeroes.map(sh => {
+    const challenges = sh.challenges.map((sc: StoredHeroChallenge) => {
+      const heroChallenge: Partial<HeroChallenge> = {
+        id: sc.id,
+        title: sc.title,
+        level: sc.level,
+        xpPerLevel: sc.xpPerLevel,
+      };
+      if (sc.iconName === CUSTOM_SVG_ICON_NAME && sc.customIconSvg) {
+        heroChallenge.customIconSvg = sc.customIconSvg;
+      } else {
+        heroChallenge.icon = getIconComponent(sc.iconName);
+      }
+      return heroChallenge as HeroChallenge;
+    });
+    return { ...sh, challenges };
+  });
 }
 
 // Helper to convert Hero[] to StoredHero[] (dehydrating icons for storage)
 export function dehydrateHeroes(heroes: Hero[]): StoredHero[] {
-  return heroes.map(h => ({
-    id: h.id,
-    name: h.name,
-    portraitUrl: h.portraitUrl,
-    personalGoalXP: h.personalGoalXP,
-    challenges: h.challenges.map((c: HeroChallenge) => {
-      const iconName = getIconName(c.icon);
-      if (!iconName) {
-        console.warn(`Could not find icon name for component in challenge: ${c.title}. Using default 'ShieldQuestion'.`);
-      }
-      const { icon, ...challengeWithoutIcon } = c;
-      return {
-        ...challengeWithoutIcon,
-        iconName: iconName || 'ShieldQuestion', // Fallback icon name
+  return heroes.map(h => {
+    const challenges = h.challenges.map((c: HeroChallenge) => {
+      const storedChallenge: Partial<StoredHeroChallenge> = {
+        id: c.id,
+        title: c.title,
+        level: c.level,
+        xpPerLevel: c.xpPerLevel,
       };
-    }),
-  }));
+      if (c.customIconSvg) {
+        storedChallenge.iconName = CUSTOM_SVG_ICON_NAME;
+        storedChallenge.customIconSvg = c.customIconSvg;
+      } else if (c.icon) {
+        storedChallenge.iconName = getIconName(c.icon) || 'ShieldQuestion';
+      } else {
+        // Fallback if neither is present, though this case should be avoided by form validation
+        storedChallenge.iconName = 'ShieldQuestion';
+      }
+      return storedChallenge as StoredHeroChallenge;
+    });
+    return {
+      id: h.id,
+      name: h.name,
+      portraitUrl: h.portraitUrl,
+      personalGoalXP: h.personalGoalXP,
+      challenges,
+    };
+  });
 }
+
+    
 
     
