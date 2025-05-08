@@ -5,7 +5,7 @@ import type React from 'react';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import HeroCard from '@/components/overwatch/HeroCard';
 import HeroBadgeEditorSheet from '@/components/overwatch/HeroBadgeEditorSheet';
-import type { Hero, HeroCalculated, StoredHero, StoredHeroChallenge } from '@/types/overwatch';
+import type { HeroCalculated, StoredHero, StoredHeroChallenge, Hero } from '@/types/overwatch';
 import { 
   initialHeroesData, 
   calculateTotalXP, 
@@ -53,35 +53,116 @@ export default function Home() {
   
   useEffect(() => {
     try {
-      const storedData = localStorage.getItem(LOCAL_STORAGE_KEY);
-      
-      if (storedData) {
+      const storedDataString = localStorage.getItem(LOCAL_STORAGE_KEY);
+      const masterDefaults: StoredHero[] = initialHeroesData;
+
+      if (storedDataString) {
         try {
-          const parsedData = JSON.parse(storedData) as StoredHero[];
-          // Ensure all initial badges are at least level 1
-          const sanitizedData = parsedData.map(hero => ({
+          const parsedData: StoredHero[] = JSON.parse(storedDataString);
+
+          // Synchronize parsedData with masterDefaults
+          const synchronizedHeroes = masterDefaults.map(defaultHero => {
+            const storedHero = parsedData.find(h => h.id === defaultHero.id);
+
+            if (storedHero) {
+              // Hero exists in storage, merge its properties and challenges
+              let finalChallengeList: StoredHeroChallenge[] = [];
+              const processedStoredChallengeIds = new Set<string>();
+
+              // Iterate through defaultHero's challenges to maintain their intended order and definitions
+              for (const defaultChallenge of defaultHero.challenges) {
+                const storedChallengeMatch = storedHero.challenges.find(sc => sc.id === defaultChallenge.id);
+                if (storedChallengeMatch) {
+                  // Default challenge found in storage: use default definition, stored level
+                  finalChallengeList.push({
+                    ...defaultChallenge, // iconName, title, xpPerLevel, customIconSvg from default
+                    level: Math.max(1, storedChallengeMatch.level || 1),
+                  });
+                  processedStoredChallengeIds.add(storedChallengeMatch.id);
+                } else {
+                  // Default challenge not in storage (new default badge for this hero), add it
+                  finalChallengeList.push({
+                    ...defaultChallenge,
+                    level: Math.max(1, defaultChallenge.level || 1),
+                  });
+                }
+              }
+
+              // Add any remaining (custom) challenges from storedHero
+              for (const storedChallenge of storedHero.challenges) {
+                if (!processedStoredChallengeIds.has(storedChallenge.id)) {
+                  finalChallengeList.push({
+                    ...storedChallenge,
+                    level: Math.max(1, storedChallenge.level || 1),
+                  });
+                }
+              }
+              
+              return {
+                id: defaultHero.id, // ID must come from default
+                name: storedHero.name, // Prefer stored name (editable via admin)
+                portraitUrl: storedHero.portraitUrl, // Prefer stored portrait (editable via admin)
+                personalGoalXP: storedHero.personalGoalXP, // Prefer stored goal (editable via admin)
+                challenges: finalChallengeList,
+              };
+            } else {
+              // Hero from masterDefaults not found in storage (new default hero), add it
+              return {
+                ...defaultHero,
+                challenges: defaultHero.challenges.map(c => ({ ...c, level: Math.max(1, c.level || 1) })),
+              };
+            }
+          });
+
+          // Add any custom heroes from parsedData that are not in masterDefaults
+          const customUserHeroes = parsedData.filter(
+            sh => !masterDefaults.some(dh => dh.id === sh.id)
+          ).map(hero => ({ // Ensure levels for custom heroes are also at least 1
             ...hero,
             challenges: hero.challenges.map(challenge => ({
               ...challenge,
-              level: Math.max(1, challenge.level || 1) 
+              level: Math.max(1, challenge.level || 1)
             }))
           }));
-          calculateAndSetHeroes(sanitizedData); 
+
+          const finalHeroesToLoad = [...synchronizedHeroes, ...customUserHeroes];
+          
+          calculateAndSetHeroes(finalHeroesToLoad);
+          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(finalHeroesToLoad));
+
         } catch (error) {
-          console.error("Failed to parse hero data from localStorage, resetting to default:", error);
-          // Dehydrate initialHeroesData (which are Hero[]) to StoredHero[] before storing
-          const defaultStoredData = dehydrateHeroes(initialHeroesData.map(h => ({...h, challenges: h.challenges.map(c => ({...c, level: Math.max(1, c.level || 1), iconName: dehydrateHeroes([h] as Hero[])[0].challenges.find(sc => sc.id === c.id)?.iconName || 'ShieldQuestion'}))} as unknown as Hero)) );
-          calculateAndSetHeroes(defaultStoredData); 
+          console.error("Failed to parse/synchronize hero data from localStorage, resetting to default:", error);
+          const defaultStoredData = masterDefaults.map(hero => ({
+            ...hero,
+            challenges: hero.challenges.map(challenge => ({
+              ...challenge,
+              level: Math.max(1, challenge.level ?? 1)
+            }))
+          }));
+          calculateAndSetHeroes(defaultStoredData);
           localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(defaultStoredData));
         }
       } else {
-        const defaultStoredData = dehydrateHeroes(initialHeroesData.map(h => ({...h, challenges: h.challenges.map(c => ({...c, level: Math.max(1, c.level || 1), iconName: dehydrateHeroes([h] as Hero[])[0].challenges.find(sc => sc.id === c.id)?.iconName || 'ShieldQuestion'}))} as unknown as Hero)) );
-        calculateAndSetHeroes(defaultStoredData); 
+        // No data in localStorage, use masterDefaults
+        const defaultStoredData = masterDefaults.map(hero => ({
+            ...hero,
+            challenges: hero.challenges.map(challenge => ({
+              ...challenge,
+              level: Math.max(1, challenge.level ?? 1)
+            }))
+          }));
+        calculateAndSetHeroes(defaultStoredData);
         localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(defaultStoredData));
       }
     } catch (e) {
       console.error('Error during initial data load, resetting to default:', e);
-      const defaultStoredData = dehydrateHeroes(initialHeroesData.map(h => ({...h, challenges: h.challenges.map(c => ({...c, level: Math.max(1, c.level || 1), iconName: dehydrateHeroes([h]as Hero[])[0].challenges.find(sc => sc.id === c.id)?.iconName || 'ShieldQuestion'}))} as unknown as Hero)) );
+      const defaultStoredData = initialHeroesData.map(hero => ({ // Use initialHeroesData directly as StoredHero[]
+            ...hero,
+            challenges: hero.challenges.map(challenge => ({
+              ...challenge,
+              level: Math.max(1, challenge.level ?? 1)
+            }))
+          }));
       calculateAndSetHeroes(defaultStoredData);
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(defaultStoredData));
     }
