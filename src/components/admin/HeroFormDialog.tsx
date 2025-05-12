@@ -2,7 +2,7 @@
 'use client';
 
 import type React from 'react';
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import type { StoredHero } from '@/types/overwatch';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -25,19 +25,20 @@ const heroSchema = z.object({
   id: z.string().min(1, "ID is required").regex(/^[a-z0-9_]+$/, "ID can only contain lowercase letters, numbers, and underscores."),
   name: z.string().min(1, "Name is required"),
   portraitUrl: z.string().url("Must be a valid URL for portrait image"),
-  personalGoalXP: z.coerce.number().min(0, "Personal Goal XP must be 0 or greater"),
+  personalGoalLevel: z.coerce.number().min(0, "Personal Goal Level must be 0 or greater").max(500, "Personal Goal Level cannot exceed 500"),
 });
+
+type HeroFormData = Omit<StoredHero, 'challenges'>; // Form data doesn't include challenges directly
 
 const HeroFormDialog: React.FC<HeroFormDialogProps> = ({ isOpen, onClose, onSubmit, hero, allHeroes }) => {
   const { toast } = useToast();
-  const { control, handleSubmit, reset, formState: { errors }, setValue } = useForm<StoredHero>({
+  const { control, handleSubmit, reset, formState: { errors }, setValue } = useForm<HeroFormData>({
     resolver: zodResolver(heroSchema),
     defaultValues: {
       id: '',
       name: '',
       portraitUrl: '',
-      personalGoalXP: 0,
-      challenges: [], // challenges are managed separately
+      personalGoalLevel: 0,
     },
   });
 
@@ -46,14 +47,13 @@ const HeroFormDialog: React.FC<HeroFormDialogProps> = ({ isOpen, onClose, onSubm
       setValue('id', hero.id);
       setValue('name', hero.name);
       setValue('portraitUrl', hero.portraitUrl);
-      setValue('personalGoalXP', hero.personalGoalXP);
-      // challenges are part of the hero object but not edited here
+      setValue('personalGoalLevel', hero.personalGoalLevel);
     } else {
-      reset({ id: '', name: '', portraitUrl: '', personalGoalXP: 0, challenges: [] });
+      reset({ id: '', name: '', portraitUrl: '', personalGoalLevel: 0 });
     }
   }, [hero, isOpen, reset, setValue]);
 
-  const handleFormSubmit = (data: StoredHero) => {
+  const handleFormSubmit = (data: HeroFormData) => {
     if (!hero && allHeroes.some(h => h.id === data.id)) {
       toast({
         title: "Error: Duplicate ID",
@@ -62,7 +62,7 @@ const HeroFormDialog: React.FC<HeroFormDialogProps> = ({ isOpen, onClose, onSubm
       });
       return;
     }
-    // Preserve existing challenges if editing
+    // Preserve existing challenges if editing, otherwise it's an empty array for a new hero
     const challenges = hero ? hero.challenges : [];
     onSubmit({ ...data, challenges });
   };
@@ -74,7 +74,7 @@ const HeroFormDialog: React.FC<HeroFormDialogProps> = ({ isOpen, onClose, onSubm
           <DialogTitle>{hero ? 'Edit Hero' : 'Add New Hero'}</DialogTitle>
           <DialogDescription>
             {hero ? `Editing ${hero.name}. ` : 'Enter the details for the new hero. '}
-            Hero ID must be unique.
+            Hero ID must be unique. Personal Goal Level: 0 for no goal, max 500.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(handleFormSubmit)} className="grid gap-4 py-4">
@@ -106,13 +106,13 @@ const HeroFormDialog: React.FC<HeroFormDialogProps> = ({ isOpen, onClose, onSubm
             {errors.portraitUrl && <p className="col-span-4 text-destructive text-sm text-right">{errors.portraitUrl.message}</p>}
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="personalGoalXP" className="text-right">Personal Goal XP</Label>
+            <Label htmlFor="personalGoalLevel" className="text-right">Goal Level</Label>
             <Controller
-              name="personalGoalXP"
+              name="personalGoalLevel"
               control={control}
-              render={({ field }) => <Input id="personalGoalXP" type="number" {...field} className="col-span-3" />}
+              render={({ field }) => <Input id="personalGoalLevel" type="number" {...field} className="col-span-3" />}
             />
-            {errors.personalGoalXP && <p className="col-span-4 text-destructive text-sm text-right">{errors.personalGoalXP.message}</p>}
+            {errors.personalGoalLevel && <p className="col-span-4 text-destructive text-sm text-right">{errors.personalGoalLevel.message}</p>}
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>

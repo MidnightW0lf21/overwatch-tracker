@@ -37,6 +37,7 @@ const HeroBadgeEditorSheet: React.FC<HeroBadgeEditorSheetProps> = ({
 }) => {
   const [estimatedTimeToMax, setEstimatedTimeToMax] = useState<string | null>(null);
   const [badgesNeededForGoal, setBadgesNeededForGoal] = useState<number | null>(null);
+  const [xpForPersonalGoalLevel, setXpForPersonalGoalLevel] = useState<number>(0);
 
   useEffect(() => {
     if (hero) {
@@ -84,22 +85,31 @@ const HeroBadgeEditorSheet: React.FC<HeroBadgeEditorSheetProps> = ({
         }
       }
 
-      // Calculate badges needed for personal goal
-      if (hero.personalGoalXP > 0 && hero.totalXp < hero.personalGoalXP) {
-        const xpRemainingForPersonalGoal = hero.personalGoalXP - hero.totalXp;
-        if (XP_PER_HERO_TYPE_BADGE_LEVEL > 0) {
-          const needed = Math.ceil(xpRemainingForPersonalGoal / XP_PER_HERO_TYPE_BADGE_LEVEL);
-          setBadgesNeededForGoal(needed);
+      // Calculate badges needed for personal goal level
+      if (hero.personalGoalLevel > 0) {
+        const xpToReachGoal = calculateXpToReachLevel(hero.personalGoalLevel);
+        setXpForPersonalGoalLevel(xpToReachGoal);
+
+        if (hero.totalXp < xpToReachGoal) {
+          const xpRemainingForPersonalGoal = xpToReachGoal - hero.totalXp;
+          if (XP_PER_HERO_TYPE_BADGE_LEVEL > 0) {
+            const needed = Math.ceil(xpRemainingForPersonalGoal / XP_PER_HERO_TYPE_BADGE_LEVEL);
+            setBadgesNeededForGoal(needed);
+          } else {
+            setBadgesNeededForGoal(null); // Should not happen if XP_PER_HERO_TYPE_BADGE_LEVEL is positive
+          }
         } else {
-          setBadgesNeededForGoal(null);
+          setBadgesNeededForGoal(0); // Goal met or exceeded
         }
       } else {
-        setBadgesNeededForGoal(0); // Goal met or no goal set
+        setBadgesNeededForGoal(null); // No goal set
+        setXpForPersonalGoalLevel(0);
       }
 
     } else {
       setEstimatedTimeToMax(null);
       setBadgesNeededForGoal(null);
+      setXpForPersonalGoalLevel(0);
     }
   }, [hero]);
 
@@ -108,7 +118,9 @@ const HeroBadgeEditorSheet: React.FC<HeroBadgeEditorSheetProps> = ({
   }
 
   const rankTitle = `Level ${hero.level} Hero`; 
-  const personalGoalProgress = hero.personalGoalXP > 0 ? Math.min(100, (hero.totalXp / hero.personalGoalXP) * 100) : 0;
+  const personalGoalProgress = hero.personalGoalLevel > 0 && xpForPersonalGoalLevel > 0 
+    ? Math.min(100, (hero.totalXp / xpForPersonalGoalLevel) * 100) 
+    : (hero.personalGoalLevel === 0 ? 0 : (hero.totalXp > 0 ? 100 : 0) );
 
 
   return (
@@ -139,23 +151,25 @@ const HeroBadgeEditorSheet: React.FC<HeroBadgeEditorSheetProps> = ({
         <div className="px-6 py-4">
           <h3 className="text-md font-semibold text-foreground/90 mb-1 flex items-center">
             <TargetIcon className="h-4 w-4 mr-2 text-muted-foreground" />
-            Personal Goal Progress
+            Personal Goal Progress (Level {hero.personalGoalLevel > 0 ? hero.personalGoalLevel : 'N/A'})
           </h3>
           <Progress value={personalGoalProgress} className="h-3 bg-accent/20 [&>div]:bg-accent" />
           <div className="flex justify-between items-center">
             <p className="text-xs text-muted-foreground mt-1">
-              {badgesNeededForGoal !== null && badgesNeededForGoal > 0 && (
-                <>{badgesNeededForGoal.toLocaleString()} more badge level-ups (avg. {XP_PER_HERO_TYPE_BADGE_LEVEL} XP)</>
+              {hero.personalGoalLevel === 0 && (
+                <>No personal goal level set.</>
               )}
-              {badgesNeededForGoal === 0 && hero.personalGoalXP > 0 && (
-                <>Goal reached!</>
+              {hero.personalGoalLevel > 0 && badgesNeededForGoal !== null && badgesNeededForGoal > 0 && (
+                <>{badgesNeededForGoal.toLocaleString()} more badge level-ups (avg. {XP_PER_HERO_TYPE_BADGE_LEVEL} XP) to reach Level {hero.personalGoalLevel}</>
               )}
-               {hero.personalGoalXP === 0 && (
-                <>No personal goal set.</>
+              {hero.personalGoalLevel > 0 && badgesNeededForGoal === 0 && (
+                <>Goal level {hero.personalGoalLevel} reached!</>
               )}
             </p>
             <p className="text-xs text-muted-foreground mt-1 text-right">
-              {hero.totalXp.toLocaleString()} / {hero.personalGoalXP.toLocaleString()} XP ({personalGoalProgress.toFixed(1)}%)
+              {hero.personalGoalLevel > 0 
+                ? `${hero.totalXp.toLocaleString()} / ${xpForPersonalGoalLevel.toLocaleString()} XP (${personalGoalProgress.toFixed(1)}%)`
+                : `${hero.totalXp.toLocaleString()} XP`}
             </p>
           </div>
         </div>
@@ -207,4 +221,3 @@ const HeroBadgeEditorSheet: React.FC<HeroBadgeEditorSheetProps> = ({
 };
 
 export default HeroBadgeEditorSheet;
-

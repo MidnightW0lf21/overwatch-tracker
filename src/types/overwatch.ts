@@ -25,7 +25,7 @@ export interface Hero {
   id: string;
   name: string;
   portraitUrl: string;
-  personalGoalXP: number;
+  personalGoalLevel: number; // Changed from personalGoalXP
   challenges: HeroChallenge[]; // Runtime uses actual components or SVG strings
 }
 
@@ -33,7 +33,7 @@ export interface StoredHero {
   id: string;
   name: string;
   portraitUrl: string;
-  personalGoalXP: number;
+  personalGoalLevel: number; // Changed from personalGoalXP
   challenges: StoredHeroChallenge[]; // Storage uses icon names or custom SVG indicators
 }
 
@@ -47,3 +47,4 @@ export interface LevelDetails {
 }
 
 export interface HeroCalculated extends Hero, LevelDetails {}
+

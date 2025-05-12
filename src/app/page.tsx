@@ -32,7 +32,7 @@ import { Progress } from '@/components/ui/progress';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 
-const LOCAL_STORAGE_KEY = 'overwatchProgressionData_v3';
+const LOCAL_STORAGE_KEY = 'overwatchProgressionData_v3'; // Consider bumping if schema changes significantly
 const GLOBAL_MAX_LEVEL = 500; // Max level for an individual hero
 
 export default function Home() {
@@ -58,7 +58,14 @@ export default function Home() {
 
       if (storedDataString) {
         try {
-          const parsedData: StoredHero[] = JSON.parse(storedDataString);
+          let parsedData: StoredHero[] = JSON.parse(storedDataString);
+
+          // Ensure personalGoalLevel exists on parsed data (migration for older data)
+          parsedData = parsedData.map(hero => ({
+            ...hero,
+            personalGoalLevel: hero.personalGoalLevel ?? (hero as any).personalGoalXP ? 50 : 0, // Basic migration if old XP field existed
+          }));
+
 
           // Synchronize parsedData with masterDefaults
           const synchronizedHeroes = masterDefaults.map(defaultHero => {
@@ -102,7 +109,7 @@ export default function Home() {
                 id: defaultHero.id, // ID must come from default
                 name: storedHero.name, // Prefer stored name (editable via admin)
                 portraitUrl: storedHero.portraitUrl, // Prefer stored portrait (editable via admin)
-                personalGoalXP: storedHero.personalGoalXP, // Prefer stored goal (editable via admin)
+                personalGoalLevel: storedHero.personalGoalLevel, // Prefer stored goal (editable via admin)
                 challenges: finalChallengeList,
               };
             } else {
@@ -119,6 +126,7 @@ export default function Home() {
             sh => !masterDefaults.some(dh => dh.id === sh.id)
           ).map(hero => ({ // Ensure levels for custom heroes are also at least 1
             ...hero,
+            personalGoalLevel: hero.personalGoalLevel ?? 0,
             challenges: hero.challenges.map(challenge => ({
               ...challenge,
               level: Math.max(1, challenge.level || 1)
@@ -134,6 +142,7 @@ export default function Home() {
           console.error("Failed to parse/synchronize hero data from localStorage, resetting to default:", error);
           const defaultStoredData = masterDefaults.map(hero => ({
             ...hero,
+            personalGoalLevel: hero.personalGoalLevel || 0,
             challenges: hero.challenges.map(challenge => ({
               ...challenge,
               level: Math.max(1, challenge.level ?? 1)
@@ -146,6 +155,7 @@ export default function Home() {
         // No data in localStorage, use masterDefaults
         const defaultStoredData = masterDefaults.map(hero => ({
             ...hero,
+            personalGoalLevel: hero.personalGoalLevel || 0,
             challenges: hero.challenges.map(challenge => ({
               ...challenge,
               level: Math.max(1, challenge.level ?? 1)
@@ -158,6 +168,7 @@ export default function Home() {
       console.error('Error during initial data load, resetting to default:', e);
       const defaultStoredData = initialHeroesData.map(hero => ({ // Use initialHeroesData directly as StoredHero[]
             ...hero,
+            personalGoalLevel: hero.personalGoalLevel || 0,
             challenges: hero.challenges.map(challenge => ({
               ...challenge,
               level: Math.max(1, challenge.level ?? 1)

@@ -1,3 +1,4 @@
+
 import type { Hero, HeroChallenge, LevelDetails, StoredHero, StoredHeroChallenge } from '@/types/overwatch';
 import { getIconComponent, getIconName } from './icon-utils';
 
@@ -127,7 +128,7 @@ export const initialHeroesData: StoredHero[] = [
     id: 'soldier76', 
     name: 'Soldier: 76', 
     portraitUrl: 'https://static.wikia.nocookie.net/overwatch_gamepedia/images/2/2b/Icon-Soldier_76.png', 
-    personalGoalXP: 200000,
+    personalGoalLevel: 100, // Example goal level
     challenges: [
       { id: 's76_damage_dealt', title: 'Damage Dealt', iconName: 'Shell', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
       { id: 's76_critical_hits', title: 'Critical Hits', iconName: 'Crosshair', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
@@ -143,9 +144,9 @@ export const initialHeroesData: StoredHero[] = [
     id: 'tracer', 
     name: 'Tracer', 
     portraitUrl: 'https://picsum.photos/seed/tracer/100/100', 
-    personalGoalXP: 150000,
+    personalGoalLevel: 75, // Example goal level
     challenges: [
-      { id: 'tracer_pulse_kills', title: 'Pulse Bomb Kills', iconName: 'Zap', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
+      { id: 'tracer_pulse_kills', title: 'Pulse Bomb Kills', iconName: 'Bomb', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL }, // Changed Zap to Bomb
       { id: 'tracer_recall_healed', title: 'Health Recalled', iconName: 'HeartPulse', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
       { id: 'tracer_time_played', title: 'Time Played', iconName: 'Clock', level: 1, xpPerLevel: XP_PER_TIME_TYPE_BADGE_LEVEL },
       { id: 'tracer_wins', title: 'Wins', iconName: 'Trophy', level: 1, xpPerLevel: XP_PER_WIN_TYPE_BADGE_LEVEL },
@@ -155,10 +156,10 @@ export const initialHeroesData: StoredHero[] = [
     id: 'mercy', 
     name: 'Mercy', 
     portraitUrl: 'https://picsum.photos/seed/mercy/100/100', 
-    personalGoalXP: 250000,
+    personalGoalLevel: 120, // Example goal level
     challenges: [
         { id: 'mercy_healing_done', title: 'Healing Done', iconName: 'HeartPulse', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
-        { id: 'mercy_rez', title: 'Resurrections', iconName: 'Zap', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
+        { id: 'mercy_rez', title: 'Resurrections', iconName: 'UserCheck', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL }, // Changed Zap to UserCheck
         { id: 'mercy_wins', title: 'Wins', iconName: 'Trophy', level: 1, xpPerLevel: XP_PER_WIN_TYPE_BADGE_LEVEL },
         { id: 'mercy_time_played', title: 'Time Played', iconName: 'Clock', level: 1, xpPerLevel: XP_PER_TIME_TYPE_BADGE_LEVEL },
     ],
@@ -167,11 +168,11 @@ export const initialHeroesData: StoredHero[] = [
     id: 'reinhardt', 
     name: 'Reinhardt', 
     portraitUrl: 'https://picsum.photos/seed/reinhardt/100/100', 
-    personalGoalXP: 180000,
+    personalGoalLevel: 90, // Example goal level
     challenges: [
       { id: 'rein_shatter_stuns', title: 'Earthshatter Stuns', iconName: 'ShieldQuestion', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
-      { id: 'rein_charge_pins', title: 'Charge Pins', iconName: 'Zap', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
-      { id: 'rein_damage_blocked', title: 'Damage Blocked', iconName: 'ShieldQuestion', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
+      { id: 'rein_charge_pins', title: 'Charge Pins', iconName: 'Target', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL }, // Changed Zap to Target
+      { id: 'rein_damage_blocked', title: 'Damage Blocked', iconName: 'Shield', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL }, // Changed ShieldQuestion to Shield
       { id: 'rein_wins', title: 'Wins', iconName: 'Trophy', level: 1, xpPerLevel: XP_PER_WIN_TYPE_BADGE_LEVEL },
       { id: 'rein_time_played', title: 'Time Played', iconName: 'Clock', level: 1, xpPerLevel: XP_PER_TIME_TYPE_BADGE_LEVEL },
     ],
@@ -180,11 +181,11 @@ export const initialHeroesData: StoredHero[] = [
     id: 'ana', 
     name: 'Ana', 
     portraitUrl: 'https://picsum.photos/seed/ana/100/100', 
-    personalGoalXP: 220000,
+    personalGoalLevel: 110, // Example goal level
     challenges: [
-        { id: 'ana_sleep_darts', title: 'Sleep Darts Hit', iconName: 'Zap', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
+        { id: 'ana_sleep_darts', title: 'Sleep Darts Hit', iconName: 'Timer', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL }, // Changed Zap to Timer
         { id: 'ana_biotic_grenade_assists', title: 'Biotic Grenade Assists', iconName: 'HeartPulse', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
-        { id: 'ana_nano_boosts', title: 'Nano Boosts Applied', iconName: 'Shapes', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
+        { id: 'ana_nano_boosts', title: 'Nano Boosts Applied', iconName: 'Zap', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL }, // Changed Shapes to Zap
         { id: 'ana_wins', title: 'Wins', iconName: 'Trophy', level: 1, xpPerLevel: XP_PER_WIN_TYPE_BADGE_LEVEL },
         { id: 'ana_time_played', title: 'Time Played', iconName: 'Clock', level: 1, xpPerLevel: XP_PER_TIME_TYPE_BADGE_LEVEL },
     ],
@@ -193,9 +194,9 @@ export const initialHeroesData: StoredHero[] = [
     id: 'genji', 
     name: 'Genji', 
     portraitUrl: 'https://picsum.photos/seed/genji/100/100', 
-    personalGoalXP: 190000,
+    personalGoalLevel: 95, // Example goal level
     challenges: [
-       { id: 'genji_blade_kills', title: 'Dragonblade Kills', iconName: 'Sword', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
+       { id: 'genji_blade_kills', title: 'Dragonblade Kills', iconName: 'Swords', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL }, // Changed Sword to Swords
        { id: 'genji_deflect_damage', title: 'Damage Deflected', iconName: 'ShieldQuestion', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
        { id: 'genji_wins', title: 'Wins', iconName: 'Trophy', level: 1, xpPerLevel: XP_PER_WIN_TYPE_BADGE_LEVEL },
        { id: 'genji_time_played', title: 'Time Played', iconName: 'Clock', level: 1, xpPerLevel: XP_PER_TIME_TYPE_BADGE_LEVEL },
@@ -220,7 +221,13 @@ export function hydrateHeroes(storedHeroes: StoredHero[]): Hero[] {
       }
       return heroChallenge as HeroChallenge;
     });
-    return { ...sh, challenges };
+    return { 
+      id: sh.id,
+      name: sh.name,
+      portraitUrl: sh.portraitUrl,
+      personalGoalLevel: sh.personalGoalLevel || 0, // Ensure personalGoalLevel exists
+      challenges 
+    };
   });
 }
 
@@ -249,7 +256,7 @@ export function dehydrateHeroes(heroes: Hero[]): StoredHero[] {
       id: h.id,
       name: h.name,
       portraitUrl: h.portraitUrl,
-      personalGoalXP: h.personalGoalXP,
+      personalGoalLevel: h.personalGoalLevel || 0, // Ensure personalGoalLevel exists
       challenges,
     };
   });
