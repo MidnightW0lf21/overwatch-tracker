@@ -93,9 +93,12 @@ const withPWA = require('next-pwa')({
   ],
 });
 
+const isProd = process.env.NODE_ENV === 'production';
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  output: 'export', // Required for static export to GitHub Pages
+  assetPrefix: isProd ? '/overwatch-tracker/' : '',
+  basePath: isProd ? '/overwatch-tracker' : '',
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -103,6 +106,7 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true,
   },
   images: {
+    unoptimized: true, // Required for static export with next/image
     remotePatterns: [
       {
         protocol: 'https',
@@ -121,3 +125,4 @@ const nextConfig: NextConfig = {
 };
 
 export default withPWA(nextConfig);
+
