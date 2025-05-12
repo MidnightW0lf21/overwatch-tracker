@@ -93,13 +93,12 @@ const withPWA = require('next-pwa')({
   ],
 });
 
-const isProd = process.env.NODE_ENV === 'production';
 
 const nextConfig: NextConfig = {
   output: 'export',
   // For Firebase Hosting at the root, assetPrefix and basePath should be empty
-  assetPrefix: isProd ? '' : '',
-  basePath: isProd ? '' : '',
+  assetPrefix:  '', // Correct for root deployment
+  basePath:  '', // Correct for root deployment
   typescript: {
     ignoreBuildErrors: true,
   },
