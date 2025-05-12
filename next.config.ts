@@ -96,7 +96,6 @@ const withPWA = require('next-pwa')({
 
 const nextConfig: NextConfig = {
   output: 'export',
-  // For Firebase Hosting at the root, assetPrefix and basePath should be empty
   assetPrefix:  '', // Correct for root deployment
   basePath:  '', // Correct for root deployment
   typescript: {

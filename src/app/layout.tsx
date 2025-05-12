@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   manifest: '/manifest.json', 
   themeColor: '#1E2E4A', 
   icons: {
-    icon: '/favicon.ico', // Corrected path for root deployment
+    icon: '/favicon.ico', // Ensure this path is correct for root deployment
   },
 };
 
