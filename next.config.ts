@@ -96,9 +96,10 @@ const withPWA = require('next-pwa')({
 const isProd = process.env.NODE_ENV === 'production';
 
 const nextConfig: NextConfig = {
-  output: 'export', // Required for static export to GitHub Pages
-  assetPrefix: isProd ? '/overwatch-tracker/' : '',
-  basePath: isProd ? '/overwatch-tracker' : '',
+  output: 'export',
+  // For Firebase Hosting at the root, assetPrefix and basePath should be empty
+  assetPrefix: isProd ? '' : '',
+  basePath: isProd ? '' : '',
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -106,7 +107,7 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true,
   },
   images: {
-    unoptimized: true, // Required for static export with next/image
+    unoptimized: true, 
     remotePatterns: [
       {
         protocol: 'https',

@@ -1,0 +1,6 @@
+{
+  "firebase_hosting": {
+    "deploymentHostingUrl": "https://overwatch-progression-tracker.web.app"
+  },
+  "cloud_run_deploy": {}
+}

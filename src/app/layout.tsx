@@ -1,19 +1,22 @@
 
 import type {Metadata} from 'next';
-import { Inter } from 'next/font/google'; // Using Inter as a suitable modern font
+import { Inter } from 'next/font/google'; 
 import './globals.css';
-import { Toaster } from "@/components/ui/toaster"; // Ensure Toaster is globally available
+import { Toaster } from "@/components/ui/toaster"; 
 
 const inter = Inter({
   subsets: ['latin'],
-  variable: '--font-inter', // Changed from geist to inter
+  variable: '--font-inter', 
 });
 
 export const metadata: Metadata = {
   title: 'Overwatch Progression Tracker',
   description: 'Track your Overwatch 2 hero progression and sub-badges.',
-  manifest: '/manifest.json', // Added manifest link for PWA
-  themeColor: '#1E2E4A', // Explicitly set theme-color via metadata
+  manifest: '/manifest.json', 
+  themeColor: '#1E2E4A', 
+  icons: {
+    icon: '/favicon.ico', // Corrected path for root deployment
+  },
 };
 
 export default function RootLayout({
@@ -23,14 +26,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={inter.variable}>
-      {/* 
-        The <head> tag is no longer manually defined here.
-        Next.js will automatically construct and populate the <head> 
-        based on the 'metadata' export and the linked manifest.json.
-      */}
-      <body className="antialiased font-sans"> {/* Use --font-inter through font-sans utility */}
+      <body className="antialiased font-sans"> 
         {children}
-        <Toaster /> {/* Global Toaster for notifications */}
+        <Toaster /> 
       </body>
     </html>
   );
