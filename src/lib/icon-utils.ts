@@ -25,7 +25,7 @@ import {
   UserCheck 
 } from 'lucide-react';
 
-// This map is primarily for Lucide icons. Custom SVGs are handled separately.
+// This map is for Lucide icons.
 export const iconNameMap: Record<string, React.ElementType> = {
   Shell,
   Crosshair,
@@ -56,7 +56,8 @@ Object.entries(iconNameMap).forEach(([name, component]) => {
   componentToIconNameMap.set(component, name);
 });
 
-export function getIconComponent(iconName: string): React.ElementType {
+export function getIconComponent(iconName?: string): React.ElementType {
+  if (!iconName) return ShieldQuestion; // Fallback for undefined iconName
   const Icon = iconNameMap[iconName];
   if (!Icon) {
     // console.warn(`Lucide icon component not found for name: ${iconName}. Falling back to ShieldQuestion.`);

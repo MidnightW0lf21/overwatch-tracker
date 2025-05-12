@@ -17,7 +17,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { XP_PER_TIME_TYPE_BADGE_LEVEL, XP_PER_HERO_TYPE_BADGE_LEVEL, calculateXpToReachLevel } from '@/lib/overwatch-utils';
+import { calculateXpToReachLevel } from '@/lib/overwatch-utils';
+import { XP_PER_TIME_TYPE_BADGE_LEVEL, XP_PER_HERO_TYPE_BADGE_LEVEL } from '@/lib/overwatch-utils';
 import { ClockIcon, StarIcon, TargetIcon } from 'lucide-react';
 
 interface HeroBadgeEditorSheetProps {
@@ -27,7 +28,7 @@ interface HeroBadgeEditorSheetProps {
   onClose: () => void;
 }
 
-const HERO_MAX_LEVEL = 500; // Defined max level for a hero
+const HERO_MAX_LEVEL = 500; 
 
 const HeroBadgeEditorSheet: React.FC<HeroBadgeEditorSheetProps> = ({
   isOpen,
@@ -41,10 +42,10 @@ const HeroBadgeEditorSheet: React.FC<HeroBadgeEditorSheetProps> = ({
 
   useEffect(() => {
     if (hero) {
-      // Calculate estimated time to max level
       if (hero.level >= HERO_MAX_LEVEL) {
         setEstimatedTimeToMax("Max level reached!");
       } else {
+        // Find time badge by its xpPerLevel property directly from hero.challenges
         const timeBadge = hero.challenges.find(
           (c) => c.xpPerLevel === XP_PER_TIME_TYPE_BADGE_LEVEL
         );
@@ -85,24 +86,24 @@ const HeroBadgeEditorSheet: React.FC<HeroBadgeEditorSheetProps> = ({
         }
       }
 
-      // Calculate badges needed for personal goal level
       if (hero.personalGoalLevel > 0) {
         const xpToReachGoal = calculateXpToReachLevel(hero.personalGoalLevel);
         setXpForPersonalGoalLevel(xpToReachGoal);
 
         if (hero.totalXp < xpToReachGoal) {
           const xpRemainingForPersonalGoal = xpToReachGoal - hero.totalXp;
-          if (XP_PER_HERO_TYPE_BADGE_LEVEL > 0) {
+          // Use the default XP_PER_HERO_TYPE_BADGE_LEVEL for calculation
+          if (XP_PER_HERO_TYPE_BADGE_LEVEL > 0) { 
             const needed = Math.ceil(xpRemainingForPersonalGoal / XP_PER_HERO_TYPE_BADGE_LEVEL);
             setBadgesNeededForGoal(needed);
           } else {
-            setBadgesNeededForGoal(null); // Should not happen if XP_PER_HERO_TYPE_BADGE_LEVEL is positive
+            setBadgesNeededForGoal(null); 
           }
         } else {
-          setBadgesNeededForGoal(0); // Goal met or exceeded
+          setBadgesNeededForGoal(0); 
         }
       } else {
-        setBadgesNeededForGoal(null); // No goal set
+        setBadgesNeededForGoal(null); 
         setXpForPersonalGoalLevel(0);
       }
 
@@ -130,7 +131,7 @@ const HeroBadgeEditorSheet: React.FC<HeroBadgeEditorSheetProps> = ({
           <div className="flex items-center space-x-4">
             {hero.portraitUrl && (
               <Image
-                src={hero.portraitUrl}
+                src={hero.portraitUrl.trimStart()}
                 alt={`${hero.name} Portrait`}
                 width={64}
                 height={64}

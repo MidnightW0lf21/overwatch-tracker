@@ -1,22 +1,20 @@
 
 import type React from 'react';
 
-// Runtime version used by components
+// Stored version (localStorage, initial data configuration, form data)
+export interface StoredHeroChallenge {
+  id: string; // Unique ID for this specific badge instance on a hero
+  title: string;
+  iconName: string; // Name of the Lucide icon
+  xpPerLevel: number;
+  level: number;
+}
+
+// Runtime version used by components that render badges
 export interface HeroChallenge {
   id: string;
   title: string;
-  icon?: React.ElementType; // Actual Lucide component for rendering (optional)
-  customIconSvg?: string; // Custom SVG string (optional)
-  level: number;
-  xpPerLevel: number;
-}
-
-// Storage version (localStorage, initial data configuration)
-export interface StoredHeroChallenge {
-  id: string;
-  title: string;
-  iconName: string; // Name of the Lucide icon, or a special value like '_customSvg'
-  customIconSvg?: string; // SVG string, present if iconName indicates a custom SVG
+  icon?: React.ElementType; // Actual Lucide component for rendering
   level: number;
   xpPerLevel: number;
 }
@@ -25,16 +23,16 @@ export interface Hero {
   id: string;
   name: string;
   portraitUrl: string;
-  personalGoalLevel: number; // Changed from personalGoalXP
-  challenges: HeroChallenge[]; // Runtime uses actual components or SVG strings
+  personalGoalLevel: number;
+  challenges: HeroChallenge[]; // Runtime uses actual components
 }
 
 export interface StoredHero {
   id: string;
   name: string;
   portraitUrl: string;
-  personalGoalLevel: number; // Changed from personalGoalXP
-  challenges: StoredHeroChallenge[]; // Storage uses icon names or custom SVG indicators
+  personalGoalLevel: number;
+  challenges: StoredHeroChallenge[]; // Storage uses icon names
 }
 
 export interface LevelDetails {
@@ -47,4 +45,3 @@ export interface LevelDetails {
 }
 
 export interface HeroCalculated extends Hero, LevelDetails {}
-

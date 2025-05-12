@@ -6,11 +6,10 @@ export const XP_PER_HERO_TYPE_BADGE_LEVEL = 200;
 export const XP_PER_WIN_TYPE_BADGE_LEVEL = 1200;
 export const XP_PER_TIME_TYPE_BADGE_LEVEL = 5600;
 
-// New level progression data based on the provided table
 interface LevelTier {
   level: number;
-  totalXpToReachThisLevel: number; // Cumulative XP required to START this level
-  xpToNextLevel: number;           // XP needed to advance from this level to the next
+  totalXpToReachThisLevel: number; 
+  xpToNextLevel: number;           
 }
 
 const levelProgressionTiers: LevelTier[] = [
@@ -41,20 +40,16 @@ const levelProgressionTiers: LevelTier[] = [
   { level: 25, totalXpToReachThisLevel: 778000, xpToNextLevel: 60000 },
 ];
 
-const XP_PER_LEVEL_AFTER_TABLE = 60000; // For levels beyond L25
-const CUSTOM_SVG_ICON_NAME = '_customSvg';
+const XP_PER_LEVEL_AFTER_TABLE = 60000;
 
 export function calculateTotalXP(heroChallenges: StoredHeroChallenge[]): number {
   return heroChallenges.reduce((total, challenge) => {
-    // Badge level 0 contributes 0 XP. Only levels > 0 count.
-    // Level 1 is the base, so it doesn't contribute to XP. XP is gained from level 2 onwards.
-    if (challenge.level > 1) { // Changed from > 0 to > 1
+    if (challenge.level > 1) {
       return total + ((challenge.level -1) * challenge.xpPerLevel);
     }
     return total;
   }, 0);
 }
-
 
 export function calculateLevelDetails(totalXp: number): Omit<LevelDetails, 'totalXp'> {
   for (let i = 0; i < levelProgressionTiers.length; i++) {
@@ -74,9 +69,8 @@ export function calculateLevelDetails(totalXp: number): Omit<LevelDetails, 'tota
     }
   }
 
-  // If totalXp is beyond the defined table (i.e., >= start of Level 26)
-  const maxTableLevelEntry = levelProgressionTiers[levelProgressionTiers.length - 1]; // Level 25 entry
-  const xpAtStartOfMaxTableLevelPlus1 = maxTableLevelEntry.totalXpToReachThisLevel + maxTableLevelEntry.xpToNextLevel; // XP to start Level 26
+  const maxTableLevelEntry = levelProgressionTiers[levelProgressionTiers.length - 1]; 
+  const xpAtStartOfMaxTableLevelPlus1 = maxTableLevelEntry.totalXpToReachThisLevel + maxTableLevelEntry.xpToNextLevel; 
 
   const xpOverMaxTable = totalXp - xpAtStartOfMaxTableLevelPlus1;
   const levelsGainedOverMaxTable = Math.floor(xpOverMaxTable / XP_PER_LEVEL_AFTER_TABLE);
@@ -95,40 +89,31 @@ export function calculateLevelDetails(totalXp: number): Omit<LevelDetails, 'tota
 
 export function calculateXpToReachLevel(targetLevel: number): number {
   if (targetLevel <= 0) return 0;
-  if (targetLevel === 1) return levelProgressionTiers[0].totalXpToReachThisLevel; // XP to *start* level 1 is 0
+  if (targetLevel === 1) return levelProgressionTiers[0].totalXpToReachThisLevel;
 
   const tier = levelProgressionTiers.find(t => t.level === targetLevel);
   if (tier) {
-    return tier.totalXpToReachThisLevel; // This is the XP needed to *start* this level
+    return tier.totalXpToReachThisLevel; 
   }
 
-  // If targetLevel is beyond the defined table (e.g., targetLevel 27)
-  // We need the XP to *start* level 26, then add XP for levels beyond that.
-  const lastTierInTable = levelProgressionTiers[levelProgressionTiers.length - 1]; // Level 25 entry
-  
-  // XP required to *start* the level after the last one in the table (e.g., start of Level 26)
+  const lastTierInTable = levelProgressionTiers[levelProgressionTiers.length - 1]; 
   const xpAtStartOfFirstLevelBeyondTable = lastTierInTable.totalXpToReachThisLevel + lastTierInTable.xpToNextLevel;
 
-  if (targetLevel === lastTierInTable.level + 1) { // e.g. targetLevel is 26
+  if (targetLevel === lastTierInTable.level + 1) { 
       return xpAtStartOfFirstLevelBeyondTable;
   }
   
-  // For levels further beyond (e.g., targetLevel 27, 28, ...)
-  // levelsBeyondTablePlusOne means how many full 60k XP blocks we need *after* starting level 26
   const levelsBeyondTablePlusOne = targetLevel - (lastTierInTable.level + 1);
   const xpBeyondTable = levelsBeyondTablePlusOne * XP_PER_LEVEL_AFTER_TABLE;
   return xpAtStartOfFirstLevelBeyondTable + xpBeyondTable;
 }
 
-
-// initialHeroesData now uses StoredHero[] with iconName
-// All badge levels are initialized to 1, and this level 1 does not contribute to XP.
 export const initialHeroesData: StoredHero[] = [
   { 
     id: 'soldier76', 
     name: 'Soldier: 76', 
     portraitUrl: 'https://static.wikia.nocookie.net/overwatch_gamepedia/images/2/2b/Icon-Soldier_76.png', 
-    personalGoalLevel: 100, // Example goal level
+    personalGoalLevel: 100,
     challenges: [
       { id: 's76_damage_dealt', title: 'Damage Dealt', iconName: 'Shell', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
       { id: 's76_critical_hits', title: 'Critical Hits', iconName: 'Crosshair', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
@@ -144,9 +129,9 @@ export const initialHeroesData: StoredHero[] = [
     id: 'tracer', 
     name: 'Tracer', 
     portraitUrl: 'https://picsum.photos/seed/tracer/100/100', 
-    personalGoalLevel: 75, // Example goal level
+    personalGoalLevel: 75,
     challenges: [
-      { id: 'tracer_pulse_kills', title: 'Pulse Bomb Kills', iconName: 'Bomb', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL }, // Changed Zap to Bomb
+      { id: 'tracer_pulse_kills', title: 'Pulse Bomb Kills', iconName: 'Bomb', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
       { id: 'tracer_recall_healed', title: 'Health Recalled', iconName: 'HeartPulse', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
       { id: 'tracer_time_played', title: 'Time Played', iconName: 'Clock', level: 1, xpPerLevel: XP_PER_TIME_TYPE_BADGE_LEVEL },
       { id: 'tracer_wins', title: 'Wins', iconName: 'Trophy', level: 1, xpPerLevel: XP_PER_WIN_TYPE_BADGE_LEVEL },
@@ -156,10 +141,10 @@ export const initialHeroesData: StoredHero[] = [
     id: 'mercy', 
     name: 'Mercy', 
     portraitUrl: 'https://picsum.photos/seed/mercy/100/100', 
-    personalGoalLevel: 120, // Example goal level
+    personalGoalLevel: 120,
     challenges: [
         { id: 'mercy_healing_done', title: 'Healing Done', iconName: 'HeartPulse', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
-        { id: 'mercy_rez', title: 'Resurrections', iconName: 'UserCheck', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL }, // Changed Zap to UserCheck
+        { id: 'mercy_rez', title: 'Resurrections', iconName: 'UserCheck', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
         { id: 'mercy_wins', title: 'Wins', iconName: 'Trophy', level: 1, xpPerLevel: XP_PER_WIN_TYPE_BADGE_LEVEL },
         { id: 'mercy_time_played', title: 'Time Played', iconName: 'Clock', level: 1, xpPerLevel: XP_PER_TIME_TYPE_BADGE_LEVEL },
     ],
@@ -168,11 +153,11 @@ export const initialHeroesData: StoredHero[] = [
     id: 'reinhardt', 
     name: 'Reinhardt', 
     portraitUrl: 'https://picsum.photos/seed/reinhardt/100/100', 
-    personalGoalLevel: 90, // Example goal level
+    personalGoalLevel: 90,
     challenges: [
       { id: 'rein_shatter_stuns', title: 'Earthshatter Stuns', iconName: 'ShieldQuestion', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
-      { id: 'rein_charge_pins', title: 'Charge Pins', iconName: 'Target', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL }, // Changed Zap to Target
-      { id: 'rein_damage_blocked', title: 'Damage Blocked', iconName: 'Shield', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL }, // Changed ShieldQuestion to Shield
+      { id: 'rein_charge_pins', title: 'Charge Pins', iconName: 'Target', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
+      { id: 'rein_damage_blocked', title: 'Damage Blocked', iconName: 'Shield', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
       { id: 'rein_wins', title: 'Wins', iconName: 'Trophy', level: 1, xpPerLevel: XP_PER_WIN_TYPE_BADGE_LEVEL },
       { id: 'rein_time_played', title: 'Time Played', iconName: 'Clock', level: 1, xpPerLevel: XP_PER_TIME_TYPE_BADGE_LEVEL },
     ],
@@ -181,11 +166,11 @@ export const initialHeroesData: StoredHero[] = [
     id: 'ana', 
     name: 'Ana', 
     portraitUrl: 'https://picsum.photos/seed/ana/100/100', 
-    personalGoalLevel: 110, // Example goal level
+    personalGoalLevel: 110,
     challenges: [
-        { id: 'ana_sleep_darts', title: 'Sleep Darts Hit', iconName: 'Timer', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL }, // Changed Zap to Timer
+        { id: 'ana_sleep_darts', title: 'Sleep Darts Hit', iconName: 'Timer', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
         { id: 'ana_biotic_grenade_assists', title: 'Biotic Grenade Assists', iconName: 'HeartPulse', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
-        { id: 'ana_nano_boosts', title: 'Nano Boosts Applied', iconName: 'Zap', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL }, // Changed Shapes to Zap
+        { id: 'ana_nano_boosts', title: 'Nano Boosts Applied', iconName: 'Zap', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
         { id: 'ana_wins', title: 'Wins', iconName: 'Trophy', level: 1, xpPerLevel: XP_PER_WIN_TYPE_BADGE_LEVEL },
         { id: 'ana_time_played', title: 'Time Played', iconName: 'Clock', level: 1, xpPerLevel: XP_PER_TIME_TYPE_BADGE_LEVEL },
     ],
@@ -194,74 +179,69 @@ export const initialHeroesData: StoredHero[] = [
     id: 'genji', 
     name: 'Genji', 
     portraitUrl: 'https://picsum.photos/seed/genji/100/100', 
-    personalGoalLevel: 95, // Example goal level
+    personalGoalLevel: 95,
     challenges: [
-       { id: 'genji_blade_kills', title: 'Dragonblade Kills', iconName: 'Swords', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL }, // Changed Sword to Swords
+       { id: 'genji_blade_kills', title: 'Dragonblade Kills', iconName: 'Swords', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
        { id: 'genji_deflect_damage', title: 'Damage Deflected', iconName: 'ShieldQuestion', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
        { id: 'genji_wins', title: 'Wins', iconName: 'Trophy', level: 1, xpPerLevel: XP_PER_WIN_TYPE_BADGE_LEVEL },
        { id: 'genji_time_played', title: 'Time Played', iconName: 'Clock', level: 1, xpPerLevel: XP_PER_TIME_TYPE_BADGE_LEVEL },
     ],
   },
+  {
+    id: 'venture',
+    name: 'Venture',
+    portraitUrl: '\thttps://static.wikia.nocookie.net/overwatch_gamepedia/images/c/c7/OW2_Venture.png',
+    personalGoalLevel: 50,
+    challenges: [
+      { id: 'venture_burrow_damage', title: 'Burrow Damage', iconName: 'Activity', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
+      { id: 'venture_drill_dash_damage', title: 'Drill Dash Damage', iconName: 'Zap', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
+      { id: 'venture_tectonic_shock_kills', title: 'Tectonic Shock Kills', iconName: 'Bomb', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
+      { id: 'venture_wins', title: 'Wins', iconName: 'Trophy', level: 1, xpPerLevel: XP_PER_WIN_TYPE_BADGE_LEVEL },
+      { id: 'venture_time_played', title: 'Time Played', iconName: 'Clock', level: 1, xpPerLevel: XP_PER_TIME_TYPE_BADGE_LEVEL },
+    ]
+  }
 ];
 
-// Helper to convert StoredHero[] to Hero[] (hydrating icons)
 export function hydrateHeroes(storedHeroes: StoredHero[]): Hero[] {
   return storedHeroes.map(sh => {
     const challenges = sh.challenges.map((sc: StoredHeroChallenge) => {
-      const heroChallenge: Partial<HeroChallenge> = {
+      const heroChallenge: HeroChallenge = {
         id: sc.id,
         title: sc.title,
+        icon: getIconComponent(sc.iconName),
         level: sc.level,
         xpPerLevel: sc.xpPerLevel,
       };
-      if (sc.iconName === CUSTOM_SVG_ICON_NAME && sc.customIconSvg) {
-        heroChallenge.customIconSvg = sc.customIconSvg;
-      } else {
-        heroChallenge.icon = getIconComponent(sc.iconName);
-      }
-      return heroChallenge as HeroChallenge;
+      return heroChallenge;
     });
     return { 
       id: sh.id,
       name: sh.name,
-      portraitUrl: sh.portraitUrl,
-      personalGoalLevel: sh.personalGoalLevel || 0, // Ensure personalGoalLevel exists
+      portraitUrl: sh.portraitUrl.trimStart(), // Ensure no leading whitespace
+      personalGoalLevel: sh.personalGoalLevel || 0,
       challenges 
     };
   });
 }
 
-// Helper to convert Hero[] to StoredHero[] (dehydrating icons for storage)
 export function dehydrateHeroes(heroes: Hero[]): StoredHero[] {
   return heroes.map(h => {
     const challenges = h.challenges.map((c: HeroChallenge) => {
-      const storedChallenge: Partial<StoredHeroChallenge> = {
+      const storedChallenge: StoredHeroChallenge = {
         id: c.id,
         title: c.title,
+        iconName: getIconName(c.icon) || 'ShieldQuestion', // Fallback icon name
         level: c.level,
         xpPerLevel: c.xpPerLevel,
       };
-      if (c.customIconSvg) {
-        storedChallenge.iconName = CUSTOM_SVG_ICON_NAME;
-        storedChallenge.customIconSvg = c.customIconSvg;
-      } else if (c.icon) {
-        storedChallenge.iconName = getIconName(c.icon) || 'ShieldQuestion';
-      } else {
-        // Fallback if neither is present, though this case should be avoided by form validation
-        storedChallenge.iconName = 'ShieldQuestion';
-      }
-      return storedChallenge as StoredHeroChallenge;
+      return storedChallenge;
     });
     return {
       id: h.id,
       name: h.name,
       portraitUrl: h.portraitUrl,
-      personalGoalLevel: h.personalGoalLevel || 0, // Ensure personalGoalLevel exists
+      personalGoalLevel: h.personalGoalLevel || 0,
       challenges,
     };
   });
 }
-
-    
-
-    

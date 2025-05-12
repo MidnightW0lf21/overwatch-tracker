@@ -15,8 +15,7 @@ interface HeroChallengeCardProps {
 }
 
 const HeroChallengeCard: React.FC<HeroChallengeCardProps> = ({ challenge, heroId, onLevelChange }) => {
-  const IconComponent = challenge.icon;
-  const customSvg = challenge.customIconSvg;
+  const IconComponent = challenge.icon; // Directly use the Lucide component from HeroChallenge
   const [currentLevel, setCurrentLevel] = useState(String(challenge.level));
 
   useEffect(() => {
@@ -54,17 +53,10 @@ const HeroChallengeCard: React.FC<HeroChallengeCardProps> = ({ challenge, heroId
     <Card className="bg-card text-card-foreground shadow-md rounded-lg overflow-hidden flex flex-col h-full">
       <CardHeader className="p-3 pb-2">
         <div className="flex items-center space-x-3">
-          {IconComponent && (
+          {IconComponent ? (
             <IconComponent className="h-7 w-7 text-primary flex-shrink-0" strokeWidth={1.5} />
-          )}
-          {customSvg && !IconComponent && (
-            <div 
-              className="h-7 w-7 text-primary flex-shrink-0 [&>svg]:h-full [&>svg]:w-full" 
-              dangerouslySetInnerHTML={{ __html: customSvg }} 
-            />
-          )}
-          {/* Fallback if neither is provided, though this should be prevented by form validation */}
-          {!IconComponent && !customSvg && (
+          ) : (
+             // Fallback if icon is somehow not provided (though type implies it should be)
              <div className="h-7 w-7 bg-muted rounded flex items-center justify-center text-muted-foreground text-xs">?</div>
           )}
           <div className="flex-1 min-w-0">
