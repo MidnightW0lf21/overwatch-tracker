@@ -7,6 +7,9 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import type { HeroChallenge } from '@/types/overwatch';
+import { getBadgeDefinition } from '@/lib/badge-definitions';
+import { ShieldQuestion } from 'lucide-react';
+
 
 interface HeroChallengeCardProps {
   challenge: HeroChallenge;
@@ -15,8 +18,8 @@ interface HeroChallengeCardProps {
 }
 
 const HeroChallengeCard: React.FC<HeroChallengeCardProps> = ({ challenge, heroId, onLevelChange }) => {
-  const IconComponent = challenge.icon; // Directly use the Lucide component from HeroChallenge
   const [currentLevel, setCurrentLevel] = useState(String(challenge.level));
+  const badgeDefinition = getBadgeDefinition(challenge.badgeId); // Fetches the full definition
 
   useEffect(() => {
     setCurrentLevel(String(challenge.level));
@@ -48,20 +51,20 @@ const HeroChallengeCard: React.FC<HeroChallengeCardProps> = ({ challenge, heroId
       (e.target as HTMLInputElement).blur(); 
     }
   };
-
+  
+  // Use icon from badgeDefinition if available, otherwise fallback
+  const IconComponent = badgeDefinition ? badgeDefinition.icon : ShieldQuestion;
+    
   return (
     <Card className="bg-card text-card-foreground shadow-md rounded-lg overflow-hidden flex flex-col h-full">
       <CardHeader className="p-3 pb-2">
         <div className="flex items-center space-x-3">
-          {IconComponent ? (
+          {IconComponent && (
             <IconComponent className="h-7 w-7 text-primary flex-shrink-0" strokeWidth={1.5} />
-          ) : (
-             // Fallback if icon is somehow not provided (though type implies it should be)
-             <div className="h-7 w-7 bg-muted rounded flex items-center justify-center text-muted-foreground text-xs">?</div>
           )}
           <div className="flex-1 min-w-0">
             <h3 className="text-sm font-semibold uppercase tracking-wider truncate" title={challenge.title}>
-              {challenge.title}
+              {challenge.title} 
             </h3>
             <p className="text-xs text-muted-foreground">XP/Lvl: {challenge.xpPerLevel.toLocaleString()}</p>
           </div>

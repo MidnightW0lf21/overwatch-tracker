@@ -1,7 +1,7 @@
 
 import type { Hero, HeroChallenge, LevelDetails, StoredHero, StoredHeroChallenge } from '@/types/overwatch';
-import { getIconComponent, getIconName } from './icon-utils';
-import { getBadgeDefinition, type BadgeDefinition } from '@/lib/badge-definitions'; // Corrected import path
+import { getBadgeDefinition } from '@/lib/badge-definitions';
+import { ShieldQuestion } from 'lucide-react'; // Import ShieldQuestion for fallback
 
 export const XP_PER_HERO_TYPE_BADGE_LEVEL = 200;
 export const XP_PER_WIN_TYPE_BADGE_LEVEL = 1200;
@@ -43,7 +43,6 @@ const levelProgressionTiers: LevelTier[] = [
 
 const XP_PER_LEVEL_AFTER_TABLE = 60000;
 
-// This function expects challenges to have xpPerLevel already populated
 export function calculateTotalXP(heroChallenges: Array<{ level: number; xpPerLevel: number }>): number {
   return heroChallenges.reduce((total, challenge) => {
     if (challenge.level > 1) {
@@ -109,7 +108,6 @@ export function calculateXpToReachLevel(targetLevel: number): number {
   const xpBeyondTable = levelsBeyondTablePlusOne * XP_PER_LEVEL_AFTER_TABLE;
   return xpAtStartOfFirstLevelBeyondTable + xpBeyondTable;
 }
-
 
 export const initialHeroesData: StoredHero[] = [
   { 
@@ -211,27 +209,26 @@ export function hydrateHeroes(storedHeroes: StoredHero[]): Hero[] {
       const badgeDef = getBadgeDefinition(sc.badgeId);
       if (!badgeDef) {
         console.warn(`Badge definition not found for ID: ${sc.badgeId}. Using fallback.`);
-        // Fallback logic or skip
         return { 
           id: sc.id,
           badgeId: sc.badgeId,
           title: "Unknown Badge",
-          icon: ShieldQuestion, // Default Lucide icon from lucide-react, ensure it's imported if used here
-          xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL, 
+          icon: ShieldQuestion,
+          xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL, // Now defined in this file
           level: sc.level,
-        } as HeroChallenge; // Cast to HeroChallenge
+        } as HeroChallenge;
       }
 
       const heroChallenge: HeroChallenge = {
-        id: sc.id, // instance id
+        id: sc.id,
         badgeId: sc.badgeId,
         title: badgeDef.title,
-        icon: badgeDef.icon, // Lucide component from definition
+        icon: badgeDef.icon, 
         level: sc.level,
         xpPerLevel: badgeDef.xpPerLevel,
       };
       return heroChallenge;
-    });
+    }).filter(Boolean) as HeroChallenge[];
 
     return { 
       id: sh.id,
@@ -244,23 +241,15 @@ export function hydrateHeroes(storedHeroes: StoredHero[]): Hero[] {
 }
 
 export function dehydrateHeroes(heroes: Hero[]): StoredHero[] {
-  return heroes.map(h => {
-    const challenges = h.challenges.map((c: HeroChallenge) => {
-      // StoredHeroChallenge only needs id, badgeId, and level
-      const storedChallenge: StoredHeroChallenge = {
-        id: c.id, // instance id
-        badgeId: c.badgeId,
-        level: c.level,
-      };
-      return storedChallenge;
-    });
-    return {
-      id: h.id,
-      name: h.name,
-      portraitUrl: h.portraitUrl,
-      personalGoalLevel: h.personalGoalLevel || 0,
-      challenges,
-    };
-  });
+  return heroes.map(h => ({
+    id: h.id,
+    name: h.name,
+    portraitUrl: h.portraitUrl,
+    personalGoalLevel: h.personalGoalLevel || 0,
+    challenges: h.challenges.map(c => ({
+      id: c.id,
+      badgeId: c.badgeId,
+      level: c.level,
+    })),
+  }));
 }
-
