@@ -1,0 +1,25 @@
+
+{
+  "name": "Overwatch Progression Tracker",
+  "short_name": "OW Tracker",
+  "description": "Track your Overwatch 2 hero progression and sub-badges.",
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1E2E4A",
+  "theme_color": "#1E2E4A",
+  "scope": "/"
+}
