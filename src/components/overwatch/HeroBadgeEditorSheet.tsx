@@ -17,8 +17,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { XP_PER_TIME_TYPE_BADGE_LEVEL, calculateXpToReachLevel } from '@/lib/overwatch-utils';
-import { ClockIcon } from 'lucide-react';
+import { XP_PER_TIME_TYPE_BADGE_LEVEL, XP_PER_HERO_TYPE_BADGE_LEVEL, calculateXpToReachLevel } from '@/lib/overwatch-utils';
+import { ClockIcon, StarIcon, TargetIcon } from 'lucide-react';
 
 interface HeroBadgeEditorSheetProps {
   isOpen: boolean;
@@ -36,9 +36,11 @@ const HeroBadgeEditorSheet: React.FC<HeroBadgeEditorSheetProps> = ({
   onClose,
 }) => {
   const [estimatedTimeToMax, setEstimatedTimeToMax] = useState<string | null>(null);
+  const [badgesNeededForGoal, setBadgesNeededForGoal] = useState<number | null>(null);
 
   useEffect(() => {
     if (hero) {
+      // Calculate estimated time to max level
       if (hero.level >= HERO_MAX_LEVEL) {
         setEstimatedTimeToMax("Max level reached!");
       } else {
@@ -47,19 +49,19 @@ const HeroBadgeEditorSheet: React.FC<HeroBadgeEditorSheetProps> = ({
         );
 
         if (timeBadge) {
-          const xpForMaxLevel = calculateXpToReachLevel(HERO_MAX_LEVEL + 1); // XP to complete level HERO_MAX_LEVEL
+          const xpForMaxLevel = calculateXpToReachLevel(HERO_MAX_LEVEL + 1); 
           const xpRemaining = Math.max(0, xpForMaxLevel - hero.totalXp);
 
           if (xpRemaining > 0 && XP_PER_TIME_TYPE_BADGE_LEVEL > 0) {
             const timeBadgeLevelsNeeded = xpRemaining / XP_PER_TIME_TYPE_BADGE_LEVEL;
-            const totalMinutesNeeded = timeBadgeLevelsNeeded * 20; // 20 minutes per time badge level
+            const totalMinutesNeeded = timeBadgeLevelsNeeded * 20; 
 
             if (totalMinutesNeeded < 1 && totalMinutesNeeded > 0) {
               setEstimatedTimeToMax("~1 min");
             } else {
               const roundedTotalMinutes = Math.round(totalMinutesNeeded);
               if (roundedTotalMinutes === 0) {
-                setEstimatedTimeToMax(totalMinutesNeeded > 0 ? "~1 min" : null); // Should be null if truly 0
+                setEstimatedTimeToMax(totalMinutesNeeded > 0 ? "~1 min" : null); 
               } else {
                 const days = Math.floor(roundedTotalMinutes / (60 * 24));
                 const remainingMinutesAfterDaysCalc = roundedTotalMinutes % (60 * 24);
@@ -74,16 +76,30 @@ const HeroBadgeEditorSheet: React.FC<HeroBadgeEditorSheetProps> = ({
                 setEstimatedTimeToMax(timeStringParts.length > 0 ? timeStringParts.join(' ') : (roundedTotalMinutes > 0 ? "~1 min" : null) );
               }
             }
-          } else { // xpRemaining is 0 or XP_PER_TIME_TYPE_BADGE_LEVEL is 0
-             // If xpRemaining is 0, it means hero has enough XP for max level, should be caught by hero.level >= HERO_MAX_LEVEL
+          } else { 
             setEstimatedTimeToMax(null); 
           }
         } else {
           setEstimatedTimeToMax("No time-based badge found to estimate.");
         }
       }
+
+      // Calculate badges needed for personal goal
+      if (hero.personalGoalXP > 0 && hero.totalXp < hero.personalGoalXP) {
+        const xpRemainingForPersonalGoal = hero.personalGoalXP - hero.totalXp;
+        if (XP_PER_HERO_TYPE_BADGE_LEVEL > 0) {
+          const needed = Math.ceil(xpRemainingForPersonalGoal / XP_PER_HERO_TYPE_BADGE_LEVEL);
+          setBadgesNeededForGoal(needed);
+        } else {
+          setBadgesNeededForGoal(null);
+        }
+      } else {
+        setBadgesNeededForGoal(0); // Goal met or no goal set
+      }
+
     } else {
       setEstimatedTimeToMax(null);
+      setBadgesNeededForGoal(null);
     }
   }, [hero]);
 
@@ -121,11 +137,27 @@ const HeroBadgeEditorSheet: React.FC<HeroBadgeEditorSheetProps> = ({
         </SheetHeader>
 
         <div className="px-6 py-4">
-          <h3 className="text-md font-semibold text-foreground/90 mb-1">Personal Goal Progress</h3>
+          <h3 className="text-md font-semibold text-foreground/90 mb-1 flex items-center">
+            <TargetIcon className="h-4 w-4 mr-2 text-muted-foreground" />
+            Personal Goal Progress
+          </h3>
           <Progress value={personalGoalProgress} className="h-3 bg-accent/20 [&>div]:bg-accent" />
-          <p className="text-xs text-muted-foreground mt-1 text-right">
-            {hero.totalXp.toLocaleString()} / {hero.personalGoalXP.toLocaleString()} XP ({personalGoalProgress.toFixed(1)}%)
-          </p>
+          <div className="flex justify-between items-center">
+            <p className="text-xs text-muted-foreground mt-1">
+              {badgesNeededForGoal !== null && badgesNeededForGoal > 0 && (
+                <>{badgesNeededForGoal.toLocaleString()} more badge level-ups (avg. {XP_PER_HERO_TYPE_BADGE_LEVEL} XP)</>
+              )}
+              {badgesNeededForGoal === 0 && hero.personalGoalXP > 0 && (
+                <>Goal reached!</>
+              )}
+               {hero.personalGoalXP === 0 && (
+                <>No personal goal set.</>
+              )}
+            </p>
+            <p className="text-xs text-muted-foreground mt-1 text-right">
+              {hero.totalXp.toLocaleString()} / {hero.personalGoalXP.toLocaleString()} XP ({personalGoalProgress.toFixed(1)}%)
+            </p>
+          </div>
         </div>
 
         {estimatedTimeToMax && (
@@ -143,7 +175,8 @@ const HeroBadgeEditorSheet: React.FC<HeroBadgeEditorSheetProps> = ({
           </div>
         )}
 
-        <h3 className="text-xl font-semibold mb-3 text-foreground/90 px-6 border-t border-border pt-4">
+        <h3 className="text-xl font-semibold mb-3 text-foreground/90 px-6 border-t border-border pt-4 flex items-center">
+          <StarIcon className="h-5 w-5 mr-2 text-muted-foreground" />
           Hero Badges
         </h3>
         <ScrollArea className="flex-grow px-6 pb-2">
@@ -174,3 +207,4 @@ const HeroBadgeEditorSheet: React.FC<HeroBadgeEditorSheetProps> = ({
 };
 
 export default HeroBadgeEditorSheet;
+
