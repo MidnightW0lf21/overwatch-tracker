@@ -40,61 +40,42 @@ export default function ManageBadgesPageClient() {
     const storedDataString = localStorage.getItem(LOCAL_STORAGE_KEY);
     if (storedDataString) {
       try {
-        let parsedData: ExportData | StoredHero[];
-        try {
-            parsedData = JSON.parse(storedDataString);
-        } catch (e) {
-            console.error("Failed to parse localStorage, resetting to default:", e);
-            parsedData = {version: "0.0.0", heroes: initialHeroesData }; // Fallback
-        }
-        
-        let heroesToLoad: StoredHero[];
-
-        if (typeof parsedData === 'object' && parsedData !== null && 'version' in parsedData && 'heroes' in parsedData && Array.isArray((parsedData as ExportData).heroes)) {
-          heroesToLoad = (parsedData as ExportData).heroes;
-        } else if (Array.isArray(parsedData)) { // Legacy format
-          heroesToLoad = parsedData as StoredHero[];
-        }
-         else {
-            console.warn("Invalid data format in localStorage, using initial defaults.");
-            heroesToLoad = initialHeroesData;
-        }
-        
-        const sanitizedData = heroesToLoad.map(hero => ({
-          ...hero,
-          portraitUrl: hero.portraitUrl?.trimStart() || '',
-          personalGoalLevel: typeof hero.personalGoalLevel === 'number' ? hero.personalGoalLevel : 0,
-          challenges: hero.challenges.map(challenge => ({
-            id: challenge.id, // instance id
-            badgeId: challenge.badgeId,
-            level: challenge.level ?? 1 
-          }))
-        }));
+        const parsedData: StoredHero[] = JSON.parse(storedData);
+        const sanitizedData = parsedData.map(hero => {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { personalGoalXP, ...restOfHero } = hero as any; // personalGoalXP is legacy
+          return {
+            ...restOfHero,
+            personalGoalLevel: typeof hero.personalGoalLevel === 'number' ? hero.personalGoalLevel : 0,
+            challenges: hero.challenges.map(challenge => ({
+              ...challenge,
+              level: challenge.level ?? 1 
+            }))
+          } as StoredHero;
+        });
         setAllHeroes(sanitizedData);
       } catch (error) {
         console.error("Failed to parse hero data from localStorage", error);
-        setAllHeroes(initialHeroesData.map(hero => ({
-            ...hero,
-            portraitUrl: hero.portraitUrl?.trimStart() || '',
-            personalGoalLevel: typeof hero.personalGoalLevel === 'number' ? hero.personalGoalLevel : 0,
-            challenges: hero.challenges.map(challenge => ({
-                id: challenge.id, // instance id
-                badgeId: challenge.badgeId,
-                level: challenge.level ?? 1
-            }))
-        })));
+        setAllHeroes(initialHeroesData.map(hero => {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const { personalGoalXP, ...restOfHero } = hero as any;
+            return {
+                ...restOfHero,
+                personalGoalLevel: typeof hero.personalGoalLevel === 'number' ? hero.personalGoalLevel : 0,
+                challenges: hero.challenges.map(challenge => ({...challenge, level: challenge.level ?? 1}))
+            } as StoredHero;
+        }));
       }
     } else {
-       setAllHeroes(initialHeroesData.map(hero => ({
-            ...hero,
-            portraitUrl: hero.portraitUrl?.trimStart() || '',
-            personalGoalLevel: typeof hero.personalGoalLevel === 'number' ? hero.personalGoalLevel : 0,
-            challenges: hero.challenges.map(challenge => ({
-                id: challenge.id, // instance id
-                badgeId: challenge.badgeId,
-                level: challenge.level ?? 1
-            }))
-        })));
+       setAllHeroes(initialHeroesData.map(hero => {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const { personalGoalXP, ...restOfHero } = hero as any;
+            return {
+                ...restOfHero,
+                personalGoalLevel: typeof hero.personalGoalLevel === 'number' ? hero.personalGoalLevel : 0,
+                challenges: hero.challenges.map(challenge => ({...challenge, level: challenge.level ?? 1}))
+            } as StoredHero;
+        }));
     }
   }, []);
 
@@ -103,24 +84,21 @@ export default function ManageBadgesPageClient() {
   }, [loadHeroes]);
 
   const saveHeroes = useCallback((updatedHeroes: StoredHero[]) => {
-    const heroesToSave = updatedHeroes.map(hero => ({
-      ...hero,
-      portraitUrl: hero.portraitUrl?.trimStart() || '',
-      personalGoalLevel: typeof hero.personalGoalLevel === 'number' && hero.personalGoalLevel >= 0 ? hero.personalGoalLevel : 0,
-      challenges: hero.challenges.map(c => ({
-        id: c.id, // instance id
-        badgeId: c.badgeId,
-        level: c.level
-      }))
-    }));
+    const heroesToSave = updatedHeroes.map(hero => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { personalGoalXP, ...restOfHero } = hero as any; // Ensure legacy field is removed
+      const pgLevel = (restOfHero as StoredHero).personalGoalLevel;
+      return {
+        ...restOfHero,
+        personalGoalLevel: typeof pgLevel === 'number' && pgLevel >= 0 ? pgLevel : 0,
+      } as StoredHero;
+    });
     
-    const exportPayload: ExportData = {
-      version: EXPORT_DATA_VERSION,
-      heroes: heroesToSave
-    };
-
+    // console.log("Saving to localStorage in ManageBadgesPageClient:", JSON.stringify(heroesToSave, null, 2)); // DEBUG
+    
     setAllHeroes(heroesToSave);
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(exportPayload)); 
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(heroesToSave));
+    
     if (selectedHeroId && !heroesToSave.find(h => h.id === selectedHeroId)) {
         setSelectedHeroId(null);
     }
@@ -150,12 +128,19 @@ export default function ManageBadgesPageClient() {
     toast({ title: "Hero Deleted", description: "The hero has been removed." });
   };
   
-  const handleHeroFormSubmit = (heroData: StoredHero) => {
+  const handleHeroFormSubmit = (heroDataFromForm: StoredHero) => {
+    // heroDataFromForm already includes challenges if editing, or empty array if new
+    // It also includes the personalGoalLevel from the form
+    
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { personalGoalXP, ...cleanSubmittedHeroData } = heroDataFromForm as any; // Remove legacy XP field
+    
     const finalSubmittedHeroData: StoredHero = {
-        ...heroData,
-        portraitUrl: heroData.portraitUrl?.trimStart() || '',
-        personalGoalLevel: typeof heroData.personalGoalLevel === 'number' 
-                            ? heroData.personalGoalLevel 
+        ...cleanSubmittedHeroData,
+        // Ensure personalGoalLevel is a number, defaulting to 0 if not.
+        // This should be handled by Zod coercion in the form, but as a safeguard:
+        personalGoalLevel: typeof cleanSubmittedHeroData.personalGoalLevel === 'number' 
+                            ? cleanSubmittedHeroData.personalGoalLevel 
                             : 0,
         challenges: heroData.challenges.map(c => ({ // Ensure challenges are in StoredHeroChallenge format
             id: c.id,
@@ -164,18 +149,19 @@ export default function ManageBadgesPageClient() {
         }))
     };
 
-    let newListOfHeroes;
-    if (editingHero) {
+    let newListOfHeroes: StoredHero[];
+    if (editingHero) { // Check if we were in "edit" mode
       newListOfHeroes = allHeroes.map(h => {
         if (h.id === finalSubmittedHeroData.id) {
-          return finalSubmittedHeroData; 
+          return finalSubmittedHeroData; // Replace with the new, cleaned hero data from form
         }
+        // For other heroes, ensure they are also clean (no legacy XP, valid personalGoalLevel)
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { personalGoalXP: oldXP, ...restOfH } = h as any;
         return {
-            ...h,
-            portraitUrl: h.portraitUrl?.trimStart() || '',
-            personalGoalLevel: typeof h.personalGoalLevel === 'number' ? h.personalGoalLevel : 0,
-             challenges: h.challenges.map(c => ({id: c.id, badgeId: c.badgeId, level: c.level}))
-        };
+            ...restOfH,
+            personalGoalLevel: typeof (restOfH as StoredHero).personalGoalLevel === 'number' ? (restOfH as StoredHero).personalGoalLevel : 0,
+        } as StoredHero;
       });
       toast({ title: "Hero Updated", description: `${finalSubmittedHeroData.name} has been updated.` });
     } else {
@@ -183,20 +169,24 @@ export default function ManageBadgesPageClient() {
         toast({ title: "Error", description: `Hero ID "${finalSubmittedHeroData.id}" already exists. Please use a unique ID.`, variant: "destructive" });
         return;
       }
-      const cleanedExistingHeroes = allHeroes.map(h => ({
-          ...h,
-          portraitUrl: h.portraitUrl?.trimStart() || '',
-          personalGoalLevel: typeof h.personalGoalLevel === 'number' ? h.personalGoalLevel : 0,
-          challenges: h.challenges.map(c => ({id: c.id, badgeId: c.badgeId, level: c.level}))
-      }));
+      const cleanedExistingHeroes = allHeroes.map(h => {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { personalGoalXP: oldXP, ...restOfH } = h as any;
+          return {
+            ...restOfH,
+            personalGoalLevel: typeof (restOfH as StoredHero).personalGoalLevel === 'number' ? (restOfH as StoredHero).personalGoalLevel : 0,
+          } as StoredHero;
+      });
       newListOfHeroes = [...cleanedExistingHeroes, finalSubmittedHeroData];
       toast({ title: "Hero Added", description: `${finalSubmittedHeroData.name} has been added.` });
     }
     
     saveHeroes(newListOfHeroes);
     setIsHeroDialogOpen(false);
-    setEditingHero(null);
-    if (!editingHero || (editingHero && selectedHeroId !== finalSubmittedHeroData.id)) { // check editingHero as well
+    setEditingHero(null); // Clear editing state
+
+    // If adding a new hero, select them. If editing, ensure selectedHeroId is current.
+    if (!editingHero || selectedHeroId !== finalSubmittedHeroData.id) {
         setSelectedHeroId(finalSubmittedHeroData.id);
     }
   };
@@ -234,11 +224,11 @@ export default function ManageBadgesPageClient() {
         let updatedChallenges;
         if (editingBadge) { // Editing an existing badge instance
           updatedChallenges = hero.challenges.map(b => b.id === badgeData.id ? badgeData : b);
-          toast({ title: "Badge Instance Updated", description: `Badge instance "${badgeData.id}" has been updated.` });
-        } else { // Adding a new badge instance
-          if (hero.challenges.some(b => b.id === badgeData.id)) { // Check for duplicate INSTANCE ID
-             toast({ title: "Error", description: `Badge instance ID "${badgeData.id}" already exists for this hero. Please use a unique ID.`, variant: "destructive" });
-             return;
+          toast({ title: "Badge Updated", description: `Badge "${badgeData.title}" has been updated.` });
+        } else {
+          if (hero.challenges.some(b => b.id === badgeData.id)) {
+             toast({ title: "Error", description: `Badge ID "${badgeData.id}" already exists for this hero. Please use a unique ID.`, variant: "destructive" });
+             return; // Important: stop execution if ID exists
           }
           updatedChallenges = [...hero.challenges, badgeData];
           const badgeDef = getBadgeDefinition(badgeData.badgeId);
@@ -248,7 +238,10 @@ export default function ManageBadgesPageClient() {
       }
       return hero;
     });
-    saveHeroes(updatedHeroes);
+    // Only save if a change was actually made (i.e., didn't return early from duplicate ID)
+    if (updatedHeroes.find(h => h.id === selectedHeroId)?.challenges.some(b => b.id === badgeData.id) || editingBadge) {
+        saveHeroes(updatedHeroes);
+    }
     setIsBadgeDialogOpen(false);
     setEditingBadge(null);
   };
@@ -554,4 +547,3 @@ export default function ManageBadgesPageClient() {
     </div>
   );
 }
-

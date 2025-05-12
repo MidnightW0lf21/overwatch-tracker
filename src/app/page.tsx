@@ -1,4 +1,3 @@
-
 'use client';
 
 import type React from 'react';
@@ -30,14 +29,8 @@ import { Progress } from '@/components/ui/progress';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 
-const LOCAL_STORAGE_KEY = 'overwatchProgressionData_v3'; 
+const LOCAL_STORAGE_KEY = 'overwatchProgressionData_v3';
 const GLOBAL_MAX_LEVEL = 500; 
-
-interface ExportData {
-  version: string;
-  heroes: StoredHero[];
-}
-
 
 export default function Home() {
   const [heroes, setHeroes] = useState<HeroCalculated[]>([]);
@@ -71,43 +64,33 @@ export default function Home() {
 
       if (storedDataString) {
         try {
-          let parsedJson: ExportData | StoredHero[]; 
-          
-          try {
-            parsedJson = JSON.parse(storedDataString);
-          } catch (parseError) {
-            console.error("Failed to parse localStorage data, resetting to default:", parseError);
-            parsedJson = { version: "0.0.0", heroes: masterDefaults }; 
-          }
+          let parsedData: StoredHero[] = JSON.parse(storedDataString);
 
-          let heroesToProcess: StoredHero[];
-
-          if (typeof parsedJson === 'object' && parsedJson !== null && 'version' in parsedJson && 'heroes' in parsedJson && Array.isArray((parsedJson as ExportData).heroes)) {
-            heroesToProcess = (parsedJson as ExportData).heroes;
-          } else if (Array.isArray(parsedJson)) { 
-            heroesToProcess = parsedJson as StoredHero[];
-          }
-           else {
-              console.warn("Invalid data format in localStorage, using initial defaults.");
-              heroesToProcess = masterDefaults;
-          }
-          
-          const sanitizedHeroes = heroesToProcess.map(hero => ({
-            ...hero,
-            portraitUrl: hero.portraitUrl?.trimStart() || '',
-            personalGoalLevel: hero.personalGoalLevel ?? 0, 
-            challenges: hero.challenges.map(c => ({
-              id: c.id, 
-              badgeId: c.badgeId,
-              level: c.level
-            }))
-          }));
+          // Ensure personalGoalLevel exists and is a number on parsed data
+          parsedData = parsedData.map(hero => {
+            let currentPersonalGoalLevel = 0; // Default if no valid level found
+            if (typeof hero.personalGoalLevel === 'number') {
+              currentPersonalGoalLevel = hero.personalGoalLevel;
+            } else if ((hero as any).personalGoalXP && typeof (hero as any).personalGoalXP === 'number') {
+              // Basic migration from old XP field if personalGoalLevel is missing/invalid
+              // This could be more sophisticated by calculating level from XP, but 50 is a placeholder for now
+              currentPersonalGoalLevel = 50; 
+            }
+            return {
+              ...hero,
+              personalGoalLevel: currentPersonalGoalLevel,
+            };
+          });
 
 
+          // Synchronize parsedData with masterDefaults
           const synchronizedHeroes = masterDefaults.map(defaultHero => {
             const storedHero = sanitizedHeroes.find(h => h.id === defaultHero.id);
 
             if (storedHero) {
+              // Hero exists in storage. User's edits (name, portrait, personalGoalLevel)
+              // from storedHero should be prioritized.
+              // Challenges are merged to ensure new default badges are added and old ones kept.
               let finalChallengeList: StoredHeroChallenge[] = [];
               const processedStoredChallengeInstanceIds = new Set<string>();
 
@@ -115,13 +98,12 @@ export default function Home() {
                 const storedChallengeMatch = storedHero.challenges.find(sc => sc.id === defaultChallenge.id || sc.badgeId === defaultChallenge.badgeId);
                 
                 if (storedChallengeMatch) {
-                    finalChallengeList.push({
-                        id: storedChallengeMatch.id, 
-                        badgeId: storedChallengeMatch.badgeId, 
-                        level: Math.max(1, storedChallengeMatch.level || 1),
-                    });
-                    processedStoredChallengeInstanceIds.add(storedChallengeMatch.id); 
-                } else { 
+                  finalChallengeList.push({
+                    ...defaultChallenge, 
+                    level: Math.max(1, storedChallengeMatch.level || 1),
+                  });
+                  processedStoredChallengeIds.add(storedChallengeMatch.id);
+                } else {
                   finalChallengeList.push({
                     id: defaultChallenge.id, 
                     badgeId: defaultChallenge.badgeId,
@@ -143,22 +125,21 @@ export default function Home() {
                 }
               }
               
+              // Prioritize stored values for editable fields
               return {
                 id: defaultHero.id, 
-                name: storedHero.name || defaultHero.name,
-                portraitUrl: storedHero.portraitUrl?.trimStart() || defaultHero.portraitUrl.trimStart(),
-                personalGoalLevel: storedHero.personalGoalLevel ?? defaultHero.personalGoalLevel ?? 0,
+                name: storedHero.name, 
+                portraitUrl: storedHero.portraitUrl, 
+                personalGoalLevel: storedHero.personalGoalLevel, // This is crucial: use the value from localStorage
                 challenges: finalChallengeList,
               };
-            } else { 
+            } else {
+              // Hero from masterDefaults not found in storage (new default hero), add it
+              // It gets all its values from defaultHero
               return {
                 ...defaultHero,
-                portraitUrl: defaultHero.portraitUrl.trimStart(),
-                challenges: defaultHero.challenges.map(c => ({ 
-                    id: c.id, 
-                    badgeId: c.badgeId,
-                    level: Math.max(1, c.level || 1) 
-                })),
+                personalGoalLevel: defaultHero.personalGoalLevel || 0, // Ensure it's a number
+                challenges: defaultHero.challenges.map(c => ({ ...c, level: Math.max(1, c.level || 1) })),
               };
             }
           });
@@ -166,28 +147,20 @@ export default function Home() {
           const customUserHeroes = sanitizedHeroes.filter(
             sh => !masterDefaults.some(dh => dh.id === sh.id)
           ).map(hero => ({ 
+          ).map(hero => ({ 
             ...hero,
-            portraitUrl: hero.portraitUrl.trimStart(),
-            personalGoalLevel: hero.personalGoalLevel ?? 0,
-            challenges: hero.challenges
-                .map(challenge => {
-                    const badgeDef = getBadgeDefinition(challenge.badgeId);
-                    if (!badgeDef) return null; 
-                    return {
-                        id: challenge.id, 
-                        badgeId: challenge.badgeId,
-                        level: Math.max(1, challenge.level || 1)
-                    };
-                })
-                .filter(Boolean) as StoredHeroChallenge[]
+            personalGoalLevel: typeof hero.personalGoalLevel === 'number' ? hero.personalGoalLevel : 0,
+            challenges: hero.challenges.map(challenge => ({
+              ...challenge,
+              level: Math.max(1, challenge.level || 1)
+            }))
           }));
 
           const finalHeroesToLoad = [...synchronizedHeroes, ...customUserHeroes];
           
           calculateAndSetHeroes(finalHeroesToLoad);
-          const exportPayload: ExportData = { version: "1.0.0", heroes: finalHeroesToLoad };
-          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(exportPayload));
-
+          // Re-save the synchronized data to ensure consistency and to add new default heroes/badges
+          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(finalHeroesToLoad));
 
         } catch (error) {
           console.error("Failed to parse/synchronize hero data from localStorage, resetting to default:", error);
@@ -222,7 +195,7 @@ export default function Home() {
       }
     } catch (e) {
       console.error('Error during initial data load, resetting to default:', e);
-      const defaultStoredData = initialHeroesData.map(hero => ({
+      const defaultStoredData = initialHeroesData.map(hero => ({ 
             ...hero,
             portraitUrl: hero.portraitUrl.trimStart(),
             personalGoalLevel: hero.personalGoalLevel || 0,
@@ -251,6 +224,7 @@ export default function Home() {
   
   const handleBadgeLevelChange = (heroId: string, challengeId: string, newLevel: number) => {
     const finalNewLevel = Math.max(1, newLevel); 
+    const finalNewLevel = Math.max(1, newLevel); 
 
     const updatedHeroesList = heroes.map(h => {
       if (h.id === heroId) {
@@ -258,14 +232,12 @@ export default function Home() {
           c.id === challengeId ? { ...c, level: finalNewLevel } : c
         );
         
-        const challengesForXPCalc = updatedChallenges.map(uc => {
-            const def = getBadgeDefinition(uc.badgeId);
-            return {
-                id: uc.id, 
-                badgeId: uc.badgeId,
-                level: uc.level,
-                xpPerLevel: def ? def.xpPerLevel : 0,
-            };
+        const storedChallengesForXPCalc = dehydrateHeroes([h] as Hero[])[0].challenges.map(storedChallenge => {
+          const updatedChallenge = updatedChallenges.find(uc => uc.id === storedChallenge.id);
+          return {
+            ...storedChallenge,
+            level: updatedChallenge ? updatedChallenge.level : storedChallenge.level,
+          };
         });
 
         const totalXp = calculateTotalXP(challengesForXPCalc);
@@ -338,8 +310,8 @@ export default function Home() {
         const xpForMaxLevel = calculateXpToReachLevel(GLOBAL_MAX_LEVEL + 1);
         const xpRemaining = Math.max(0, xpForMaxLevel - hero.totalXp);
 
-        if (xpRemaining > 0 && timeBadgeDef.xpPerLevel > 0) {
-            const timeBadgeLevelsNeeded = xpRemaining / timeBadgeDef.xpPerLevel;
+        if (xpRemaining > 0 && XP_PER_TIME_TYPE_BADGE_LEVEL > 0) {
+            const timeBadgeLevelsNeeded = xpRemaining / XP_PER_TIME_TYPE_BADGE_LEVEL;
             totalMinutes += timeBadgeLevelsNeeded * 20; 
         }
     });
@@ -356,6 +328,7 @@ export default function Home() {
 
     const minutesInHour = 60;
     const hoursInDay = 24;
+    const daysInYear = 365; 
     const daysInYear = 365; 
 
     const years = Math.floor(totalMinutes / (minutesInHour * hoursInDay * daysInYear));
@@ -517,4 +490,3 @@ export default function Home() {
     </div>
   );
 }
-
