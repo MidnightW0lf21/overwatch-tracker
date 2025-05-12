@@ -1,6 +1,7 @@
 
 import type { Hero, HeroChallenge, LevelDetails, StoredHero, StoredHeroChallenge } from '@/types/overwatch';
 import { getIconComponent, getIconName } from './icon-utils';
+import { getBadgeDefinition, type BadgeDefinition } from '@/lib/badge-definitions'; // Corrected import path
 
 export const XP_PER_HERO_TYPE_BADGE_LEVEL = 200;
 export const XP_PER_WIN_TYPE_BADGE_LEVEL = 1200;
@@ -42,7 +43,8 @@ const levelProgressionTiers: LevelTier[] = [
 
 const XP_PER_LEVEL_AFTER_TABLE = 60000;
 
-export function calculateTotalXP(heroChallenges: StoredHeroChallenge[]): number {
+// This function expects challenges to have xpPerLevel already populated
+export function calculateTotalXP(heroChallenges: Array<{ level: number; xpPerLevel: number }>): number {
   return heroChallenges.reduce((total, challenge) => {
     if (challenge.level > 1) {
       return total + ((challenge.level -1) * challenge.xpPerLevel);
@@ -108,6 +110,7 @@ export function calculateXpToReachLevel(targetLevel: number): number {
   return xpAtStartOfFirstLevelBeyondTable + xpBeyondTable;
 }
 
+
 export const initialHeroesData: StoredHero[] = [
   { 
     id: 'soldier76', 
@@ -115,14 +118,14 @@ export const initialHeroesData: StoredHero[] = [
     portraitUrl: 'https://static.wikia.nocookie.net/overwatch_gamepedia/images/2/2b/Icon-Soldier_76.png', 
     personalGoalLevel: 100,
     challenges: [
-      { id: 's76_damage_dealt', title: 'Damage Dealt', iconName: 'Shell', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
-      { id: 's76_critical_hits', title: 'Critical Hits', iconName: 'Crosshair', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
-      { id: 's76_helix_direct', title: 'Helix Rocket Direct Hits', iconName: 'Skull', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
-      { id: 's76_helix_final_blows', title: 'Helix Rocket Final Blows', iconName: 'Shapes', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
-      { id: 's76_biotic_healing', title: 'Biotic Field Healing', iconName: 'Activity', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
-      { id: 's76_visor_kills', title: 'Tactical Visor Kills', iconName: 'Eye', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
-      { id: 's76_time_played', title: 'Time Played', iconName: 'Clock', level: 1, xpPerLevel: XP_PER_TIME_TYPE_BADGE_LEVEL },
-      { id: 's76_wins', title: 'Wins', iconName: 'Trophy', level: 1, xpPerLevel: XP_PER_WIN_TYPE_BADGE_LEVEL },
+      { id: 's76_damage_dealt_instance', badgeId: 's76_damage_dealt', level: 1 },
+      { id: 's76_critical_hits_instance', badgeId: 's76_critical_hits', level: 1 },
+      { id: 's76_helix_direct_instance', badgeId: 's76_helix_direct', level: 1 },
+      { id: 's76_helix_final_blows_instance', badgeId: 's76_helix_final_blows', level: 1 },
+      { id: 's76_biotic_healing_instance', badgeId: 's76_biotic_healing', level: 1 },
+      { id: 's76_visor_kills_instance', badgeId: 's76_visor_kills', level: 1 },
+      { id: 's76_time_played_instance', badgeId: 's76_time_played', level: 1 },
+      { id: 's76_wins_instance', badgeId: 's76_wins', level: 1 },
     ],
   },
   { 
@@ -131,10 +134,10 @@ export const initialHeroesData: StoredHero[] = [
     portraitUrl: 'https://picsum.photos/seed/tracer/100/100', 
     personalGoalLevel: 75,
     challenges: [
-      { id: 'tracer_pulse_kills', title: 'Pulse Bomb Kills', iconName: 'Bomb', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
-      { id: 'tracer_recall_healed', title: 'Health Recalled', iconName: 'HeartPulse', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
-      { id: 'tracer_time_played', title: 'Time Played', iconName: 'Clock', level: 1, xpPerLevel: XP_PER_TIME_TYPE_BADGE_LEVEL },
-      { id: 'tracer_wins', title: 'Wins', iconName: 'Trophy', level: 1, xpPerLevel: XP_PER_WIN_TYPE_BADGE_LEVEL },
+      { id: 'tracer_pulse_kills_instance', badgeId: 'tracer_pulse_kills', level: 1 },
+      { id: 'tracer_recall_healed_instance', badgeId: 'tracer_recall_healed', level: 1 },
+      { id: 'tracer_time_played_instance', badgeId: 'tracer_time_played', level: 1 },
+      { id: 'tracer_wins_instance', badgeId: 'tracer_wins', level: 1 },
     ],
   },
   { 
@@ -143,10 +146,10 @@ export const initialHeroesData: StoredHero[] = [
     portraitUrl: 'https://picsum.photos/seed/mercy/100/100', 
     personalGoalLevel: 120,
     challenges: [
-        { id: 'mercy_healing_done', title: 'Healing Done', iconName: 'HeartPulse', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
-        { id: 'mercy_rez', title: 'Resurrections', iconName: 'UserCheck', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
-        { id: 'mercy_wins', title: 'Wins', iconName: 'Trophy', level: 1, xpPerLevel: XP_PER_WIN_TYPE_BADGE_LEVEL },
-        { id: 'mercy_time_played', title: 'Time Played', iconName: 'Clock', level: 1, xpPerLevel: XP_PER_TIME_TYPE_BADGE_LEVEL },
+        { id: 'mercy_healing_done_instance', badgeId: 'mercy_healing_done', level: 1 },
+        { id: 'mercy_rez_instance', badgeId: 'mercy_rez', level: 1 },
+        { id: 'mercy_wins_instance', badgeId: 'mercy_wins', level: 1 },
+        { id: 'mercy_time_played_instance', badgeId: 'mercy_time_played', level: 1 },
     ],
   },
   { 
@@ -155,11 +158,11 @@ export const initialHeroesData: StoredHero[] = [
     portraitUrl: 'https://picsum.photos/seed/reinhardt/100/100', 
     personalGoalLevel: 90,
     challenges: [
-      { id: 'rein_shatter_stuns', title: 'Earthshatter Stuns', iconName: 'ShieldQuestion', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
-      { id: 'rein_charge_pins', title: 'Charge Pins', iconName: 'Target', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
-      { id: 'rein_damage_blocked', title: 'Damage Blocked', iconName: 'Shield', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
-      { id: 'rein_wins', title: 'Wins', iconName: 'Trophy', level: 1, xpPerLevel: XP_PER_WIN_TYPE_BADGE_LEVEL },
-      { id: 'rein_time_played', title: 'Time Played', iconName: 'Clock', level: 1, xpPerLevel: XP_PER_TIME_TYPE_BADGE_LEVEL },
+      { id: 'rein_shatter_stuns_instance', badgeId: 'rein_shatter_stuns', level: 1 },
+      { id: 'rein_charge_pins_instance', badgeId: 'rein_charge_pins', level: 1 },
+      { id: 'rein_damage_blocked_instance', badgeId: 'rein_damage_blocked', level: 1 },
+      { id: 'rein_wins_instance', badgeId: 'rein_wins', level: 1 },
+      { id: 'rein_time_played_instance', badgeId: 'rein_time_played', level: 1 },
     ],
   },
   { 
@@ -168,11 +171,11 @@ export const initialHeroesData: StoredHero[] = [
     portraitUrl: 'https://picsum.photos/seed/ana/100/100', 
     personalGoalLevel: 110,
     challenges: [
-        { id: 'ana_sleep_darts', title: 'Sleep Darts Hit', iconName: 'Timer', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
-        { id: 'ana_biotic_grenade_assists', title: 'Biotic Grenade Assists', iconName: 'HeartPulse', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
-        { id: 'ana_nano_boosts', title: 'Nano Boosts Applied', iconName: 'Zap', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
-        { id: 'ana_wins', title: 'Wins', iconName: 'Trophy', level: 1, xpPerLevel: XP_PER_WIN_TYPE_BADGE_LEVEL },
-        { id: 'ana_time_played', title: 'Time Played', iconName: 'Clock', level: 1, xpPerLevel: XP_PER_TIME_TYPE_BADGE_LEVEL },
+        { id: 'ana_sleep_darts_instance', badgeId: 'ana_sleep_darts', level: 1 },
+        { id: 'ana_biotic_grenade_assists_instance', badgeId: 'ana_biotic_grenade_assists', level: 1 },
+        { id: 'ana_nano_boosts_instance', badgeId: 'ana_nano_boosts', level: 1 },
+        { id: 'ana_wins_instance', badgeId: 'ana_wins', level: 1 },
+        { id: 'ana_time_played_instance', badgeId: 'ana_time_played', level: 1 },
     ],
   },
   { 
@@ -181,23 +184,23 @@ export const initialHeroesData: StoredHero[] = [
     portraitUrl: 'https://picsum.photos/seed/genji/100/100', 
     personalGoalLevel: 95,
     challenges: [
-       { id: 'genji_blade_kills', title: 'Dragonblade Kills', iconName: 'Swords', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
-       { id: 'genji_deflect_damage', title: 'Damage Deflected', iconName: 'ShieldQuestion', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
-       { id: 'genji_wins', title: 'Wins', iconName: 'Trophy', level: 1, xpPerLevel: XP_PER_WIN_TYPE_BADGE_LEVEL },
-       { id: 'genji_time_played', title: 'Time Played', iconName: 'Clock', level: 1, xpPerLevel: XP_PER_TIME_TYPE_BADGE_LEVEL },
+       { id: 'genji_blade_kills_instance', badgeId: 'genji_blade_kills', level: 1 },
+       { id: 'genji_deflect_damage_instance', badgeId: 'genji_deflect_damage', level: 1 },
+       { id: 'genji_wins_instance', badgeId: 'genji_wins', level: 1 },
+       { id: 'genji_time_played_instance', badgeId: 'genji_time_played', level: 1 },
     ],
   },
   {
     id: 'venture',
     name: 'Venture',
-    portraitUrl: '\thttps://static.wikia.nocookie.net/overwatch_gamepedia/images/c/c7/OW2_Venture.png',
+    portraitUrl: 'https://static.wikia.nocookie.net/overwatch_gamepedia/images/c/c7/OW2_Venture.png',
     personalGoalLevel: 50,
     challenges: [
-      { id: 'venture_burrow_damage', title: 'Burrow Damage', iconName: 'Activity', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
-      { id: 'venture_drill_dash_damage', title: 'Drill Dash Damage', iconName: 'Zap', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
-      { id: 'venture_tectonic_shock_kills', title: 'Tectonic Shock Kills', iconName: 'Bomb', level: 1, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
-      { id: 'venture_wins', title: 'Wins', iconName: 'Trophy', level: 1, xpPerLevel: XP_PER_WIN_TYPE_BADGE_LEVEL },
-      { id: 'venture_time_played', title: 'Time Played', iconName: 'Clock', level: 1, xpPerLevel: XP_PER_TIME_TYPE_BADGE_LEVEL },
+      { id: 'venture_burrow_damage_instance', badgeId: 'venture_burrow_damage', level: 1 },
+      { id: 'venture_drill_dash_damage_instance', badgeId: 'venture_drill_dash_damage', level: 1 },
+      { id: 'venture_tectonic_shock_kills_instance', badgeId: 'venture_tectonic_shock_kills', level: 1 },
+      { id: 'venture_wins_instance', badgeId: 'venture_wins', level: 1 },
+      { id: 'venture_time_played_instance', badgeId: 'venture_time_played', level: 1 },
     ]
   }
 ];
@@ -205,19 +208,35 @@ export const initialHeroesData: StoredHero[] = [
 export function hydrateHeroes(storedHeroes: StoredHero[]): Hero[] {
   return storedHeroes.map(sh => {
     const challenges = sh.challenges.map((sc: StoredHeroChallenge) => {
+      const badgeDef = getBadgeDefinition(sc.badgeId);
+      if (!badgeDef) {
+        console.warn(`Badge definition not found for ID: ${sc.badgeId}. Using fallback.`);
+        // Fallback logic or skip
+        return { 
+          id: sc.id,
+          badgeId: sc.badgeId,
+          title: "Unknown Badge",
+          icon: ShieldQuestion, // Default Lucide icon from lucide-react, ensure it's imported if used here
+          xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL, 
+          level: sc.level,
+        } as HeroChallenge; // Cast to HeroChallenge
+      }
+
       const heroChallenge: HeroChallenge = {
-        id: sc.id,
-        title: sc.title,
-        icon: getIconComponent(sc.iconName),
+        id: sc.id, // instance id
+        badgeId: sc.badgeId,
+        title: badgeDef.title,
+        icon: badgeDef.icon, // Lucide component from definition
         level: sc.level,
-        xpPerLevel: sc.xpPerLevel,
+        xpPerLevel: badgeDef.xpPerLevel,
       };
       return heroChallenge;
     });
+
     return { 
       id: sh.id,
       name: sh.name,
-      portraitUrl: sh.portraitUrl.trimStart(), // Ensure no leading whitespace
+      portraitUrl: sh.portraitUrl.trimStart(), 
       personalGoalLevel: sh.personalGoalLevel || 0,
       challenges 
     };
@@ -227,12 +246,11 @@ export function hydrateHeroes(storedHeroes: StoredHero[]): Hero[] {
 export function dehydrateHeroes(heroes: Hero[]): StoredHero[] {
   return heroes.map(h => {
     const challenges = h.challenges.map((c: HeroChallenge) => {
+      // StoredHeroChallenge only needs id, badgeId, and level
       const storedChallenge: StoredHeroChallenge = {
-        id: c.id,
-        title: c.title,
-        iconName: getIconName(c.icon) || 'ShieldQuestion', // Fallback icon name
+        id: c.id, // instance id
+        badgeId: c.badgeId,
         level: c.level,
-        xpPerLevel: c.xpPerLevel,
       };
       return storedChallenge;
     });
@@ -245,3 +263,4 @@ export function dehydrateHeroes(heroes: Hero[]): StoredHero[] {
     };
   });
 }
+

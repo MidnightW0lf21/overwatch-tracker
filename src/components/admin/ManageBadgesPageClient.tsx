@@ -3,8 +3,8 @@
 
 import type React from 'react';
 import { useState, useEffect, useCallback, ChangeEvent } from 'react';
-import type { StoredHero, StoredHeroChallenge } from '@/types/overwatch';
-import { initialHeroesData } from '@/lib/overwatch-utils';
+import type { StoredHero, StoredHeroChallenge, HeroChallenge as RuntimeHeroChallenge } from '@/types/overwatch'; // Use RuntimeHeroChallenge for display
+import { initialHeroesData, XP_PER_HERO_TYPE_BADGE_LEVEL } from '@/lib/overwatch-utils'; // XP_PER_HERO_TYPE_BADGE_LEVEL for default
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,13 +15,13 @@ import HeroFormDialog from './HeroFormDialog';
 import BadgeFormDialog from './BadgeFormDialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import Link from 'next/link';
+import { getBadgeDefinition } from '@/lib/badge-definitions';
 
 
 const LOCAL_STORAGE_KEY = 'overwatchProgressionData_v3';
 
-// Define the structure for the exported/imported JSON data
 interface ExportData {
-  version: string; // To handle future data structure changes
+  version: string; 
   heroes: StoredHero[];
 }
 const EXPORT_DATA_VERSION = "1.0.0";
@@ -37,16 +37,27 @@ export default function ManageBadgesPageClient() {
   const { toast } = useToast();
 
   const loadHeroes = useCallback(() => {
-    const storedData = localStorage.getItem(LOCAL_STORAGE_KEY);
-    if (storedData) {
+    const storedDataString = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (storedDataString) {
       try {
-        const parsedData: StoredHero[] | ExportData = JSON.parse(storedData);
+        let parsedData: ExportData | StoredHero[];
+        try {
+            parsedData = JSON.parse(storedDataString);
+        } catch (e) {
+            console.error("Failed to parse localStorage, resetting to default:", e);
+            parsedData = {version: "0.0.0", heroes: initialHeroesData }; // Fallback
+        }
+        
         let heroesToLoad: StoredHero[];
 
-        if ('version' in parsedData && 'heroes' in parsedData) { // Check if it's new ExportData format
-          heroesToLoad = parsedData.heroes;
-        } else { // Assume old StoredHero[] format
+        if (typeof parsedData === 'object' && parsedData !== null && 'version' in parsedData && 'heroes' in parsedData && Array.isArray((parsedData as ExportData).heroes)) {
+          heroesToLoad = (parsedData as ExportData).heroes;
+        } else if (Array.isArray(parsedData)) { // Legacy format
           heroesToLoad = parsedData as StoredHero[];
+        }
+         else {
+            console.warn("Invalid data format in localStorage, using initial defaults.");
+            heroesToLoad = initialHeroesData;
         }
         
         const sanitizedData = heroesToLoad.map(hero => ({
@@ -54,7 +65,8 @@ export default function ManageBadgesPageClient() {
           portraitUrl: hero.portraitUrl?.trimStart() || '',
           personalGoalLevel: typeof hero.personalGoalLevel === 'number' ? hero.personalGoalLevel : 0,
           challenges: hero.challenges.map(challenge => ({
-            ...challenge,
+            id: challenge.id, // instance id
+            badgeId: challenge.badgeId,
             level: challenge.level ?? 1 
           }))
         }));
@@ -65,7 +77,11 @@ export default function ManageBadgesPageClient() {
             ...hero,
             portraitUrl: hero.portraitUrl?.trimStart() || '',
             personalGoalLevel: typeof hero.personalGoalLevel === 'number' ? hero.personalGoalLevel : 0,
-            challenges: hero.challenges.map(challenge => ({...challenge, level: challenge.level ?? 1}))
+            challenges: hero.challenges.map(challenge => ({
+                id: challenge.id, // instance id
+                badgeId: challenge.badgeId,
+                level: challenge.level ?? 1
+            }))
         })));
       }
     } else {
@@ -73,7 +89,11 @@ export default function ManageBadgesPageClient() {
             ...hero,
             portraitUrl: hero.portraitUrl?.trimStart() || '',
             personalGoalLevel: typeof hero.personalGoalLevel === 'number' ? hero.personalGoalLevel : 0,
-            challenges: hero.challenges.map(challenge => ({...challenge, level: challenge.level ?? 1}))
+            challenges: hero.challenges.map(challenge => ({
+                id: challenge.id, // instance id
+                badgeId: challenge.badgeId,
+                level: challenge.level ?? 1
+            }))
         })));
     }
   }, []);
@@ -87,6 +107,11 @@ export default function ManageBadgesPageClient() {
       ...hero,
       portraitUrl: hero.portraitUrl?.trimStart() || '',
       personalGoalLevel: typeof hero.personalGoalLevel === 'number' && hero.personalGoalLevel >= 0 ? hero.personalGoalLevel : 0,
+      challenges: hero.challenges.map(c => ({
+        id: c.id, // instance id
+        badgeId: c.badgeId,
+        level: c.level
+      }))
     }));
     
     const exportPayload: ExportData = {
@@ -95,7 +120,7 @@ export default function ManageBadgesPageClient() {
     };
 
     setAllHeroes(heroesToSave);
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(exportPayload)); // Save as ExportData
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(exportPayload)); 
     if (selectedHeroId && !heroesToSave.find(h => h.id === selectedHeroId)) {
         setSelectedHeroId(null);
     }
@@ -132,6 +157,11 @@ export default function ManageBadgesPageClient() {
         personalGoalLevel: typeof heroData.personalGoalLevel === 'number' 
                             ? heroData.personalGoalLevel 
                             : 0,
+        challenges: heroData.challenges.map(c => ({ // Ensure challenges are in StoredHeroChallenge format
+            id: c.id,
+            badgeId: c.badgeId,
+            level: c.level
+        }))
     };
 
     let newListOfHeroes;
@@ -144,6 +174,7 @@ export default function ManageBadgesPageClient() {
             ...h,
             portraitUrl: h.portraitUrl?.trimStart() || '',
             personalGoalLevel: typeof h.personalGoalLevel === 'number' ? h.personalGoalLevel : 0,
+             challenges: h.challenges.map(c => ({id: c.id, badgeId: c.badgeId, level: c.level}))
         };
       });
       toast({ title: "Hero Updated", description: `${finalSubmittedHeroData.name} has been updated.` });
@@ -156,6 +187,7 @@ export default function ManageBadgesPageClient() {
           ...h,
           portraitUrl: h.portraitUrl?.trimStart() || '',
           personalGoalLevel: typeof h.personalGoalLevel === 'number' ? h.personalGoalLevel : 0,
+          challenges: h.challenges.map(c => ({id: c.id, badgeId: c.badgeId, level: c.level}))
       }));
       newListOfHeroes = [...cleanedExistingHeroes, finalSubmittedHeroData];
       toast({ title: "Hero Added", description: `${finalSubmittedHeroData.name} has been added.` });
@@ -164,7 +196,7 @@ export default function ManageBadgesPageClient() {
     saveHeroes(newListOfHeroes);
     setIsHeroDialogOpen(false);
     setEditingHero(null);
-    if (!editingHero || selectedHeroId !== finalSubmittedHeroData.id) {
+    if (!editingHero || (editingHero && selectedHeroId !== finalSubmittedHeroData.id)) { // check editingHero as well
         setSelectedHeroId(finalSubmittedHeroData.id);
     }
   };
@@ -180,36 +212,37 @@ export default function ManageBadgesPageClient() {
     setIsBadgeDialogOpen(true);
   };
 
-  const handleDeleteBadge = (badgeIdToDelete: string) => {
+  const handleDeleteBadge = (badgeInstanceIdToDelete: string) => {
     if (!selectedHeroId) return;
     const updatedHeroes = allHeroes.map(hero => {
       if (hero.id === selectedHeroId) {
         return {
           ...hero,
-          challenges: hero.challenges.filter(badge => badge.id !== badgeIdToDelete),
+          challenges: hero.challenges.filter(badge => badge.id !== badgeInstanceIdToDelete),
         };
       }
       return hero;
     });
     saveHeroes(updatedHeroes);
-    toast({ title: "Badge Deleted", description: "The badge has been removed from the hero." });
+    toast({ title: "Badge Instance Deleted", description: "The badge instance has been removed from the hero." });
   };
 
-  const handleBadgeFormSubmit = (badgeData: StoredHeroChallenge) => {
+  const handleBadgeFormSubmit = (badgeData: StoredHeroChallenge) => { // badgeData is StoredHeroChallenge
     if (!selectedHeroId) return;
     const updatedHeroes = allHeroes.map(hero => {
       if (hero.id === selectedHeroId) {
         let updatedChallenges;
-        if (editingBadge) {
+        if (editingBadge) { // Editing an existing badge instance
           updatedChallenges = hero.challenges.map(b => b.id === badgeData.id ? badgeData : b);
-          toast({ title: "Badge Updated", description: `Badge "${badgeData.title}" has been updated.` });
-        } else {
-          if (hero.challenges.some(b => b.id === badgeData.id)) {
-             toast({ title: "Error", description: `Badge ID "${badgeData.id}" already exists for this hero. Please use a unique ID.`, variant: "destructive" });
+          toast({ title: "Badge Instance Updated", description: `Badge instance "${badgeData.id}" has been updated.` });
+        } else { // Adding a new badge instance
+          if (hero.challenges.some(b => b.id === badgeData.id)) { // Check for duplicate INSTANCE ID
+             toast({ title: "Error", description: `Badge instance ID "${badgeData.id}" already exists for this hero. Please use a unique ID.`, variant: "destructive" });
              return;
           }
           updatedChallenges = [...hero.challenges, badgeData];
-          toast({ title: "Badge Added", description: `Badge "${badgeData.title}" has been added to ${hero.name}.` });
+          const badgeDef = getBadgeDefinition(badgeData.badgeId);
+          toast({ title: "Badge Instance Added", description: `Badge "${badgeDef?.title || badgeData.badgeId}" has been added to ${hero.name}.` });
         }
         return { ...hero, challenges: updatedChallenges };
       }
@@ -220,24 +253,28 @@ export default function ManageBadgesPageClient() {
     setEditingBadge(null);
   };
 
-  const handleMoveBadge = (badgeId: string, direction: 'up' | 'down') => {
+  const handleMoveBadge = (badgeInstanceId: string, direction: 'up' | 'down') => {
     if (!selectedHeroId) return;
 
     const updatedHeroes = allHeroes.map(hero => {
       if (hero.id === selectedHeroId) {
         const challenges = [...hero.challenges];
-        const badgeIndex = challenges.findIndex(b => b.id === badgeId);
+        const badgeIndex = challenges.findIndex(b => b.id === badgeInstanceId);
 
         if (badgeIndex === -1) return hero; 
 
+        let targetIndex = -1;
         if (direction === 'up' && badgeIndex > 0) {
+          targetIndex = badgeIndex -1;
           [challenges[badgeIndex], challenges[badgeIndex - 1]] = [challenges[badgeIndex - 1], challenges[badgeIndex]];
         } else if (direction === 'down' && badgeIndex < challenges.length - 1) {
+          targetIndex = badgeIndex + 1;
           [challenges[badgeIndex], challenges[badgeIndex + 1]] = [challenges[badgeIndex + 1], challenges[badgeIndex]];
         } else {
           return hero; 
         }
-        toast({ title: "Badge Reordered", description: `Badge "${challenges[direction === 'up' ? badgeIndex -1 : badgeIndex + 1].title}" has been moved.`})
+        const movedBadgeDef = getBadgeDefinition(challenges[targetIndex].badgeId);
+        toast({ title: "Badge Reordered", description: `Badge "${movedBadgeDef?.title || challenges[targetIndex].badgeId}" has been moved.`})
         return { ...hero, challenges };
       }
       return hero;
@@ -248,7 +285,7 @@ export default function ManageBadgesPageClient() {
   const handleExportData = () => {
     const dataToExport: ExportData = {
       version: EXPORT_DATA_VERSION,
-      heroes: allHeroes,
+      heroes: allHeroes, // allHeroes is already StoredHero[]
     };
     const jsonString = JSON.stringify(dataToExport, null, 2);
     const blob = new Blob([jsonString], { type: "application/json" });
@@ -274,54 +311,55 @@ export default function ManageBadgesPageClient() {
     reader.onload = (e) => {
       try {
         const jsonString = e.target?.result as string;
-        const importedData: ExportData | StoredHero[] = JSON.parse(jsonString);
+        const importedJson: ExportData | StoredHero[] = JSON.parse(jsonString);
         
         let heroesToImport: StoredHero[];
 
-        if (typeof importedData === 'object' && importedData !== null && 'version' in importedData && 'heroes' in importedData) {
-            // New format with version
-            if (importedData.version !== EXPORT_DATA_VERSION) {
-                toast({ title: "Import Error", description: `Unsupported data version. Expected ${EXPORT_DATA_VERSION}, got ${importedData.version}.`, variant: "destructive" });
-                return;
+        if (typeof importedJson === 'object' && importedJson !== null && 'version' in importedJson && 'heroes' in importedJson && Array.isArray((importedJson as ExportData).heroes)) {
+            if ((importedJson as ExportData).version !== EXPORT_DATA_VERSION) {
+                // Potentially handle version migrations here in the future
+                toast({ title: "Import Warning", description: `Data is from a different version (imported: ${(importedJson as ExportData).version}, current: ${EXPORT_DATA_VERSION}). Proceeding with import.`, variant: "default" });
             }
-            heroesToImport = (importedData as ExportData).heroes;
-        } else if (Array.isArray(importedData)) {
-            // Old format (array of StoredHero)
-            heroesToImport = importedData as StoredHero[];
+            heroesToImport = (importedJson as ExportData).heroes;
+        } else if (Array.isArray(importedJson)) {
+            heroesToImport = importedJson as StoredHero[];
+             toast({ title: "Import Warning", description: `Imported data is in a legacy format. Proceeding with import.`, variant: "default" });
         } else {
             toast({ title: "Import Error", description: "Invalid file format.", variant: "destructive" });
             return;
         }
-
-        // Basic validation for heroesToImport (can be expanded)
-        if (!Array.isArray(heroesToImport) || !heroesToImport.every(h => h.id && h.name && Array.isArray(h.challenges))) {
-            toast({ title: "Import Error", description: "Imported data is not in the expected StoredHero[] format.", variant: "destructive" });
+        
+        if (!Array.isArray(heroesToImport) || !heroesToImport.every(h => h.id && h.name && Array.isArray(h.challenges) && h.challenges.every(c => c.id && c.badgeId && typeof c.level === 'number'))) {
+            toast({ title: "Import Error", description: "Imported data is not in the expected StoredHero[] format or has missing fields.", variant: "destructive" });
             return;
         }
         
-        // Sanitize imported data just like in loadHeroes
         const sanitizedImportedHeroes = heroesToImport.map(hero => ({
-          ...hero,
+          id: hero.id,
+          name: hero.name,
           portraitUrl: hero.portraitUrl?.trimStart() || '',
           personalGoalLevel: typeof hero.personalGoalLevel === 'number' ? hero.personalGoalLevel : 0,
-          challenges: hero.challenges.map(challenge => ({
-            ...challenge, // ensure all props of StoredHeroChallenge are present
-            id: challenge.id || `badge_${Math.random().toString(36).substr(2, 9)}`, // Ensure ID
-            title: challenge.title || "Untitled Badge",
-            iconName: challenge.iconName || "ShieldQuestion",
-            xpPerLevel: typeof challenge.xpPerLevel === 'number' ? challenge.xpPerLevel : XP_PER_HERO_TYPE_BADGE_LEVEL,
-            level: challenge.level ?? 1,
-          }))
+          challenges: hero.challenges.map(challenge => {
+            const badgeDef = getBadgeDefinition(challenge.badgeId);
+            if (!badgeDef) {
+                console.warn(`Import: Badge definition not found for badgeId "${challenge.badgeId}" on hero "${hero.name}". Skipping this badge instance.`);
+                return null; 
+            }
+            return {
+                id: challenge.id, // instance id
+                badgeId: challenge.badgeId,
+                level: Math.max(1, challenge.level ?? 1),
+            };
+          }).filter(Boolean) as StoredHeroChallenge[] // Filter out nulls if any badge defs were missing
         }));
 
         saveHeroes(sanitizedImportedHeroes);
-        setSelectedHeroId(null); // Reset selection
+        setSelectedHeroId(null); 
         toast({ title: "Data Imported", description: "Hero progression data has been successfully imported." });
       } catch (error) {
         console.error("Error importing data:", error);
         toast({ title: "Import Error", description: "Failed to parse or process the JSON file. Make sure it's a valid export.", variant: "destructive" });
       } finally {
-        // Reset file input to allow importing the same file again if needed
         if (event.target) {
             event.target.value = '';
         }
@@ -352,7 +390,7 @@ export default function ManageBadgesPageClient() {
                 <DownloadIcon className="mr-2 h-4 w-4" /> Export Data
             </Button>
             <Button variant="outline" asChild>
-                <label htmlFor="import-file-input" className="cursor-pointer">
+                <label htmlFor="import-file-input" className="cursor-pointer inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2">
                     <UploadIcon className="mr-2 h-4 w-4" /> Import Data
                     <Input 
                         id="import-file-input" 
@@ -421,22 +459,24 @@ export default function ManageBadgesPageClient() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2"><ShieldCheckIcon /> Badges for {selectedHero.name}</CardTitle>
-            <CardDescription>Manage the badges available for this hero. Badge levels are edited on the main tracker page. You can reorder badges using the arrow buttons.</CardDescription>
+            <CardDescription>Manage the badge instances for this hero. You can reorder badges using the arrow buttons.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <Button onClick={handleOpenAddBadgeDialog} variant="outline">
-              <PlusCircleIcon className="mr-2 h-4 w-4" /> Add Badge to {selectedHero.name}
+              <PlusCircleIcon className="mr-2 h-4 w-4" /> Add Badge Instance to {selectedHero.name}
             </Button>
             {selectedHero.challenges.length > 0 ? (
               <ul className="space-y-2">
-                {selectedHero.challenges.map((badge, index) => (
-                  <li key={badge.id} className="flex items-center justify-between p-3 bg-card-foreground/5 rounded-md">
+                {selectedHero.challenges.map((badgeInstance, index) => {
+                  const badgeDef = getBadgeDefinition(badgeInstance.badgeId);
+                  return (
+                  <li key={badgeInstance.id} className="flex items-center justify-between p-3 bg-card-foreground/5 rounded-md">
                     <div className="flex items-center gap-2">
                         <div className="flex flex-col">
                             <Button 
                                 variant="ghost" 
                                 size="icon" 
-                                onClick={() => handleMoveBadge(badge.id, 'up')}
+                                onClick={() => handleMoveBadge(badgeInstance.id, 'up')}
                                 disabled={index === 0}
                                 aria-label="Move badge up"
                                 className="h-6 w-6"
@@ -446,7 +486,7 @@ export default function ManageBadgesPageClient() {
                             <Button 
                                 variant="ghost" 
                                 size="icon" 
-                                onClick={() => handleMoveBadge(badge.id, 'down')}
+                                onClick={() => handleMoveBadge(badgeInstance.id, 'down')}
                                 disabled={index === selectedHero.challenges.length - 1}
                                 aria-label="Move badge down"
                                 className="h-6 w-6"
@@ -455,41 +495,41 @@ export default function ManageBadgesPageClient() {
                             </Button>
                         </div>
                         <div>
-                        <p className="font-semibold">{badge.title} <span className="text-xs text-muted-foreground">(ID: {badge.id})</span></p>
-                        <p className="text-sm text-muted-foreground">Icon: {badge.iconName}, XP/Lvl: {badge.xpPerLevel}, Initial Lvl: {badge.level}</p>
+                        <p className="font-semibold">{badgeDef?.title || 'Unknown Badge'} <span className="text-xs text-muted-foreground">(Instance ID: {badgeInstance.id})</span></p>
+                        <p className="text-sm text-muted-foreground">Type ID: {badgeInstance.badgeId}, XP/Lvl: {badgeDef?.xpPerLevel || 'N/A'}, Initial Lvl: {badgeInstance.level}</p>
                         </div>
                     </div>
                     <div className="flex gap-2">
-                      <Button onClick={() => handleOpenEditBadgeDialog(badge)} variant="outline" size="icon" aria-label="Edit Badge">
+                      <Button onClick={() => handleOpenEditBadgeDialog(badgeInstance)} variant="outline" size="icon" aria-label="Edit Badge Instance">
                         <EditIcon className="h-4 w-4" />
-                         <span className="sr-only">Edit Badge</span>
+                         <span className="sr-only">Edit Badge Instance</span>
                       </Button>
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
-                          <Button variant="destructive" size="icon" aria-label="Delete Badge">
+                          <Button variant="destructive" size="icon" aria-label="Delete Badge Instance">
                             <Trash2Icon className="h-4 w-4" />
-                            <span className="sr-only">Delete Badge</span>
+                            <span className="sr-only">Delete Badge Instance</span>
                           </Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>
                             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                             <AlertDialogDescription>
-                              This will permanently delete the badge &quot;{badge.title}&quot; from {selectedHero.name}. This action cannot be undone.
+                              This will permanently delete the badge instance &quot;{badgeDef?.title || badgeInstance.id}&quot; from {selectedHero.name}. This action cannot be undone.
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
                             <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => handleDeleteBadge(badge.id)}>Delete Badge</AlertDialogAction>
+                            <AlertDialogAction onClick={() => handleDeleteBadge(badgeInstance.id)}>Delete Badge Instance</AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>
                       </AlertDialog>
                     </div>
                   </li>
-                ))}
+                )})}
               </ul>
             ) : (
-              <p className="text-muted-foreground">No badges configured for {selectedHero.name}.</p>
+              <p className="text-muted-foreground">No badge instances configured for {selectedHero.name}.</p>
             )}
           </CardContent>
         </Card>
@@ -507,10 +547,11 @@ export default function ManageBadgesPageClient() {
         isOpen={isBadgeDialogOpen}
         onClose={() => { setIsBadgeDialogOpen(false); setEditingBadge(null);}}
         onSubmit={handleBadgeFormSubmit}
-        badge={editingBadge}
+        badge={editingBadge} // This is StoredHeroChallenge (badge instance)
         heroName={selectedHero?.name || ''}
-        existingBadgeIds={selectedHero?.challenges.map(b => b.id) || []}
+        existingBadgeInstanceIds={selectedHero?.challenges.map(b => b.id) || []}
       />
     </div>
   );
 }
+
