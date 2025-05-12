@@ -1,5 +1,7 @@
-# Firebase Studio
+# Overwatch 2 Hero Progression Tracker
 
-This is a NextJS starter in Firebase Studio.
+This is a web app, created to track hero progression levels, made with FireBase.
 
-To get started, take a look at src/app/page.tsx.
+This project was made just for fun.
+
+More features might come. :)
