@@ -2,14 +2,14 @@
 'use client';
 
 import type React from 'react';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import type { StoredHeroChallenge } from '@/types/overwatch';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { iconNameMap, getIconComponent } from '@/lib/icon-utils'; // For icon preview if needed, though badge definitions provide icons
+// Removed getIconComponent as icon is now directly on BadgeDefinition
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -21,15 +21,14 @@ interface BadgeFormDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (badge: StoredHeroChallenge) => void;
-  badge: StoredHeroChallenge | null; 
+  badge: StoredHeroChallenge | null;
   heroName: string;
-  existingBadgeInstanceIds: string[]; 
+  existingBadgeInstanceIds: string[];
 }
 
-// Schema for adding/editing a badge *instance* on a hero
 const badgeInstanceSchema = z.object({
   id: z.string().min(1, "Instance ID is required").regex(/^[a-z0-9_]+$/, "Instance ID can only contain lowercase letters, numbers, and underscores."),
-  badgeId: z.string().min(1, "Badge Type is required"), // This will be selected from badgeDefinitions
+  badgeId: z.string().min(1, "Badge Type is required"),
   level: z.coerce.number().min(1, "Initial Level must be 1 or greater").default(1),
 });
 
@@ -40,8 +39,8 @@ const BadgeFormDialog: React.FC<BadgeFormDialogProps> = ({ isOpen, onClose, onSu
   const { control, handleSubmit, reset, formState: { errors }, setValue, watch } = useForm<BadgeInstanceFormValues>({
     resolver: zodResolver(badgeInstanceSchema),
     defaultValues: {
-      id: '', // Instance ID
-      badgeId: Object.keys(badgeDefinitions)[0] || '', // Default to first badge type
+      id: '',
+      badgeId: Object.keys(badgeDefinitions)[0] || '',
       level: 1,
     },
   });
@@ -52,13 +51,13 @@ const BadgeFormDialog: React.FC<BadgeFormDialogProps> = ({ isOpen, onClose, onSu
 
 
   useEffect(() => {
-    if (badge) { // Editing existing badge instance
+    if (badge) {
       setValue('id', badge.id);
       setValue('badgeId', badge.badgeId);
       setValue('level', badge.level);
-    } else { // Adding new badge instance
+    } else {
       reset({
-        id: `badge_instance_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`, // Auto-generate unique instance ID
+        id: `badge_instance_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
         badgeId: Object.keys(badgeDefinitions)[0] || '',
         level: 1,
       });
@@ -74,8 +73,7 @@ const BadgeFormDialog: React.FC<BadgeFormDialogProps> = ({ isOpen, onClose, onSu
       });
       return;
     }
-    
-    // Ensure the selected badgeId is valid
+
     if (!getBadgeDefinition(data.badgeId)) {
         toast({
             title: "Error: Invalid Badge Type",
@@ -84,10 +82,10 @@ const BadgeFormDialog: React.FC<BadgeFormDialogProps> = ({ isOpen, onClose, onSu
         });
         return;
     }
-    
+
     const submittedBadgeData: StoredHeroChallenge = {
-      id: data.id, // This is the instance ID
-      badgeId: data.badgeId, // This is the type ID from badgeDefinitions
+      id: data.id,
+      badgeId: data.badgeId,
       level: data.level,
     };
     onSubmit(submittedBadgeData);
@@ -135,7 +133,7 @@ const BadgeFormDialog: React.FC<BadgeFormDialogProps> = ({ isOpen, onClose, onSu
             {IconPreview && <IconPreview className="h-6 w-6 text-primary" />}
             {errors.badgeId && <p className="col-span-4 text-destructive text-sm text-right">{errors.badgeId.message}</p>}
           </div>
-          
+
           {selectedBadgeDefinition && (
             <div className="grid grid-cols-4 items-center gap-4">
                 <Label className="text-right col-span-1">Details</Label>
@@ -169,3 +167,4 @@ const BadgeFormDialog: React.FC<BadgeFormDialogProps> = ({ isOpen, onClose, onSu
 
 export default BadgeFormDialog;
 
+    

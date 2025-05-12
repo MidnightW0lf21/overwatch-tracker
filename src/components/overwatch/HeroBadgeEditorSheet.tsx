@@ -18,7 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { calculateXpToReachLevel } from '@/lib/overwatch-utils';
-import { XP_PER_TIME_TYPE_BADGE_LEVEL, XP_PER_HERO_TYPE_BADGE_LEVEL } from '@/lib/overwatch-utils';
+import { getBadgeDefinition, XP_PER_HERO_TYPE_BADGE_LEVEL, XP_PER_TIME_TYPE_BADGE_LEVEL } from '@/lib/badge-definitions';
 import { ClockIcon, StarIcon, TargetIcon } from 'lucide-react';
 
 interface HeroBadgeEditorSheetProps {
@@ -184,7 +184,10 @@ const HeroBadgeEditorSheet: React.FC<HeroBadgeEditorSheetProps> = ({
             <p className="text-sm text-muted-foreground ml-6">
               {estimatedTimeToMax}
             </p>
-            {hero.level < HERO_MAX_LEVEL && hero.challenges.some(c => c.xpPerLevel === XP_PER_TIME_TYPE_BADGE_LEVEL) && !estimatedTimeToMax?.includes("No time-based badge") && !estimatedTimeToMax?.includes("Max level reached!") && (
+            {hero.level < HERO_MAX_LEVEL && hero.challenges.some(c => {
+                const badgeDef = getBadgeDefinition(c.badgeId);
+                return badgeDef?.xpPerLevel === XP_PER_TIME_TYPE_BADGE_LEVEL;
+            }) && !estimatedTimeToMax?.includes("No time-based badge") && !estimatedTimeToMax?.includes("Max level reached!") && (
                  <p className="text-xs text-muted-foreground/70 ml-6 mt-0.5">(Assuming a time badge level is earned every 20 mins of play)</p>
             )}
           </div>

@@ -23,7 +23,7 @@ export interface Hero {
   name: string;
   portraitUrl: string;
   personalGoalLevel: number;
-  challenges: HeroChallenge[]; 
+  challenges: HeroChallenge[];
 }
 
 export interface StoredHero {
@@ -31,7 +31,7 @@ export interface StoredHero {
   name: string;
   portraitUrl: string;
   personalGoalLevel: number;
-  challenges: StoredHeroChallenge[]; 
+  challenges: StoredHeroChallenge[];
 }
 
 export interface LevelDetails {
@@ -44,3 +44,5 @@ export interface LevelDetails {
 }
 
 export interface HeroCalculated extends Hero, LevelDetails {}
+
+    
