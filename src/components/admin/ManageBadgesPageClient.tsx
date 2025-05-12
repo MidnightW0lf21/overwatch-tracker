@@ -3,7 +3,7 @@
 import type React from 'react';
 import { useState, useEffect, useCallback } from 'react';
 import type { StoredHero, StoredHeroChallenge } from '@/types/overwatch';
-import { initialHeroesData } from '@/lib/overwatch-utils'; // Removed hydrateHeroes, dehydrateHeroes, calculateTotalXP, calculateLevelDetails as they are not used here
+import { initialHeroesData } from '@/lib/overwatch-utils';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -32,26 +32,39 @@ export default function ManageBadgesPageClient() {
       try {
         const parsedData: StoredHero[] = JSON.parse(storedData);
         // Ensure all badges have a level, default to 1 if missing
-        const sanitizedData = parsedData.map(hero => ({
-          ...hero,
-          challenges: hero.challenges.map(challenge => ({
-            ...challenge,
-            level: challenge.level ?? 1 // Default to level 1 if undefined
-          }))
-        }));
+        // Also ensure personalGoalXP is removed if present, as it's legacy
+        const sanitizedData = parsedData.map(hero => {
+          const { personalGoalXP, ...restOfHero } = hero as any;
+          return {
+            ...restOfHero,
+            personalGoalLevel: typeof hero.personalGoalLevel === 'number' ? hero.personalGoalLevel : 0,
+            challenges: hero.challenges.map(challenge => ({
+              ...challenge,
+              level: challenge.level ?? 1 
+            }))
+          } as StoredHero;
+        });
         setAllHeroes(sanitizedData);
       } catch (error) {
         console.error("Failed to parse hero data from localStorage", error);
-        setAllHeroes(initialHeroesData.map(hero => ({ // Use initialHeroesData which is StoredHero[]
-            ...hero,
-            challenges: hero.challenges.map(challenge => ({...challenge, level: challenge.level ?? 1}))
-        })));
+        setAllHeroes(initialHeroesData.map(hero => {
+            const { personalGoalXP, ...restOfHero } = hero as any;
+            return {
+                ...restOfHero,
+                personalGoalLevel: typeof hero.personalGoalLevel === 'number' ? hero.personalGoalLevel : 0,
+                challenges: hero.challenges.map(challenge => ({...challenge, level: challenge.level ?? 1}))
+            } as StoredHero;
+        }));
       }
     } else {
-       setAllHeroes(initialHeroesData.map(hero => ({
-        ...hero,
-        challenges: hero.challenges.map(challenge => ({...challenge, level: challenge.level ?? 1}))
-      })));
+       setAllHeroes(initialHeroesData.map(hero => {
+            const { personalGoalXP, ...restOfHero } = hero as any;
+            return {
+                ...restOfHero,
+                personalGoalLevel: typeof hero.personalGoalLevel === 'number' ? hero.personalGoalLevel : 0,
+                challenges: hero.challenges.map(challenge => ({...challenge, level: challenge.level ?? 1}))
+            } as StoredHero;
+        }));
     }
   }, []);
 
@@ -60,9 +73,18 @@ export default function ManageBadgesPageClient() {
   }, [loadHeroes]);
 
   const saveHeroes = useCallback((updatedHeroes: StoredHero[]) => {
-    setAllHeroes(updatedHeroes);
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedHeroes));
-    if (selectedHeroId && !updatedHeroes.find(h => h.id === selectedHeroId)) {
+    // Ensure personalGoalXP is stripped before final save
+    const heroesToSave = updatedHeroes.map(hero => {
+      const { personalGoalXP, ...restOfHero } = hero as any;
+      return {
+        ...restOfHero,
+        // Ensure personalGoalLevel is a valid number, defaulting to 0
+        personalGoalLevel: typeof hero.personalGoalLevel === 'number' && hero.personalGoalLevel >= 0 ? hero.personalGoalLevel : 0,
+      } as StoredHero;
+    });
+    setAllHeroes(heroesToSave);
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(heroesToSave));
+    if (selectedHeroId && !heroesToSave.find(h => h.id === selectedHeroId)) {
         setSelectedHeroId(null);
     }
   }, [selectedHeroId]);
@@ -92,22 +114,55 @@ export default function ManageBadgesPageClient() {
   };
   
   const handleHeroFormSubmit = (heroData: StoredHero) => {
-    let updatedHeroes;
+    // Remove personalGoalXP from the submitted heroData, as it's a legacy field
+    const { personalGoalXP, ...cleanSubmittedHeroDataSansXP } = heroData as any;
+    // Ensure personalGoalLevel is a valid number
+    const finalSubmittedHeroData: StoredHero = {
+        ...cleanSubmittedHeroDataSansXP,
+        personalGoalLevel: typeof cleanSubmittedHeroDataSansXP.personalGoalLevel === 'number' 
+                            ? cleanSubmittedHeroDataSansXP.personalGoalLevel 
+                            : 0,
+    };
+
+
+    let newListOfHeroes;
     if (editingHero) {
-      updatedHeroes = allHeroes.map(h => h.id === heroData.id ? heroData : h);
-      toast({ title: "Hero Updated", description: `${heroData.name} has been updated.` });
+      newListOfHeroes = allHeroes.map(h => {
+        const { personalGoalXP: oldXP, ...restOfH } = h as any; // Clean personalGoalXP from all heroes in the list
+        if (h.id === finalSubmittedHeroData.id) {
+          return finalSubmittedHeroData; // Replace with the new, cleaned hero data
+        }
+        return {
+            ...restOfH,
+            personalGoalLevel: typeof restOfH.personalGoalLevel === 'number' ? restOfH.personalGoalLevel : 0,
+        } as StoredHero;
+      });
+      toast({ title: "Hero Updated", description: `${finalSubmittedHeroData.name} has been updated.` });
     } else {
-      if (allHeroes.some(h => h.id === heroData.id)) {
-        toast({ title: "Error", description: `Hero ID "${heroData.id}" already exists. Please use a unique ID.`, variant: "destructive" });
+      // Adding a new hero
+      if (allHeroes.some(h => h.id === finalSubmittedHeroData.id)) {
+        toast({ title: "Error", description: `Hero ID "${finalSubmittedHeroData.id}" already exists. Please use a unique ID.`, variant: "destructive" });
         return;
       }
-      updatedHeroes = [...allHeroes, heroData];
-      toast({ title: "Hero Added", description: `${heroData.name} has been added.` });
+      // Clean personalGoalXP from existing heroes before adding the new one
+      const cleanedExistingHeroes = allHeroes.map(h => {
+          const { personalGoalXP: oldXP, ...restOfH } = h as any;
+          return {
+            ...restOfH,
+            personalGoalLevel: typeof restOfH.personalGoalLevel === 'number' ? restOfH.personalGoalLevel : 0,
+          } as StoredHero;
+      });
+      newListOfHeroes = [...cleanedExistingHeroes, finalSubmittedHeroData];
+      toast({ title: "Hero Added", description: `${finalSubmittedHeroData.name} has been added.` });
     }
-    saveHeroes(updatedHeroes);
+    
+    saveHeroes(newListOfHeroes);
     setIsHeroDialogOpen(false);
     setEditingHero(null);
-    if (!editingHero) setSelectedHeroId(heroData.id); 
+    // If adding a new hero, select them. If editing, selectedHeroId should already be set.
+    if (!editingHero || selectedHeroId !== finalSubmittedHeroData.id) {
+        setSelectedHeroId(finalSubmittedHeroData.id);
+    }
   };
 
   const handleOpenAddBadgeDialog = () => {
@@ -169,16 +224,14 @@ export default function ManageBadgesPageClient() {
         const challenges = [...hero.challenges];
         const badgeIndex = challenges.findIndex(b => b.id === badgeId);
 
-        if (badgeIndex === -1) return hero; // Badge not found
+        if (badgeIndex === -1) return hero; 
 
         if (direction === 'up' && badgeIndex > 0) {
-          // Swap with previous element
           [challenges[badgeIndex], challenges[badgeIndex - 1]] = [challenges[badgeIndex - 1], challenges[badgeIndex]];
         } else if (direction === 'down' && badgeIndex < challenges.length - 1) {
-          // Swap with next element
           [challenges[badgeIndex], challenges[badgeIndex + 1]] = [challenges[badgeIndex + 1], challenges[badgeIndex]];
         } else {
-          return hero; // Cannot move further
+          return hero; 
         }
         toast({ title: "Badge Reordered", description: `Badge "${challenges[direction === 'up' ? badgeIndex -1 : badgeIndex + 1].title}" has been moved.`})
         return { ...hero, challenges };
@@ -349,3 +402,4 @@ export default function ManageBadgesPageClient() {
     </div>
   );
 }
+
