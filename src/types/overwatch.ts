@@ -1,19 +1,18 @@
 
 import type React from 'react';
+// BadgeDefinition is no longer directly imported here, as HeroChallenge will get its properties from badge-definitions.ts via badgeId
 
-// Stored version (localStorage, initial data configuration, form data)
 export interface StoredHeroChallenge {
   id: string; // Unique ID for this specific badge instance on a hero
   badgeId: string; // ID referencing the badge definition
   level: number;
 }
 
-// Runtime version used by components that render badges
 export interface HeroChallenge {
   id: string; // Unique ID for the challenge instance
   badgeId: string; // ID referencing the badge definition
   title: string; // Title of the HeroChallenge, fetched from BadgeDefinition
-  icon: React.ElementType; // Actual Lucide component for rendering
+  icon: React.ElementType; // Actual Lucide component for rendering (fetched from BadgeDefinition)
   level: number;
   xpPerLevel: number; // XP/Level, fetched from BadgeDefinition
 }
@@ -44,5 +43,3 @@ export interface LevelDetails {
 }
 
 export interface HeroCalculated extends Hero, LevelDetails {}
-
-    

@@ -401,8 +401,8 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background text-foreground p-4 sm:p-6 lg:p-8">
       <header className="mb-6 text-center relative">
-        <h1 className="text-4xl sm:text-5xl font-bold text-primary tracking-tight">Overwatch Progression Tracker</h1>
-        <p className="text-lg text-muted-foreground mt-2">Track your hero badges, levels, and personal goals.</p>
+        <h1 className="text-4xl sm:text-5xl font-bold text-primary tracking-tight">Overwatch 2 Progression Tracker</h1>
+        <p className="text-lg text-muted-foreground mt-2">🏆 Track your hero badges, levels, and personal goals. 🔫</p>
         <div className="absolute top-0 right-0 flex space-x-2">
            <TooltipProvider>
             <Tooltip>
@@ -441,7 +441,7 @@ export default function Home() {
               </TooltipTrigger>
               <TooltipContent className="max-w-xs bg-popover text-popover-foreground p-3 rounded-md shadow-lg text-sm" side="bottom" align="end">
                 <p className="font-semibold mb-1">How XP is Calculated:</p>
-                <p className="text-xs mb-2">XP is earned by leveling up individual hero badges. Badge level 1 is the base and grants no XP. XP is awarded for levels 2 and above (i.e., level N grants (N-1) * XP_PER_LEVEL).</p>
+                <p className="text-xs mb-2">XP is earned by leveling up individual hero badges. Badge level 1 is the base and grants no XP. XP is awarded for levels 2 and above.</p>
                 <ul className="list-disc list-inside space-y-1 text-xs">
                   <li>Hero-specific Badges: {XP_PER_HERO_TYPE_BADGE_LEVEL} XP per level above 1</li>
                   <li>Win Badges: {XP_PER_WIN_TYPE_BADGE_LEVEL} XP per level above 1</li>
@@ -449,7 +449,7 @@ export default function Home() {
                 </ul>
                 <p className="mt-2 font-semibold mb-1">Hero Level Progression:</p>
                  <p className="text-xs mb-2">Hero levels are based on total XP earned, following the Overwatch 2 progression system. XP requirements per level vary.</p>
-                <p className="mt-3 text-xs">Click on a hero to edit their badges and see progress. Badges must be level 2 or higher to contribute XP.</p>
+                <p className="mt-3 text-xs">Click on a hero to edit their badges and see progress.</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -485,7 +485,7 @@ export default function Home() {
               {formattedTotalTimeToMaxAllHeroes}
             </p>
             { !formattedTotalTimeToMaxAllHeroes.includes("All heroes maxed!") && !formattedTotalTimeToMaxAllHeroes.includes("Loading...") && !formattedTotalTimeToMaxAllHeroes.includes("N/A") && (
-                 <p className="text-xs text-muted-foreground/70 ml-6 mt-0.5">(Assuming a time badge level is earned every 20 mins of play per hero)</p>
+                 <p className="text-xs text-muted-foreground/70 ml-6 mt-0.5">(20 mins of play = 1 Time Badge)</p>
             )}
           </div>
         </CardContent>

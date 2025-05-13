@@ -9,7 +9,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-// Removed getIconComponent as icon is now directly on BadgeDefinition
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -21,14 +20,14 @@ interface BadgeFormDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (badge: StoredHeroChallenge) => void;
-  badge: StoredHeroChallenge | null;
+  badge: StoredHeroChallenge | null; // Represents the specific instance being edited
   heroName: string;
   existingBadgeInstanceIds: string[];
 }
 
 const badgeInstanceSchema = z.object({
   id: z.string().min(1, "Instance ID is required").regex(/^[a-z0-9_]+$/, "Instance ID can only contain lowercase letters, numbers, and underscores."),
-  badgeId: z.string().min(1, "Badge Type is required"),
+  badgeId: z.string().min(1, "Badge Type is required"), // This is the ID of the BadgeDefinition
   level: z.coerce.number().min(1, "Initial Level must be 1 or greater").default(1),
 });
 
@@ -166,5 +165,3 @@ const BadgeFormDialog: React.FC<BadgeFormDialogProps> = ({ isOpen, onClose, onSu
 };
 
 export default BadgeFormDialog;
-
-    

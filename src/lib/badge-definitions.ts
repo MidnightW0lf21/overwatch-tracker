@@ -20,7 +20,7 @@ export type BadgeDefinition = {
 
 export const badgeDefinitions: Record<string, BadgeDefinition> = {
   // Soldier: 76
-  s76_damage_dealt: { id: 's76_dmg_dealt', title: 'Damage Dealt', icon: Zap, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
+  s76_dmg_dealt: { id: 's76_dmg_dealt', title: 'Damage Dealt', icon: Zap, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   s76_critical_hits: { id: 's76_critical_hits', title: 'Critical Hits', icon: Crosshair, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   s76_helix_direct: { id: 's76_helix_direct', title: 'Helix Rocket Direct Hits', icon: Target, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   s76_helix_final_blows: { id: 's76_helix_final_blows', title: 'Helix Rocket Final Blows', icon: Skull, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
@@ -67,8 +67,8 @@ export const badgeDefinitions: Record<string, BadgeDefinition> = {
   ana_players_saved: { id: 'ana_players_saved', title: 'Players Saved', icon: Activity, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   ana_eliminations: { id: 'ana_eliminations', title: 'Eliminations', icon: Skull, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   ana_enemies_slept: { id: 'ana_enemies_slept', title: 'Enemies Slept', icon: Timer, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
-  ana_ally_applied: { id: 'ana_ally_applied', title: 'Ally Grenades Applied', icon: HeartPulse, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL }, // Renamed for clarity
-  ana_enemy_applied: { id: 'ana_enemy_applied', title: 'Enemy Grenades Applied', icon: Bomb, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL }, // Renamed for clarity
+  ana_ally_applied: { id: 'ana_ally_applied', title: 'Ally Grenades Applied', icon: HeartPulse, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL }, 
+  ana_enemy_applied: { id: 'ana_enemy_applied', title: 'Enemy Grenades Applied', icon: Bomb, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL }, 
   ana_nano_assists: { id: 'ana_nano_assists', title: 'Nano Boost Assists', icon: Zap, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   ana_sleep_darts: { id: 'ana_sleep_darts', title: 'Sleep Darts Hit', icon: Timer, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   ana_biotic_grenade_assists: { id: 'ana_biotic_grenade_assists', title: 'Biotic Grenade Assists', icon: HeartPulse, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
@@ -161,8 +161,8 @@ export const badgeDefinitions: Record<string, BadgeDefinition> = {
   doomfist_overhealth_created: { id: 'doomfist_overhealth_created', title: 'Overhealth Created', icon: Shield, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   doomfist_dmg_dealt: { id: 'doomfist_dmg_dealt', title: 'Damage Dealt', icon: Zap, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   doomfist_slam_kills: { id: 'doomfist_slam_kills', title: 'Seismic Slam Kills', icon: Skull, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
-  doomfist_punch_empowered: { id: 'doomfist_punch_empowered', title: 'Empowered Punch', icon: Zap, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL }, // Changed from Sword
-  doomfist_wall_stuns: { id: 'doomfist_wall_stuns', title: 'Wall Stuns', icon: Shapes, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL }, // Changed from Sword
+  doomfist_punch_empowered: { id: 'doomfist_punch_empowered', title: 'Empowered Punch', icon: Zap, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
+  doomfist_wall_stuns: { id: 'doomfist_wall_stuns', title: 'Wall Stuns', icon: Shapes, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   doomfist_meteor_kills: { id: 'doomfist_meteor_kills', title: 'Meteor Strike Kills', icon: Bomb, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   doomfist_time_played: { id: 'doomfist_time_played', title: 'Time Played', icon: Clock, xpPerLevel: XP_PER_TIME_TYPE_BADGE_LEVEL },
   doomfist_wins: { id: 'doomfist_wins', title: 'Wins', icon: Trophy, xpPerLevel: XP_PER_WIN_TYPE_BADGE_LEVEL },
@@ -177,7 +177,7 @@ export const badgeDefinitions: Record<string, BadgeDefinition> = {
   echo_time_played: { id: 'echo_time_played', title: 'Time Played', icon: Clock, xpPerLevel: XP_PER_TIME_TYPE_BADGE_LEVEL },
   echo_wins: { id: 'echo_wins', title: 'Wins', icon: Trophy, xpPerLevel: XP_PER_WIN_TYPE_BADGE_LEVEL },
 
-  // Freja (Placeholder - assuming badge IDs match title for now, adjust as needed)
+  // Freja
   freja_eliminations: { id: 'freja_eliminations', title: 'Eliminations', icon: Skull, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   freja_dmg_dealt: { id: 'freja_dmg_dealt', title: 'Damage Dealt', icon: Zap, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   freja_final_blows: { id: 'freja_final_blows', title: 'Final Blows', icon: Skull, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
@@ -186,7 +186,7 @@ export const badgeDefinitions: Record<string, BadgeDefinition> = {
   freja_time_played: { id: 'freja_time_played', title: 'Time Played', icon: Clock, xpPerLevel: XP_PER_TIME_TYPE_BADGE_LEVEL },
   freja_wins: { id: 'freja_wins', title: 'Wins', icon: Trophy, xpPerLevel: XP_PER_WIN_TYPE_BADGE_LEVEL },
 
-  // Hazard (Placeholder)
+  // Hazard
   hazard_dmg_mitigated: { id: 'hazard_dmg_mitigated', title: 'Damage Mitigated', icon: Shield, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   hazard_spike_guard: { id: 'hazard_spike_guard', title: 'Spike Guard', icon: ShieldQuestion, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   hazard_leap_kills: { id: 'hazard_leap_kills', title: 'Violent Leap Kills', icon: Skull, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
@@ -208,7 +208,7 @@ export const badgeDefinitions: Record<string, BadgeDefinition> = {
   // Junker Queen
   junker_queen_dmg_mitigated: { id: 'junker_queen_dmg_mitigated', title: 'Damage Mitigated', icon: Shield, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   junker_queen_dmg_dealt: { id: 'junker_queen_dmg_dealt', title: 'Damage Dealt', icon: Zap, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
-  junker_queen_wound_dmg: { id: 'junker_queen_wound_dmg', title: 'Wound Damage', icon: HeartPulse, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL }, // More thematic
+  junker_queen_wound_dmg: { id: 'junker_queen_wound_dmg', title: 'Wound Damage', icon: HeartPulse, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   junker_queen_blade_kills: { id: 'junker_queen_blade_kills', title: 'Jagged Blade Kills', icon: Skull, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   junker_queen_carnage_kills: { id: 'junker_queen_carnage_kills', title: 'Carnage Kills', icon: Skull, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   junker_queen_rampage_kills: { id: 'junker_queen_rampage_kills', title: 'Rampage Kills', icon: Skull, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
@@ -225,7 +225,7 @@ export const badgeDefinitions: Record<string, BadgeDefinition> = {
   junkrat_time_played: { id: 'junkrat_time_played', title: 'Time Played', icon: Clock, xpPerLevel: XP_PER_TIME_TYPE_BADGE_LEVEL },
   junkrat_wins: { id: 'junkrat_wins', title: 'Wins', icon: Trophy, xpPerLevel: XP_PER_WIN_TYPE_BADGE_LEVEL },
 
-  // Juno (Placeholder)
+  // Juno
   juno_heal_done: { id: 'juno_heal_done', title: 'Healing Done', icon: HeartPulse, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   juno_players_saved: { id: 'juno_players_saved', title: 'Players Saved', icon: Activity, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   juno_eliminations: { id: 'juno_eliminations', title: 'Eliminations', icon: Skull, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
@@ -251,7 +251,7 @@ export const badgeDefinitions: Record<string, BadgeDefinition> = {
   lifeweaver_players_saved: { id: 'lifeweaver_players_saved', title: 'Players Saved', icon: Activity, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   lifeweaver_eliminations: { id: 'lifeweaver_eliminations', title: 'Eliminations', icon: Skull, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   lifeweaver_grip_saves: { id: 'lifeweaver_grip_saves', title: 'Life Grip Saves', icon: Activity, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
-  lifeweaver_dmg_mitigated: { id: 'lifeweaver_dmg_mitigated', title: 'Damage Mitigated', icon: Shield, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL }, // Petal Platform
+  lifeweaver_dmg_mitigated: { id: 'lifeweaver_dmg_mitigated', title: 'Damage Mitigated (Petal Platform)', icon: Shield, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   lifeweaver_tree_heal: { id: 'lifeweaver_tree_heal', title: 'Tree of Life Healing', icon: HeartPulse, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   lifeweaver_time_played: { id: 'lifeweaver_time_played', title: 'Time Played', icon: Clock, xpPerLevel: XP_PER_TIME_TYPE_BADGE_LEVEL },
   lifeweaver_wins: { id: 'lifeweaver_wins', title: 'Wins', icon: Trophy, xpPerLevel: XP_PER_WIN_TYPE_BADGE_LEVEL },
@@ -267,10 +267,10 @@ export const badgeDefinitions: Record<string, BadgeDefinition> = {
   lucio_wins: { id: 'lucio_wins', title: 'Wins', icon: Trophy, xpPerLevel: XP_PER_WIN_TYPE_BADGE_LEVEL },
 
   // Mauga
-  mauga_dmg_mitigated: { id: 'mauga_dmg_mitigated', title: 'Damage Mitigated', icon: Shield, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL }, // Overdrive
+  mauga_dmg_mitigated: { id: 'mauga_dmg_mitigated', title: 'Damage Mitigated (Overdrive)', icon: Shield, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   mauga_dmg_dealt: { id: 'mauga_dmg_dealt', title: 'Damage Dealt', icon: Zap, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   mauga_crit_dmg_dealt: { id: 'mauga_crit_dmg_dealt', title: 'Critical Damage Dealt', icon: Crosshair, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
-  mauga_enemy_ignitions: { id: 'mauga_enemy_ignitions', title: 'Enemy Ignitions', icon: Zap, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL }, // More thematic than Sword
+  mauga_enemy_ignitions: { id: 'mauga_enemy_ignitions', title: 'Enemy Ignitions', icon: Zap, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   mauga_knockback_hits: { id: 'mauga_knockback_hits', title: 'Overrun Knockback Hits', icon: Shapes, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   mauga_heal_done: { id: 'mauga_heal_done', title: 'Healing Done (Berserker)', icon: HeartPulse, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   mauga_cage_kills: { id: 'mauga_cage_kills', title: 'Cage Fight Kills', icon: Skull, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
@@ -283,7 +283,7 @@ export const badgeDefinitions: Record<string, BadgeDefinition> = {
   mei_icicle_critical: { id: 'mei_icicle_critical', title: 'Icicle Critical Hits', icon: Crosshair, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   mei_objective_contest: { id: 'mei_objective_contest', title: 'Objective Contest Time', icon: Timer, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   mei_self_heal: { id: 'mei_self_heal', title: 'Self Healing (Cryo-Freeze)', icon: HeartPulse, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
-  mei_enemies_frozen: { id: 'mei_enemies_frozen', title: 'Enemies Frozen (Blizzard)', icon: Shapes, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL }, // More thematic than Sword
+  mei_enemies_frozen: { id: 'mei_enemies_frozen', title: 'Enemies Frozen (Blizzard)', icon: Shapes, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   mei_time_played: { id: 'mei_time_played', title: 'Time Played', icon: Clock, xpPerLevel: XP_PER_TIME_TYPE_BADGE_LEVEL },
   mei_wins: { id: 'mei_wins', title: 'Wins', icon: Trophy, xpPerLevel: XP_PER_WIN_TYPE_BADGE_LEVEL },
 
@@ -302,7 +302,7 @@ export const badgeDefinitions: Record<string, BadgeDefinition> = {
   orisa_dmg_dealt: { id: 'orisa_dmg_dealt', title: 'Damage Dealt', icon: Zap, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   orisa_critical_dmg: { id: 'orisa_critical_dmg', title: 'Critical Damage (Weapon)', icon: Crosshair, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   orisa_javelin_hits: { id: 'orisa_javelin_hits', title: 'Energy Javelin Hits', icon: Target, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
-  orisa_javelin_wall_pins: { id: 'orisa_javelin_wall_pins', title: 'Energy Javelin Wall Pins', icon: Target, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL }, // More specific than Sword
+  orisa_javelin_wall_pins: { id: 'orisa_javelin_wall_pins', title: 'Energy Javelin Wall Pins', icon: Target, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   orisa_terra_kills: { id: 'orisa_terra_kills', title: 'Terra Surge Kills', icon: Skull, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   orisa_time_played: { id: 'orisa_time_played', title: 'Time Played', icon: Clock, xpPerLevel: XP_PER_TIME_TYPE_BADGE_LEVEL },
   orisa_wins: { id: 'orisa_wins', title: 'Wins', icon: Trophy, xpPerLevel: XP_PER_WIN_TYPE_BADGE_LEVEL },
@@ -323,7 +323,7 @@ export const badgeDefinitions: Record<string, BadgeDefinition> = {
   ramattra_barrier_dmg_mit: { id: 'ramattra_barrier_dmg_mit', title: 'Barrier Damage Mitigated', icon: Shield, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   ramattra_dmg_dealt: { id: 'ramattra_dmg_dealt', title: 'Damage Dealt', icon: Zap, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   ramattra_weapon_dmg: { id: 'ramattra_weapon_dmg', title: 'Weapon Damage (Omnic Form)', icon: Zap, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
-  ramattra_pummel_dmg: { id: 'ramattra_pummel_dmg', title: 'Pummel Damage (Nemesis Form)', icon: Zap, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL }, // Used Zap as Fist isn't standard
+  ramattra_pummel_dmg: { id: 'ramattra_pummel_dmg', title: 'Pummel Damage (Nemesis Form)', icon: Zap, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   ramattra_vortex_kills: { id: 'ramattra_vortex_kills', title: 'Ravenous Vortex Kills', icon: Skull, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   ramattra_annihilation_kills: { id: 'ramattra_annihilation_kills', title: 'Annihilation Kills', icon: Skull, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   ramattra_time_played: { id: 'ramattra_time_played', title: 'Time Played', icon: Clock, xpPerLevel: XP_PER_TIME_TYPE_BADGE_LEVEL },
@@ -334,7 +334,7 @@ export const badgeDefinitions: Record<string, BadgeDefinition> = {
   reaper_eliminations: { id: 'reaper_eliminations', title: 'Eliminations', icon: Skull, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   reaper_solo_kills: { id: 'reaper_solo_kills', title: 'Solo Kills', icon: Skull, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   reaper_self_heal: { id: 'reaper_self_heal', title: 'Self Healing (The Reaping)', icon: HeartPulse, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
-  reaper_teleport_kills: { id: 'reaper_teleport_kills', title: 'Shadow Step Kills', icon: Skull, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL }, // More specific
+  reaper_teleport_kills: { id: 'reaper_teleport_kills', title: 'Shadow Step Kills', icon: Skull, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   reaper_blossom_kills: { id: 'reaper_blossom_kills', title: 'Death Blossom Kills', icon: Skull, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   reaper_time_played: { id: 'reaper_time_played', title: 'Time Played', icon: Clock, xpPerLevel: XP_PER_TIME_TYPE_BADGE_LEVEL },
   reaper_wins: { id: 'reaper_wins', title: 'Wins', icon: Trophy, xpPerLevel: XP_PER_WIN_TYPE_BADGE_LEVEL },
@@ -344,7 +344,7 @@ export const badgeDefinitions: Record<string, BadgeDefinition> = {
   roadhog_dmg_dealt: { id: 'roadhog_dmg_dealt', title: 'Damage Dealt', icon: Zap, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   roadhog_eliminations: { id: 'roadhog_eliminations', title: 'Eliminations', icon: Skull, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   roadhog_chain_hooked: { id: 'roadhog_chain_hooked', title: 'Enemies Chain Hooked', icon: Target, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
-  roadhog_enemies_trapped: { id: 'roadhog_enemies_trapped', title: 'Enemies Trapped (Pig Pen)', icon: Shapes, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL }, // More thematic
+  roadhog_enemies_trapped: { id: 'roadhog_enemies_trapped', title: 'Enemies Trapped (Pig Pen)', icon: Shapes, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   roadhog_self_heal: { id: 'roadhog_self_heal', title: 'Self Healing (Take a Breather)', icon: HeartPulse, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   roadhog_whole_hog_kills: { id: 'roadhog_whole_hog_kills', title: 'Whole Hog Kills', icon: Skull, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   roadhog_time_played: { id: 'roadhog_time_played', title: 'Time Played', icon: Clock, xpPerLevel: XP_PER_TIME_TYPE_BADGE_LEVEL },
@@ -452,26 +452,8 @@ export const badgeDefinitions: Record<string, BadgeDefinition> = {
   zenyatta_time_played: { id: 'zenyatta_time_played', title: 'Time Played', icon: Clock, xpPerLevel: XP_PER_TIME_TYPE_BADGE_LEVEL },
   zenyatta_wins: { id: 'zenyatta_wins', title: 'Wins', icon: Trophy, xpPerLevel: XP_PER_WIN_TYPE_BADGE_LEVEL },
 
-  // Hanzo
-  hanzo_dmg_dealt: { id: 'hanzo_dmg_dealt', title: 'Damage Dealt', icon: Zap, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
-  hanzo_weapon_kills: { id: 'hanzo_weapon_kills', title: 'Weapon Kills', icon: Skull, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
-  hanzo_critical_hits: { id: 'hanzo_critical_hits', title: 'Critical Hits', icon: Crosshair, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
-  hanzo_storm_kills: { id: 'hanzo_storm_kills', title: 'Storm Arrow Kills', icon: Skull, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
-  hanzo_recon_assists: { id: 'hanzo_recon_assists', title: 'Recon Arrow Assists', icon: Swords, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
-  hanzo_dragonstrike_kills: { id: 'hanzo_dragonstrike_kills', title: 'Dragonstrike Kills', icon: Skull, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
-  hanzo_time_played: { id: 'hanzo_time_played', title: 'Time Played', icon: Clock, xpPerLevel: XP_PER_TIME_TYPE_BADGE_LEVEL },
-  hanzo_wins: { id: 'hanzo_wins', title: 'Wins', icon: Trophy, xpPerLevel: XP_PER_WIN_TYPE_BADGE_LEVEL },
-
-   // Placeholders for Reinhardt badges that might have been missed
-  rein_damage_dealt: {id: 'rein_damage_dealt', title: 'Damage Dealt', icon: Zap, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
-  rein_weapon_kills: {id: 'rein_weapon_kills', title: 'Weapon Kills', icon: Skull, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
-  rein_fire_strike_hits: {id: 'rein_fire_strike_hits', title: 'Fire Strike Hits', icon: Target, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
-  rein_earthshatter_kills: {id: 'rein_earthshatter_kills', title: 'Earthshatter Kills', icon: Skull, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
-
 };
 
 export function getBadgeDefinition(badgeId: string): BadgeDefinition | undefined {
   return badgeDefinitions[badgeId];
 }
-
-    

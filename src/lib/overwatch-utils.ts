@@ -4,8 +4,6 @@ import { getBadgeDefinition } from '@/lib/badge-definitions';
 import { ShieldQuestion } from 'lucide-react';
 
 // XP constants are now primarily defined and used in badge-definitions.ts
-// They are kept here for reference or potential direct use if needed elsewhere,
-// but badge instances themselves don't store xpPerLevel.
 
 interface LevelTier {
   level: number;
@@ -123,7 +121,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'ana_nano_assists_instance', badgeId: 'ana_nano_assists', level: 1 },
       { id: 'ana_ally_applied_instance', badgeId: 'ana_ally_applied', level: 1 },
       { id: 'ana_enemy_applied_instance', badgeId: 'ana_enemy_applied', level: 1 },
-      { id: 'ana_time_instance', badgeId: 'ana_time_played', level: 1 }, // Corrected badgeId
+      { id: 'ana_time_instance', badgeId: 'ana_time_played', level: 1 },
       { id: 'ana_wins_instance', badgeId: 'ana_wins', level: 1 },
     ],
   },
@@ -139,7 +137,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'ashe_critical_hits_instance', badgeId: 'ashe_critical_hits', level: 1 },
       { id: 'ashe_dyno_damage_instance', badgeId: 'ashe_dyno_damage', level: 1 },
       { id: 'ashe_bob_kills_instance', badgeId: 'ashe_bob_kills', level: 1 },
-      { id: 'ashe_time_instance', badgeId: 'ashe_time_played', level: 1 }, // Corrected badgeId
+      { id: 'ashe_time_instance', badgeId: 'ashe_time_played', level: 1 },
       { id: 'ashe_wins_instance', badgeId: 'ashe_wins', level: 1 },
     ],
   },
@@ -156,7 +154,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'baptiste_dmg_amplified_instance', badgeId: 'baptiste_dmg_amplified', level: 1 },
       { id: 'baptiste_heal_amplified_instance', badgeId: 'baptiste_heal_amplified', level: 1 },
       { id: 'baptiste_immortality_save_instance', badgeId: 'baptiste_immortality_save', level: 1 },
-      { id: 'baptiste_time_instance', badgeId: 'baptiste_time_played', level: 1 }, // Corrected badgeId
+      { id: 'baptiste_time_instance', badgeId: 'baptiste_time_played', level: 1 },
       { id: 'baptiste_wins_instance', badgeId: 'baptiste_wins', level: 1 },
     ],
   },
@@ -172,7 +170,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'bastion_assault_kills_instance', badgeId: 'bastion_assault_kills', level: 1 },
       { id: 'bastion_grenade_direct_instance', badgeId: 'bastion_grenade_direct', level: 1 },
       { id: 'bastion_artillery_kills_instance', badgeId: 'bastion_artillery_kills', level: 1 },
-      { id: 'bastion_time_instance', badgeId: 'bastion_time_played', level: 1 }, // Corrected badgeId
+      { id: 'bastion_time_instance', badgeId: 'bastion_time_played', level: 1 },
       { id: 'bastion_wins_instance', badgeId: 'bastion_wins', level: 1 },
     ],
   },
@@ -188,7 +186,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'brigitte_whipshot_hits_instance', badgeId: 'brigitte_whipshot_hits', level: 1 },
       { id: 'brigitte_shield_hits_instance', badgeId: 'brigitte_shield_hits', level: 1 },
       { id: 'brigitte_rally_assists_instance', badgeId: 'brigitte_rally_assists', level: 1 },
-      { id: 'brigitte_time_instance', badgeId: 'brigitte_time_played', level: 1 }, // Corrected badgeId
+      { id: 'brigitte_time_instance', badgeId: 'brigitte_time_played', level: 1 },
       { id: 'brigitte_wins_instance', badgeId: 'brigitte_wins', level: 1 },
     ],
   },
@@ -204,7 +202,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'cassidy_critical_hits_instance', badgeId: 'cassidy_critical_hits', level: 1 },
       { id: 'cassidy_maggrenade_kills_instance', badgeId: 'cassidy_maggrenade_kills', level: 1 },
       { id: 'cassidy_deadeye_kills_instance', badgeId: 'cassidy_deadeye_kills', level: 1 },
-      { id: 'cassidy_time_instance', badgeId: 'cassidy_time_played', level: 1 }, // Corrected badgeId
+      { id: 'cassidy_time_instance', badgeId: 'cassidy_time_played', level: 1 },
       { id: 'cassidy_wins_instance', badgeId: 'cassidy_wins', level: 1 },
     ],
   },
@@ -220,7 +218,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'dva_missile_kills_instance', badgeId: 'dva_missile_kills', level: 1 },
       { id: 'dva_solo_kills_instance', badgeId: 'dva_solo_kills', level: 1 },
       { id: 'dva_destruct_kills_instance', badgeId: 'dva_destruct_kills', level: 1 },
-      { id: 'dva_time_instance', badgeId: 'dva_time_played', level: 1 }, // Corrected badgeId
+      { id: 'dva_time_instance', badgeId: 'dva_time_played', level: 1 },
       { id: 'dva_wins_instance', badgeId: 'dva_wins', level: 1 },
     ],
   },
@@ -236,7 +234,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'doomfist_punch_empowered_instance', badgeId: 'doomfist_punch_empowered', level: 1 },
       { id: 'doomfist_wall_stuns_instance', badgeId: 'doomfist_wall_stuns', level: 1 },
       { id: 'doomfist_meteor_kills_instance', badgeId: 'doomfist_meteor_kills', level: 1 },
-      { id: 'doomfist_time_instance', badgeId: 'doomfist_time_played', level: 1 }, // Corrected badgeId
+      { id: 'doomfist_time_instance', badgeId: 'doomfist_time_played', level: 1 },
       { id: 'doomfist_wins_instance', badgeId: 'doomfist_wins', level: 1 },
     ],
   },
@@ -252,7 +250,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'echo_bomb_dmg_instance', badgeId: 'echo_bomb_dmg', level: 1 },
       { id: 'echo_duplicate_kills_instance', badgeId: 'echo_duplicate_kills', level: 1 },
       { id: 'echo_duplicate_ults_instance', badgeId: 'echo_duplicate_ults', level: 1 },
-      { id: 'echo_time_instance', badgeId: 'echo_time_played', level: 1 }, // Corrected badgeId
+      { id: 'echo_time_instance', badgeId: 'echo_time_played', level: 1 },
       { id: 'echo_wins_instance', badgeId: 'echo_wins', level: 1 },
     ],
   },
@@ -267,7 +265,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'freja_final_blows_instance', badgeId: 'freja_final_blows', level: 1 },
       { id: 'freja_aim_kills_instance', badgeId: 'freja_aim_kills', level: 1 },
       { id: 'freja_bola_sticks_instance', badgeId: 'freja_bola_sticks', level: 1 },
-      { id: 'freja_time_instance', badgeId: 'freja_time_played', level: 1 }, // Corrected badgeId
+      { id: 'freja_time_instance', badgeId: 'freja_time_played', level: 1 },
       { id: 'freja_wins_instance', badgeId: 'freja_wins', level: 1 },
     ],
   },
@@ -282,8 +280,8 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'genji_dmg_reflected_instance', badgeId: 'genji_dmg_reflected', level: 1 },
       { id: 'genji_strike_resets_instance', badgeId: 'genji_strike_resets', level: 1 },
       { id: 'genji_solo_kills_instance', badgeId: 'genji_solo_kills', level: 1 },
-      { id: 'genji_dragonblade_kills_instance', badgeId: 'genji_blade_kills', level: 1 }, // Corrected badgeId
-      { id: 'genji_time_instance', badgeId: 'genji_time_played', level: 1 }, // Corrected badgeId
+      { id: 'genji_dragonblade_kills_instance', badgeId: 'genji_blade_kills', level: 1 },
+      { id: 'genji_time_instance', badgeId: 'genji_time_played', level: 1 },
       { id: 'genji_wins_instance', badgeId: 'genji_wins', level: 1 },
     ],
   },
@@ -299,7 +297,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'hanzo_storm_kills_instance', badgeId: 'hanzo_storm_kills', level: 1 },
       { id: 'hanzo_recon_assists_instance', badgeId: 'hanzo_recon_assists', level: 1 },
       { id: 'hanzo_dragonstrike_kills_instance', badgeId: 'hanzo_dragonstrike_kills', level: 1 },
-      { id: 'hanzo_time_instance', badgeId: 'hanzo_time_played', level: 1 }, // Corrected badgeId
+      { id: 'hanzo_time_instance', badgeId: 'hanzo_time_played', level: 1 },
       { id: 'hanzo_wins_instance', badgeId: 'hanzo_wins', level: 1 },
     ],
   },
@@ -314,7 +312,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'hazard_leap_kills_instance', badgeId: 'hazard_leap_kills', level: 1 },
       { id: 'hazard_wall_assists_instance', badgeId: 'hazard_wall_assists', level: 1 },
       { id: 'hazard_downpour_roots_instance', badgeId: 'hazard_downpour_roots', level: 1 },
-      { id: 'hazard_time_instance', badgeId: 'hazard_time_played', level: 1 }, // Corrected badgeId
+      { id: 'hazard_time_instance', badgeId: 'hazard_time_played', level: 1 },
       { id: 'hazard_wins_instance', badgeId: 'hazard_wins', level: 1 },
     ],
   },
@@ -330,7 +328,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'illari_eliminations_instance', badgeId: 'illari_eliminations', level: 1 },
       { id: 'illari_knockback_kills_instance', badgeId: 'illari_knockback_kills', level: 1 },
       { id: 'illari_sunstruck_detonations_instance', badgeId: 'illari_sunstruck_detonations', level: 1 },
-      { id: 'illari_time_instance', badgeId: 'illari_time_played', level: 1 }, // Corrected badgeId
+      { id: 'illari_time_instance', badgeId: 'illari_time_played', level: 1 },
       { id: 'illari_wins_instance', badgeId: 'illari_wins', level: 1 },
     ],
   },
@@ -346,7 +344,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'junker_queen_blade_kills_instance', badgeId: 'junker_queen_blade_kills', level: 1 },
       { id: 'junker_queen_carnage_kills_instance', badgeId: 'junker_queen_carnage_kills', level: 1 },
       { id: 'junker_queen_rampage_kills_instance', badgeId: 'junker_queen_rampage_kills', level: 1 },
-      { id: 'junker_queen_time_instance', badgeId: 'junker_queen_time_played', level: 1 }, // Corrected badgeId
+      { id: 'junker_queen_time_instance', badgeId: 'junker_queen_time_played', level: 1 },
       { id: 'junker_queen_wins_instance', badgeId: 'junker_queen_wins', level: 1 },
     ],
   },
@@ -362,7 +360,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'junkrat_mine_kills_instance', badgeId: 'junkrat_mine_kills', level: 1 },
       { id: 'junkrat_enemies_trapped_instance', badgeId: 'junkrat_enemies_trapped', level: 1 },
       { id: 'junkrat_tire_kills_instance', badgeId: 'junkrat_tire_kills', level: 1 },
-      { id: 'junkrat_time_instance', badgeId: 'junkrat_time_played', level: 1 }, // Corrected badgeId
+      { id: 'junkrat_time_instance', badgeId: 'junkrat_time_played', level: 1 },
       { id: 'junkrat_wins_instance', badgeId: 'junkrat_wins', level: 1 },
     ],
   },
@@ -378,7 +376,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'juno_ring_assists_instance', badgeId: 'juno_ring_assists', level: 1 },
       { id: 'juno_dmg_amplified_instance', badgeId: 'juno_dmg_amplified', level: 1 },
       { id: 'juno_orbital_assists_instance', badgeId: 'juno_orbital_assists', level: 1 },
-      { id: 'juno_time_instance', badgeId: 'juno_time_played', level: 1 }, // Corrected badgeId
+      { id: 'juno_time_instance', badgeId: 'juno_time_played', level: 1 },
       { id: 'juno_wins_instance', badgeId: 'juno_wins', level: 1 },
     ],
   },
@@ -395,7 +393,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'kiriko_debuff_cleansed_instance', badgeId: 'kiriko_debuff_cleansed', level: 1 },
       { id: 'kiriko_swift_escapes_instance', badgeId: 'kiriko_swift_escapes', level: 1 },
       { id: 'kiriko_kitsune_assists_instance', badgeId: 'kiriko_kitsune_assists', level: 1 },
-      { id: 'kiriko_time_instance', badgeId: 'kiriko_time_played', level: 1 }, // Corrected badgeId
+      { id: 'kiriko_time_instance', badgeId: 'kiriko_time_played', level: 1 },
       { id: 'kiriko_wins_instance', badgeId: 'kiriko_wins', level: 1 },
     ],
   },
@@ -411,7 +409,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'lifeweaver_grip_saves_instance', badgeId: 'lifeweaver_grip_saves', level: 1 },
       { id: 'lifeweaver_dmg_mitigated_instance', badgeId: 'lifeweaver_dmg_mitigated', level: 1 },
       { id: 'lifeweaver_tree_heal_instance', badgeId: 'lifeweaver_tree_heal', level: 1 },
-      { id: 'lifeweaver_time_instance', badgeId: 'lifeweaver_time_played', level: 1 }, // Corrected badgeId
+      { id: 'lifeweaver_time_instance', badgeId: 'lifeweaver_time_played', level: 1 },
       { id: 'lifeweaver_wins_instance', badgeId: 'lifeweaver_wins', level: 1 },
     ],
   },
@@ -427,7 +425,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'lucio_speed_assists_instance', badgeId: 'lucio_speed_assists', level: 1 },
       { id: 'lucio_environmental_kills_instance', badgeId: 'lucio_environmental_kills', level: 1 },
       { id: 'lucio_barrier_dmg_mit_instance', badgeId: 'lucio_barrier_dmg_mit', level: 1 },
-      { id: 'lucio_time_instance', badgeId: 'lucio_time_played', level: 1 }, // Corrected badgeId
+      { id: 'lucio_time_instance', badgeId: 'lucio_time_played', level: 1 },
       { id: 'lucio_wins_instance', badgeId: 'lucio_wins', level: 1 },
     ],
   },
@@ -444,7 +442,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'mauga_knockback_hits_instance', badgeId: 'mauga_knockback_hits', level: 1 },
       { id: 'mauga_heal_done_instance', badgeId: 'mauga_heal_done', level: 1 },
       { id: 'mauga_cage_kills_instance', badgeId: 'mauga_cage_kills', level: 1 },
-      { id: 'mauga_time_instance', badgeId: 'mauga_time_played', level: 1 }, // Corrected badgeId
+      { id: 'mauga_time_instance', badgeId: 'mauga_time_played', level: 1 },
       { id: 'mauga_wins_instance', badgeId: 'mauga_wins', level: 1 },
     ],
   },
@@ -460,7 +458,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'mei_objective_contest_instance', badgeId: 'mei_objective_contest', level: 1 },
       { id: 'mei_self_heal_instance', badgeId: 'mei_self_heal', level: 1 },
       { id: 'mei_enemies_frozen_instance', badgeId: 'mei_enemies_frozen', level: 1 },
-      { id: 'mei_time_instance', badgeId: 'mei_time_played', level: 1 }, // Corrected badgeId
+      { id: 'mei_time_instance', badgeId: 'mei_time_played', level: 1 },
       { id: 'mei_wins_instance', badgeId: 'mei_wins', level: 1 },
     ],
   },
@@ -476,7 +474,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'mercy_players_resurrected_instance', badgeId: 'mercy_players_resurrected', level: 1 },
       { id: 'mercy_blaster_kills_instance', badgeId: 'mercy_blaster_kills', level: 1 },
       { id: 'mercy_valkyrie_assists_instance', badgeId: 'mercy_valkyrie_assists', level: 1 },
-      { id: 'mercy_time_instance', badgeId: 'mercy_time_played', level: 1 }, // Corrected badgeId
+      { id: 'mercy_time_instance', badgeId: 'mercy_time_played', level: 1 },
       { id: 'mercy_wins_instance', badgeId: 'mercy_wins', level: 1 },
     ],
   },
@@ -492,7 +490,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'moira_eliminations_instance', badgeId: 'moira_eliminations', level: 1 },
       { id: 'moira_nonultimate_dmg_instance', badgeId: 'moira_nonultimate_dmg', level: 1 },
       { id: 'moira_coalescence_instance', badgeId: 'moira_coalescence', level: 1 },
-      { id: 'moira_time_instance', badgeId: 'moira_time_played', level: 1 }, // Corrected badgeId
+      { id: 'moira_time_instance', badgeId: 'moira_time_played', level: 1 },
       { id: 'moira_wins_instance', badgeId: 'moira_wins', level: 1 },
     ],
   },
@@ -508,7 +506,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'orisa_javelin_hits_instance', badgeId: 'orisa_javelin_hits', level: 1 },
       { id: 'orisa_javelin_wall_pins_instance', badgeId: 'orisa_javelin_wall_pins', level: 1 },
       { id: 'orisa_terra_kills_instance', badgeId: 'orisa_terra_kills', level: 1 },
-      { id: 'orisa_time_instance', badgeId: 'orisa_time_played', level: 1 }, // Corrected badgeId
+      { id: 'orisa_time_instance', badgeId: 'orisa_time_played', level: 1 },
       { id: 'orisa_wins_instance', badgeId: 'orisa_wins', level: 1 },
     ],
   },
@@ -525,7 +523,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'pharah_environmental_kills_instance', badgeId: 'pharah_environmental_kills', level: 1 },
       { id: 'pharah_barrage_kills_instance', badgeId: 'pharah_barrage_kills', level: 1 },
       { id: 'pharah_aerial_kills_instance', badgeId: 'pharah_aerial_kills', level: 1 },
-      { id: 'pharah_time_instance', badgeId: 'pharah_time_played', level: 1 }, // Corrected badgeId
+      { id: 'pharah_time_instance', badgeId: 'pharah_time_played', level: 1 },
       { id: 'pharah_wins_instance', badgeId: 'pharah_wins', level: 1 },
     ],
   },
@@ -542,7 +540,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'ramattra_pummel_dmg_instance', badgeId: 'ramattra_pummel_dmg', level: 1 },
       { id: 'ramattra_vortex_kills_instance', badgeId: 'ramattra_vortex_kills', level: 1 },
       { id: 'ramattra_annihilation_kills_instance', badgeId: 'ramattra_annihilation_kills', level: 1 },
-      { id: 'ramattra_time_instance', badgeId: 'ramattra_time_played', level: 1 }, // Corrected badgeId
+      { id: 'ramattra_time_instance', badgeId: 'ramattra_time_played', level: 1 },
       { id: 'ramattra_wins_instance', badgeId: 'ramattra_wins', level: 1 },
     ],
   },
@@ -558,7 +556,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'reaper_self_heal_instance', badgeId: 'reaper_self_heal', level: 1 },
       { id: 'reaper_teleport_kills_instance', badgeId: 'reaper_teleport_kills', level: 1 },
       { id: 'reaper_blossom_kills_instance', badgeId: 'reaper_blossom_kills', level: 1 },
-      { id: 'reaper_time_instance', badgeId: 'reaper_time_played', level: 1 }, // Corrected badgeId
+      { id: 'reaper_time_instance', badgeId: 'reaper_time_played', level: 1 },
       { id: 'reaper_wins_instance', badgeId: 'reaper_wins', level: 1 },
     ],
   },
@@ -568,14 +566,14 @@ export const initialHeroesData: StoredHero[] = [
     portraitUrl: 'https://static.wikia.nocookie.net/overwatch_gamepedia/images/8/83/Icon-Reinhardt.png',
     personalGoalLevel: 500,
     challenges: [
-      { id: 'reinhardt_dmg_mitigated_instance', badgeId: 'rein_damage_blocked', level: 1 }, // Corrected badgeId
-      { id: 'reinhardt_dmg_dealt_instance', badgeId: 'rein_damage_dealt', level: 1 }, // Needs definition
-      { id: 'reinhardt_weapon_kills_instance', badgeId: 'rein_weapon_kills', level: 1 }, // Needs definition
+      { id: 'reinhardt_dmg_mitigated_instance', badgeId: 'rein_damage_blocked', level: 1 },
+      { id: 'reinhardt_dmg_dealt_instance', badgeId: 'rein_damage_dealt', level: 1 },
+      { id: 'reinhardt_weapon_kills_instance', badgeId: 'rein_weapon_kills', level: 1 },
       { id: 'reinhardt_charge_pins_instance', badgeId: 'rein_charge_pins', level: 1 },
-      { id: 'reinhardt_fire_strike_hits_instance', badgeId: 'rein_fire_strike_hits', level: 1 }, // Needs definition
-      { id: 'reinhardt_earthshatter_stuns_instance', badgeId: 'rein_shatter_stuns', level: 1 }, // Corrected badgeId
-      { id: 'reinhardt_earthshatter_kills_instance', badgeId: 'rein_earthshatter_kills', level: 1 }, // Needs definition
-      { id: 'reinhardt_time_instance', badgeId: 'rein_time_played', level: 1 }, // Corrected badgeId
+      { id: 'reinhardt_fire_strike_hits_instance', badgeId: 'rein_fire_strike_hits', level: 1 },
+      { id: 'reinhardt_earthshatter_stuns_instance', badgeId: 'rein_shatter_stuns', level: 1 },
+      { id: 'reinhardt_earthshatter_kills_instance', badgeId: 'rein_earthshatter_kills', level: 1 },
+      { id: 'reinhardt_time_instance', badgeId: 'rein_time_played', level: 1 },
       { id: 'reinhardt_wins_instance', badgeId: 'rein_wins', level: 1 },
     ],
   },
@@ -592,19 +590,19 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'roadhog_enemies_trapped_instance', badgeId: 'roadhog_enemies_trapped', level: 1 },
       { id: 'roadhog_self_heal_instance', badgeId: 'roadhog_self_heal', level: 1 },
       { id: 'roadhog_whole_hog_kills_instance', badgeId: 'roadhog_whole_hog_kills', level: 1 },
-      { id: 'roadhog_time_instance', badgeId: 'roadhog_time_played', level: 1 }, // Corrected badgeId
+      { id: 'roadhog_time_instance', badgeId: 'roadhog_time_played', level: 1 },
       { id: 'roadhog_wins_instance', badgeId: 'roadhog_wins', level: 1 },
     ],
   },
   {
-    id: 'soldier76',
+    id: 's76', // Corrected to match common usage for Soldier: 76
     name: 'Soldier: 76',
     portraitUrl: 'https://static.wikia.nocookie.net/overwatch_gamepedia/images/2/2b/Icon-Soldier_76.png',
     personalGoalLevel: 500,
     challenges: [
       { id: 's76_damage_dealt_instance', badgeId: 's76_dmg_dealt', level: 1 },
       { id: 's76_critical_hits_instance', badgeId: 's76_critical_hits', level: 1 },
-      { id: 's76_helix_direct_instance', badgeId: 's76_helix_direct', level: 1 },
+      { id: 's76_helix_direct_hits_instance', badgeId: 's76_helix_direct', level: 1 },
       { id: 's76_helix_final_blows_instance', badgeId: 's76_helix_final_blows', level: 1 },
       { id: 's76_biotic_healing_instance', badgeId: 's76_biotic_healing', level: 1 },
       { id: 's76_visor_kills_instance', badgeId: 's76_visor_kills', level: 1 },
@@ -624,7 +622,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'sigma_weapon_direct_hits_instance', badgeId: 'sigma_weapon_direct_hits', level: 1 },
       { id: 'sigma_accretion_hits_instance', badgeId: 'sigma_accretion_hits', level: 1 },
       { id: 'sigma_flux_kills_instance', badgeId: 'sigma_flux_kills', level: 1 },
-      { id: 'sigma_time_instance', badgeId: 'sigma_time_played', level: 1 }, // Corrected badgeId
+      { id: 'sigma_time_instance', badgeId: 'sigma_time_played', level: 1 },
       { id: 'sigma_wins_instance', badgeId: 'sigma_wins', level: 1 },
     ],
   },
@@ -640,7 +638,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'sojourn_slide_kills_instance', badgeId: 'sojourn_slide_kills', level: 1 },
       { id: 'sojourn_disruptor_dmg_instance', badgeId: 'sojourn_disruptor_dmg', level: 1 },
       { id: 'sojourn_overclock_hits_instance', badgeId: 'sojourn_overclock_hits', level: 1 },
-      { id: 'sojourn_time_instance', badgeId: 'sojourn_time_played', level: 1 }, // Corrected badgeId
+      { id: 'sojourn_time_instance', badgeId: 'sojourn_time_played', level: 1 },
       { id: 'sojourn_wins_instance', badgeId: 'sojourn_wins', level: 1 },
     ],
   },
@@ -657,7 +655,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'sombra_heal_pack_heal_instance', badgeId: 'sombra_heal_pack_heal', level: 1 },
       { id: 'sombra_emp_kills_instance', badgeId: 'sombra_emp_kills', level: 1 },
       { id: 'sombra_virus_kills_instance', badgeId: 'sombra_virus_kills', level: 1 },
-      { id: 'sombra_time_instance', badgeId: 'sombra_time_played', level: 1 }, // Corrected badgeId
+      { id: 'sombra_time_instance', badgeId: 'sombra_time_played', level: 1 },
       { id: 'sombra_wins_instance', badgeId: 'sombra_wins', level: 1 },
     ],
   },
@@ -673,7 +671,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'symmetra_turret_kills_instance', badgeId: 'symmetra_turret_kills', level: 1 },
       { id: 'symmetra_teleport_kills_instance', badgeId: 'symmetra_teleport_kills', level: 1 },
       { id: 'symmetra_dmg_mitigated_instance', badgeId: 'symmetra_dmg_mitigated', level: 1 },
-      { id: 'symmetra_time_instance', badgeId: 'symmetra_time_played', level: 1 }, // Corrected badgeId
+      { id: 'symmetra_time_instance', badgeId: 'symmetra_time_played', level: 1 },
       { id: 'symmetra_wins_instance', badgeId: 'symmetra_wins', level: 1 },
     ],
   },
@@ -689,7 +687,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'torbjorn_turret_kills_instance', badgeId: 'torbjorn_turret_kills', level: 1 },
       { id: 'torbjorn_dmg_mitigated_instance', badgeId: 'torbjorn_dmg_mitigated', level: 1 },
       { id: 'torbjorn_molten_kills_instance', badgeId: 'torbjorn_molten_kills', level: 1 },
-      { id: 'torbjorn_time_instance', badgeId: 'torbjorn_time_played', level: 1 }, // Corrected badgeId
+      { id: 'torbjorn_time_instance', badgeId: 'torbjorn_time_played', level: 1 },
       { id: 'torbjorn_wins_instance', badgeId: 'torbjorn_wins', level: 1 },
     ],
   },
@@ -704,8 +702,8 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'tracer_self_heal_instance', badgeId: 'tracer_self_heal', level: 1 },
       { id: 'tracer_heal_pack_heal_instance', badgeId: 'tracer_heal_pack_heal', level: 1 },
       { id: 'tracer_bomb_attached_instance', badgeId: 'tracer_bomb_attached', level: 1 },
-      { id: 'tracer_bomb_kills_instance', badgeId: 'tracer_pulse_kills', level: 1 }, // Corrected badgeId
-      { id: 'tracer_time_instance', badgeId: 'tracer_time_played', level: 1 }, // Corrected badgeId
+      { id: 'tracer_bomb_kills_instance', badgeId: 'tracer_pulse_kills', level: 1 },
+      { id: 'tracer_time_instance', badgeId: 'tracer_time_played', level: 1 },
       { id: 'tracer_wins_instance', badgeId: 'tracer_wins', level: 1 },
     ],
   },
@@ -717,10 +715,10 @@ export const initialHeroesData: StoredHero[] = [
     challenges: [
       { id: 'venture_eliminations_instance', badgeId: 'venture_eliminations', level: 1 },
       { id: 'venture_dmg_dealt_instance', badgeId: 'venture_dmg_dealt', level: 1 },
-      { id: 'venture_dash_knockbacks_instance', badgeId: 'venture_drill_dash_damage', level: 1 }, // Corrected badgeId
-      { id: 'venture_borrow_hits_instance', badgeId: 'venture_burrow_damage', level: 1 }, // Corrected badgeId
+      { id: 'venture_dash_knockbacks_instance', badgeId: 'venture_drill_dash_damage', level: 1 },
+      { id: 'venture_burrow_hits_instance', badgeId: 'venture_burrow_damage', level: 1 },
       { id: 'venture_dmg_mitigated_instance', badgeId: 'venture_dmg_mitigated', level: 1 },
-      { id: 'venture_tectonic_kills_instance', badgeId: 'venture_tectonic_shock_kills', level: 1 }, // Corrected badgeId
+      { id: 'venture_tectonic_kills_instance', badgeId: 'venture_tectonic_shock_kills', level: 1 },
       { id: 'venture_time_instance', badgeId: 'venture_time_played', level: 1 },
       { id: 'venture_wins_instance', badgeId: 'venture_wins', level: 1 },
     ],
@@ -737,7 +735,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'widowmaker_venom_applied_instance', badgeId: 'widowmaker_venom_applied', level: 1 },
       { id: 'widowmaker_recon_assists_instance', badgeId: 'widowmaker_recon_assists', level: 1 },
       { id: 'widowmaker_recon_final_blows_instance', badgeId: 'widowmaker_recon_final_blows', level: 1 },
-      { id: 'widowmaker_time_instance', badgeId: 'widowmaker_time_played', level: 1 }, // Corrected badgeId
+      { id: 'widowmaker_time_instance', badgeId: 'widowmaker_time_played', level: 1 },
       { id: 'widowmaker_wins_instance', badgeId: 'widowmaker_wins', level: 1 },
     ],
   },
@@ -753,7 +751,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'winston_secondary_hits_instance', badgeId: 'winston_secondary_hits', level: 1 },
       { id: 'winston_environmental_kills_instance', badgeId: 'winston_environmental_kills', level: 1 },
       { id: 'winston_primal_kills_instance', badgeId: 'winston_primal_kills', level: 1 },
-      { id: 'winston_time_instance', badgeId: 'winston_time_played', level: 1 }, // Corrected badgeId
+      { id: 'winston_time_instance', badgeId: 'winston_time_played', level: 1 },
       { id: 'winston_wins_instance', badgeId: 'winston_wins', level: 1 },
     ],
   },
@@ -769,7 +767,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'wrecking_ball_knockback_hits_instance', badgeId: 'wrecking_ball_knockback_hits', level: 1 },
       { id: 'wrecking_ball_heal_pack_heal_instance', badgeId: 'wrecking_ball_heal_pack_heal', level: 1 },
       { id: 'wrecking_ball_minefield_kills_instance', badgeId: 'wrecking_ball_minefield_kills', level: 1 },
-      { id: 'wrecking_ball_time_instance', badgeId: 'wrecking_ball_time_played', level: 1 }, // Corrected badgeId
+      { id: 'wrecking_ball_time_instance', badgeId: 'wrecking_ball_time_played', level: 1 },
       { id: 'wrecking_ball_wins_instance', badgeId: 'wrecking_ball_wins', level: 1 },
     ],
   },
@@ -785,7 +783,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'zarya_secondary_dmg_instance', badgeId: 'zarya_secondary_dmg', level: 1 },
       { id: 'zarya_high_energy_kills_instance', badgeId: 'zarya_high_energy_kills', level: 1 },
       { id: 'zarya_graviton_kills_instance', badgeId: 'zarya_graviton_kills', level: 1 },
-      { id: 'zarya_time_instance', badgeId: 'zarya_time_played', level: 1 }, // Corrected badgeId
+      { id: 'zarya_time_instance', badgeId: 'zarya_time_played', level: 1 },
       { id: 'zarya_wins_instance', badgeId: 'zarya_wins', level: 1 },
     ],
   },
@@ -802,7 +800,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'zenyatta_offensive_assists_instance', badgeId: 'zenyatta_offensive_assists', level: 1 },
       { id: 'zenyatta_volley_kills_instance', badgeId: 'zenyatta_volley_kills', level: 1 },
       { id: 'zenyatta_transcendence_instance', badgeId: 'zenyatta_transcendence', level: 1 },
-      { id: 'zenyatta_time_instance', badgeId: 'zenyatta_time_played', level: 1 }, // Corrected badgeId
+      { id: 'zenyatta_time_instance', badgeId: 'zenyatta_time_played', level: 1 },
       { id: 'zenyatta_wins_instance', badgeId: 'zenyatta_wins', level: 1 },
     ],
   },
@@ -811,47 +809,53 @@ export const initialHeroesData: StoredHero[] = [
 
 export function hydrateHeroes(storedHeroes: StoredHero[]): Hero[] {
  return storedHeroes.map(sh => {
-    if (!sh) return undefined; // Add a check for undefined storedHero
-    const challenges = sh.challenges.map((sc: StoredHeroChallenge) => {
-      const badgeDef = getBadgeDefinition(sc.badgeId);
-      if (!badgeDef) {
-        console.warn(`Badge definition not found for ID: ${sc.badgeId}. Using fallback.`);
+    if (!sh || !sh.id || !sh.name) { // Added more robust check for valid hero structure
+        console.warn(`Invalid hero data found in storage, skipping:`, sh);
+        return undefined; 
+    }
+    const challenges = (sh.challenges || []).map((sc: StoredHeroChallenge) => {
+      if (!sc || !sc.badgeId) { // Check for valid challenge structure
+          console.warn(`Invalid challenge data for hero ${sh.name}, badgeId missing, skipping:`, sc);
+          return null;
+      }
+      const badgeDefinition = getBadgeDefinition(sc.badgeId);
+      if (!badgeDefinition) {
+        console.warn(`Badge definition not found for ID: ${sc.badgeId} on hero ${sh.name}. Using fallback.`);
         return {
- id: sc.id,
+          id: sc.id || `unknown_badge_${Date.now()}`, // Ensure ID exists
           badgeId: sc.badgeId,
- title: "Unknown Badge", // Fallback title
- icon: ShieldQuestion, // Fallback icon component
- xpPerLevel: 0, // Fallback XP
-          level: sc.level,
+          title: "Unknown Badge", 
+          icon: ShieldQuestion, 
+          xpPerLevel: 200, // Default XP
+          level: sc.level || 1,
         } as HeroChallenge;
       }
 
       const heroChallenge: HeroChallenge = {
         id: sc.id,
         badgeId: sc.badgeId,
- title: badgeDef.title || "Unknown Badge", // Use badgeDef title or fallback
- icon: badgeDef.icon || ShieldQuestion, // Use badgeDef icon or fallback
- xpPerLevel: badgeDef.xpPerLevel || 0, // Use badgeDef xpPerLevel or fallback
-        level: sc.level,
+        title: badgeDefinition.title,
+        icon: badgeDefinition.icon, 
+        xpPerLevel: badgeDefinition.xpPerLevel,
+        level: sc.level || 1, // Ensure level is at least 1
       };
       return heroChallenge;
-    }).filter(Boolean) as HeroChallenge[];
-    if (!challenges.length) return undefined; // Filter out heroes with no valid challenges
+    }).filter(Boolean) as HeroChallenge[]; // Filter out null values
 
     return {
       id: sh.id,
       name: sh.name,
-      portraitUrl: sh.portraitUrl.trimStart(),
+      portraitUrl: (sh.portraitUrl || '').trimStart(), // Ensure portraitUrl is a string and trimmed
       personalGoalLevel: typeof sh.personalGoalLevel === 'number' ? sh.personalGoalLevel : 0,
       challenges,
     };
-  }).filter(Boolean) as Hero[]; // Final filter to remove undefined heroes
+  }).filter(Boolean) as Hero[]; 
 }
 
 export function dehydrateHeroes(heroes: Hero[]): StoredHero[] {
   return heroes.map(h => {
-    if (!h) return undefined; // Check for undefined hero
-    const challenges: StoredHeroChallenge[] = h.challenges.map((c: HeroChallenge) => ({
+    if (!h) return undefined; 
+    const challenges: StoredHeroChallenge[] = (h.challenges || []).map((c: HeroChallenge) => ({
       id: c.id,
       badgeId: c.badgeId,
       level: c.level,
@@ -863,7 +867,7 @@ export function dehydrateHeroes(heroes: Hero[]): StoredHero[] {
       personalGoalLevel: h.personalGoalLevel || 0,
       challenges,
     };
-  }).filter(Boolean) as StoredHero[]; // Filter out undefined results
+  }).filter(Boolean) as StoredHero[];
 }
 
     
