@@ -610,8 +610,8 @@ export const initialHeroesData: StoredHero[] = [
       { id: 's76_visor_kills_instance', badgeId: 's76_visor_kills', level: 1 },
       { id: 's76_time_played_instance', badgeId: 's76_time_played', level: 1 },
       { id: 's76_wins_instance', badgeId: 's76_wins', level: 1 },
-    ]
-  }
+    ],
+  },
   {
     id: 'sigma',
     name: 'Sigma',
