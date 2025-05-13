@@ -79,7 +79,7 @@ export const badgeDefinitions: Record<string, BadgeDefinition> = {
   // Genji
   genji_primary_dmg: { id: 'genji_primary_dmg', title: 'Primary Fire Damage', icon: Zap, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   genji_secondary_dmg: { id: 'genji_secondary_dmg', title: 'Secondary Fire Damage', icon: Zap, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
-  genji_dmg_reflected: { id: 'genji_dmg_reflected', title: 'Damage Reflected', icon: ShieldQuestion, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
+  genji_dmg_reflected: { id: 'genji_dmg_reflected', title: 'Damage Reflected', icon: Sword, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   genji_strike_resets: { id: 'genji_strike_resets', title: 'Swift Strike Resets', icon: Swords, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   genji_solo_kills: { id: 'genji_solo_kills', title: 'Solo Kills', icon: Skull, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   genji_blade_kills: { id: 'genji_blade_kills', title: 'Dragonblade Kills', icon: Swords, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
