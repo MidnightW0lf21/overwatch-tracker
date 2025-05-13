@@ -604,7 +604,7 @@ export const initialHeroesData: StoredHero[] = [
     challenges: [
       { id: 's76_damage_dealt_instance', badgeId: 's76_dmg_dealt', level: 1 },
       { id: 's76_critical_hits_instance', badgeId: 's76_critical_hits', level: 1 },
-      { id: 's76_helix_direct_instance', badgeId: 's76_helix-direct', level: 1 },
+      { id: 's76_helix_direct_instance', badgeId: 's76_helix_direct', level: 1 },
       { id: 's76_helix_final_blows_instance', badgeId: 's76_helix_final_blows', level: 1 },
       { id: 's76_biotic_healing_instance', badgeId: 's76_biotic_healing', level: 1 },
       { id: 's76_visor_kills_instance', badgeId: 's76_visor_kills', level: 1 },

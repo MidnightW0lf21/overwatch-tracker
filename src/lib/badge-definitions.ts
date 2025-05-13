@@ -20,7 +20,7 @@ export type BadgeDefinition = {
 
 export const badgeDefinitions: Record<string, BadgeDefinition> = {
   // Soldier: 76
-  s76_damage_dealt: { id: 's76_damage_dealt', title: 'Damage Dealt', icon: Zap, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
+  s76_damage_dealt: { id: 's76_dmg_dealt', title: 'Damage Dealt', icon: Zap, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   s76_critical_hits: { id: 's76_critical_hits', title: 'Critical Hits', icon: Crosshair, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   s76_helix_direct: { id: 's76_helix_direct', title: 'Helix Rocket Direct Hits', icon: Target, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   s76_helix_final_blows: { id: 's76_helix_final_blows', title: 'Helix Rocket Final Blows', icon: Skull, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
@@ -83,7 +83,6 @@ export const badgeDefinitions: Record<string, BadgeDefinition> = {
   genji_strike_resets: { id: 'genji_strike_resets', title: 'Swift Strike Resets', icon: Swords, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   genji_solo_kills: { id: 'genji_solo_kills', title: 'Solo Kills', icon: Skull, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   genji_blade_kills: { id: 'genji_blade_kills', title: 'Dragonblade Kills', icon: Swords, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
-  genji_deflect_damage: { id: 'genji_deflect_damage', title: 'Damage Deflected', icon: ShieldQuestion, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   genji_wins: { id: 'genji_wins', title: 'Wins', icon: Trophy, xpPerLevel: XP_PER_WIN_TYPE_BADGE_LEVEL },
   genji_time_played: { id: 'genji_time_played', title: 'Time Played', icon: Clock, xpPerLevel: XP_PER_TIME_TYPE_BADGE_LEVEL },
   
@@ -452,6 +451,16 @@ export const badgeDefinitions: Record<string, BadgeDefinition> = {
   zenyatta_transcendence: { id: 'zenyatta_transcendence', title: 'Transcendence Healing', icon: HeartPulse, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   zenyatta_time_played: { id: 'zenyatta_time_played', title: 'Time Played', icon: Clock, xpPerLevel: XP_PER_TIME_TYPE_BADGE_LEVEL },
   zenyatta_wins: { id: 'zenyatta_wins', title: 'Wins', icon: Trophy, xpPerLevel: XP_PER_WIN_TYPE_BADGE_LEVEL },
+
+  // Hanzo
+  hanzo_dmg_dealt: { id: 'hanzo_dmg_dealt', title: 'Damage Dealt', icon: Zap, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
+  hanzo_weapon_kills: { id: 'hanzo_weapon_kills', title: 'Weapon Kills', icon: Skull, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
+  hanzo_critical_hits: { id: 'hanzo_critical_hits', title: 'Critical Hits', icon: Crosshair, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
+  hanzo_storm_kills: { id: 'hanzo_storm_kills', title: 'Storm Arrow Kills', icon: Skull, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
+  hanzo_recon_assists: { id: 'hanzo_recon_assists', title: 'Recon Arrow Assists', icon: Swords, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
+  hanzo_dragonstrike_kills: { id: 'hanzo_dragonstrike_kills', title: 'Dragonstrike Kills', icon: Skull, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
+  hanzo_time_played: { id: 'hanzo_time_played', title: 'Time Played', icon: Clock, xpPerLevel: XP_PER_TIME_TYPE_BADGE_LEVEL },
+  hanzo_wins: { id: 'hanzo_wins', title: 'Wins', icon: Trophy, xpPerLevel: XP_PER_WIN_TYPE_BADGE_LEVEL },
 
    // Placeholders for Reinhardt badges that might have been missed
   rein_damage_dealt: {id: 'rein_damage_dealt', title: 'Damage Dealt', icon: Zap, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
