@@ -4,7 +4,7 @@
 import type React from 'react';
 import { useState, useEffect, useCallback, ChangeEvent } from 'react';
 import type { StoredHero, StoredHeroChallenge, HeroChallenge as RuntimeHeroChallenge } from '@/types/overwatch'; // Use RuntimeHeroChallenge for display
-import { initialHeroesData } from '@/lib/overwatch-utils'; // XP_PER_HERO_TYPE_BADGE_LEVEL for default
+import { initialHeroesData } from '@/lib/overwatch-utils'; 
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -40,7 +40,7 @@ export default function ManageBadgesPageClient() {
     const storedDataString = localStorage.getItem(LOCAL_STORAGE_KEY);
     if (storedDataString) {
       try {
-        const parsedData: StoredHero[] = JSON.parse(storedData);
+        const parsedData: StoredHero[] = JSON.parse(storedDataString);
         const sanitizedData = parsedData.map(hero => {
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
           const { personalGoalXP, ...restOfHero } = hero as any; // personalGoalXP is legacy
@@ -94,10 +94,8 @@ export default function ManageBadgesPageClient() {
       } as StoredHero;
     });
     
-    // console.log("Saving to localStorage in ManageBadgesPageClient:", JSON.stringify(heroesToSave, null, 2)); // DEBUG
-    
     setAllHeroes(heroesToSave);
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(heroesToSave));
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify({ version: EXPORT_DATA_VERSION, heroes: heroesToSave }));
     
     if (selectedHeroId && !heroesToSave.find(h => h.id === selectedHeroId)) {
         setSelectedHeroId(null);
@@ -129,20 +127,12 @@ export default function ManageBadgesPageClient() {
   };
   
   const handleHeroFormSubmit = (heroDataFromForm: StoredHero) => {
-    // heroDataFromForm already includes challenges if editing, or empty array if new
-    // It also includes the personalGoalLevel from the form
-    
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { personalGoalXP, ...cleanSubmittedHeroData } = heroDataFromForm as any; // Remove legacy XP field
-    
     const finalSubmittedHeroData: StoredHero = {
-        ...cleanSubmittedHeroData,
-        // Ensure personalGoalLevel is a number, defaulting to 0 if not.
-        // This should be handled by Zod coercion in the form, but as a safeguard:
-        personalGoalLevel: typeof cleanSubmittedHeroData.personalGoalLevel === 'number' 
-                            ? cleanSubmittedHeroData.personalGoalLevel 
+        ...heroDataFromForm,
+        personalGoalLevel: typeof heroDataFromForm.personalGoalLevel === 'number' 
+                            ? heroDataFromForm.personalGoalLevel 
                             : 0,
-        challenges: heroData.challenges.map(c => ({ // Ensure challenges are in StoredHeroChallenge format
+        challenges: heroDataFromForm.challenges.map(c => ({ 
             id: c.id,
             badgeId: c.badgeId,
             level: c.level
@@ -150,14 +140,12 @@ export default function ManageBadgesPageClient() {
     };
 
     let newListOfHeroes: StoredHero[];
-    if (editingHero) { // Check if we were in "edit" mode
+    if (editingHero) { 
       newListOfHeroes = allHeroes.map(h => {
         if (h.id === finalSubmittedHeroData.id) {
-          return finalSubmittedHeroData; // Replace with the new, cleaned hero data from form
+          return finalSubmittedHeroData; 
         }
-        // For other heroes, ensure they are also clean (no legacy XP, valid personalGoalLevel)
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { personalGoalXP: oldXP, ...restOfH } = h as any;
+        const { ...restOfH } = h as any;
         return {
             ...restOfH,
             personalGoalLevel: typeof (restOfH as StoredHero).personalGoalLevel === 'number' ? (restOfH as StoredHero).personalGoalLevel : 0,
@@ -170,8 +158,7 @@ export default function ManageBadgesPageClient() {
         return;
       }
       const cleanedExistingHeroes = allHeroes.map(h => {
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const { personalGoalXP: oldXP, ...restOfH } = h as any;
+          const { ...restOfH } = h as any;
           return {
             ...restOfH,
             personalGoalLevel: typeof (restOfH as StoredHero).personalGoalLevel === 'number' ? (restOfH as StoredHero).personalGoalLevel : 0,
@@ -183,9 +170,8 @@ export default function ManageBadgesPageClient() {
     
     saveHeroes(newListOfHeroes);
     setIsHeroDialogOpen(false);
-    setEditingHero(null); // Clear editing state
+    setEditingHero(null); 
 
-    // If adding a new hero, select them. If editing, ensure selectedHeroId is current.
     if (!editingHero || selectedHeroId !== finalSubmittedHeroData.id) {
         setSelectedHeroId(finalSubmittedHeroData.id);
     }
@@ -217,28 +203,30 @@ export default function ManageBadgesPageClient() {
     toast({ title: "Badge Instance Deleted", description: "The badge instance has been removed from the hero." });
   };
 
-  const handleBadgeFormSubmit = (badgeData: StoredHeroChallenge) => { // badgeData is StoredHeroChallenge
+  const handleBadgeFormSubmit = (badgeData: StoredHeroChallenge) => { 
     if (!selectedHeroId) return;
     const updatedHeroes = allHeroes.map(hero => {
       if (hero.id === selectedHeroId) {
         let updatedChallenges;
-        if (editingBadge) { // Editing an existing badge instance
+        const badgeDef = getBadgeDefinition(badgeData.badgeId);
+        const badgeTitle = badgeDef?.title || badgeData.badgeId;
+
+        if (editingBadge) { 
           updatedChallenges = hero.challenges.map(b => b.id === badgeData.id ? badgeData : b);
-          toast({ title: "Badge Updated", description: `Badge "${badgeData.title}" has been updated.` });
+          toast({ title: "Badge Updated", description: `Badge "${badgeTitle}" has been updated.` });
         } else {
           if (hero.challenges.some(b => b.id === badgeData.id)) {
              toast({ title: "Error", description: `Badge ID "${badgeData.id}" already exists for this hero. Please use a unique ID.`, variant: "destructive" });
-             return; // Important: stop execution if ID exists
+             return hero; 
           }
           updatedChallenges = [...hero.challenges, badgeData];
-          const badgeDef = getBadgeDefinition(badgeData.badgeId);
-          toast({ title: "Badge Instance Added", description: `Badge "${badgeDef?.title || badgeData.badgeId}" has been added to ${hero.name}.` });
+          toast({ title: "Badge Instance Added", description: `Badge "${badgeTitle}" has been added to ${hero.name}.` });
         }
         return { ...hero, challenges: updatedChallenges };
       }
       return hero;
     });
-    // Only save if a change was actually made (i.e., didn't return early from duplicate ID)
+    
     if (updatedHeroes.find(h => h.id === selectedHeroId)?.challenges.some(b => b.id === badgeData.id) || editingBadge) {
         saveHeroes(updatedHeroes);
     }
@@ -278,7 +266,7 @@ export default function ManageBadgesPageClient() {
   const handleExportData = () => {
     const dataToExport: ExportData = {
       version: EXPORT_DATA_VERSION,
-      heroes: allHeroes, // allHeroes is already StoredHero[]
+      heroes: allHeroes, 
     };
     const jsonString = JSON.stringify(dataToExport, null, 2);
     const blob = new Blob([jsonString], { type: "application/json" });
@@ -310,7 +298,7 @@ export default function ManageBadgesPageClient() {
 
         if (typeof importedJson === 'object' && importedJson !== null && 'version' in importedJson && 'heroes' in importedJson && Array.isArray((importedJson as ExportData).heroes)) {
             if ((importedJson as ExportData).version !== EXPORT_DATA_VERSION) {
-                // Potentially handle version migrations here in the future
+                
                 toast({ title: "Import Warning", description: `Data is from a different version (imported: ${(importedJson as ExportData).version}, current: ${EXPORT_DATA_VERSION}). Proceeding with import.`, variant: "default" });
             }
             heroesToImport = (importedJson as ExportData).heroes;
@@ -339,11 +327,11 @@ export default function ManageBadgesPageClient() {
                 return null; 
             }
             return {
-                id: challenge.id, // instance id
+                id: challenge.id, 
                 badgeId: challenge.badgeId,
                 level: Math.max(1, challenge.level ?? 1),
             };
-          }).filter(Boolean) as StoredHeroChallenge[] // Filter out nulls if any badge defs were missing
+          }).filter(Boolean) as StoredHeroChallenge[] 
         }));
 
         saveHeroes(sanitizedImportedHeroes);
@@ -540,10 +528,11 @@ export default function ManageBadgesPageClient() {
         isOpen={isBadgeDialogOpen}
         onClose={() => { setIsBadgeDialogOpen(false); setEditingBadge(null);}}
         onSubmit={handleBadgeFormSubmit}
-        badge={editingBadge} // This is StoredHeroChallenge (badge instance)
+        badge={editingBadge} 
         heroName={selectedHero?.name || ''}
         existingBadgeInstanceIds={selectedHero?.challenges.map(b => b.id) || []}
       />
     </div>
   );
 }
+
