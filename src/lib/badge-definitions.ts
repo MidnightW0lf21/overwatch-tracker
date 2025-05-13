@@ -142,7 +142,7 @@ export const badgeDefinitions: Record<string, BadgeDefinition> = {
   cassidy_weapon_kills: { id: 'cassidy_weapon_kills', title: 'Weapon Kills', icon: Skull, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   cassidy_hammer_kills: { id: 'cassidy_hammer_kills', title: 'Fan the Hammer Kills', icon: Skull, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   cassidy_critical_hits: { id: 'cassidy_critical_hits', title: 'Critical Hits', icon: Crosshair, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
-  cassidy_maggrenade_kills: { id: 'cassidy_maggrenade_kills', title: 'Magnetic Grenade Kills', icon: Bomb, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
+  cassidy_maggrenade_kills: { id: 'cassidy_maggrenade_kills', title: 'Flashbang Kills', icon: Bomb, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   cassidy_deadeye_kills: { id: 'cassidy_deadeye_kills', title: 'Deadeye Kills', icon: Eye, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   cassidy_time_played: { id: 'cassidy_time_played', title: 'Time Played', icon: Clock, xpPerLevel: XP_PER_TIME_TYPE_BADGE_LEVEL },
   cassidy_wins: { id: 'cassidy_wins', title: 'Wins', icon: Trophy, xpPerLevel: XP_PER_WIN_TYPE_BADGE_LEVEL },
@@ -194,6 +194,15 @@ export const badgeDefinitions: Record<string, BadgeDefinition> = {
   hazard_downpour_roots: { id: 'hazard_downpour_roots', title: 'Downpour Roots', icon: Shapes, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   hazard_time_played: { id: 'hazard_time_played', title: 'Time Played', icon: Clock, xpPerLevel: XP_PER_TIME_TYPE_BADGE_LEVEL },
   hazard_wins: { id: 'hazard_wins', title: 'Wins', icon: Trophy, xpPerLevel: XP_PER_WIN_TYPE_BADGE_LEVEL },
+
+  // Hanzo
+  hanzo_dmg_dealt: { id: 'hanzo_dmg_dealt', title: 'Damage Dealt', icon: Zap, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
+  hanzo_weapon_kills: { id: 'hanzo_weapon_kills', title: 'Weapon Kills', icon: Skull, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
+  hanzo_critical_hits: { id: 'hanzo_critical_hits', title: 'Critical Hits', icon: Skull, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
+  hanzo_storm_kills: { id: 'hanzo_storm_kills', title: 'Storm Arrow Kills', icon: Skull, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
+  hanzo_recon_assists: { id: 'hanzo_recon_assists', title: 'Recon Assists', icon: Swords, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
+  hanzo_time_played: { id: 'hanzo_time_played', title: 'Time Played', icon: Clock, xpPerLevel: XP_PER_TIME_TYPE_BADGE_LEVEL },
+  hanzo_wins: { id: 'hanzo_wins', title: 'Wins', icon: Trophy, xpPerLevel: XP_PER_WIN_TYPE_BADGE_LEVEL },
 
   // Illari
   illari_secondary_heal: { id: 'illari_secondary_heal', title: 'Secondary Fire Healing', icon: HeartPulse, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
