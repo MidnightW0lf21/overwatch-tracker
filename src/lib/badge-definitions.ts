@@ -201,6 +201,7 @@ export const badgeDefinitions: Record<string, BadgeDefinition> = {
   hanzo_critical_hits: { id: 'hanzo_critical_hits', title: 'Critical Hits', icon: Skull, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   hanzo_storm_kills: { id: 'hanzo_storm_kills', title: 'Storm Arrow Kills', icon: Skull, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   hanzo_recon_assists: { id: 'hanzo_recon_assists', title: 'Recon Assists', icon: Swords, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
+  hanzo_dragonstrike_kills: { id: 'hanzo_dragonstrike_kills', title: 'Dragonstrike Kills', icon: Skull, xpPerLevel: XP_PER_HERO_TYPE_BADGE_LEVEL },
   hanzo_time_played: { id: 'hanzo_time_played', title: 'Time Played', icon: Clock, xpPerLevel: XP_PER_TIME_TYPE_BADGE_LEVEL },
   hanzo_wins: { id: 'hanzo_wins', title: 'Wins', icon: Trophy, xpPerLevel: XP_PER_WIN_TYPE_BADGE_LEVEL },
 
