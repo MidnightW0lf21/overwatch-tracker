@@ -1,8 +1,8 @@
 
 import type { Achievement, HeroCalculated, LevelDetails } from '@/types/achievements';
 import { Medal, Star, Clock, Zap, Trophy, Shield, Swords, Users, TrendingUp, Award } from 'lucide-react';
-import { calculateXpToReachLevel, XP_PER_TIME_TYPE_BADGE_LEVEL } from '@/lib/overwatch-utils';
-import { getBadgeDefinition } from '@/lib/badge-definitions';
+import { calculateXpToReachLevel } from '@/lib/overwatch-utils';
+import { getBadgeDefinition, XP_PER_TIME_TYPE_BADGE_LEVEL } from '@/lib/badge-definitions';
 
 
 export const achievementsList: Achievement[] = [
@@ -16,18 +16,10 @@ export const achievementsList: Achievement[] = [
     isUnlocked: (_, globalLevelDetails) => (globalLevelDetails?.level ?? 0) >= 10,
   },
   {
-    id: 'global_level_50',
-    title: 'Global Level 50',
-    description: 'Reach Global Level 50 across all heroes.',
-    icon: Medal,
-    category: 'Global',
-    isUnlocked: (_, globalLevelDetails) => (globalLevelDetails?.level ?? 0) >= 50,
-  },
-  {
     id: 'global_level_100',
     title: 'Global Level 100',
     description: 'Reach Global Level 100 across all heroes.',
-    icon: Trophy,
+    icon: Medal,
     category: 'Global',
     isUnlocked: (_, globalLevelDetails) => (globalLevelDetails?.level ?? 0) >= 100,
   },
@@ -40,12 +32,20 @@ export const achievementsList: Achievement[] = [
     isUnlocked: (_, globalLevelDetails) => (globalLevelDetails?.level ?? 0) >= 250,
   },
   {
-    id: 'global_level_500',
-    title: 'Global Level 500',
-    description: 'Reach Global Level 500 across all heroes. True Dedication!',
+    id: 'global_level_750',
+    title: 'Global Level 750',
+    description: 'Reach Global Level 750 across all heroes.',
+    icon: Trophy,
+    category: 'Global',
+    isUnlocked: (_, globalLevelDetails) => (globalLevelDetails?.level ?? 0) >= 750,
+  },
+  {
+    id: 'global_level_2500',
+    title: 'Global Level 2500',
+    description: 'Reach Global Level 2500 across all heroes. True Dedication!',
     icon: Award,
     category: 'Global',
-    isUnlocked: (_, globalLevelDetails) => (globalLevelDetails?.level ?? 0) >= 500,
+    isUnlocked: (_, globalLevelDetails) => (globalLevelDetails?.level ?? 0) >= 2500,
   },
 
   // Time Played Milestones
@@ -58,28 +58,28 @@ export const achievementsList: Achievement[] = [
     isUnlocked: (_, __, totalTimePlayedMinutes) => (totalTimePlayedMinutes ?? 0) >= 10 * 60,
   },
   {
-    id: 'time_played_50_hours',
-    title: 'Time Tracker: 50 Hours',
-    description: 'Accrue 50 hours of playtime based on Time Played badges.',
+    id: 'time_played_250_hours',
+    title: 'Time Tracker: 250 Hours',
+    description: 'Accrue 250 hours of playtime based on Time Played badges.',
     icon: Clock,
     category: 'Time',
-    isUnlocked: (_, __, totalTimePlayedMinutes) => (totalTimePlayedMinutes ?? 0) >= 50 * 60,
+    isUnlocked: (_, __, totalTimePlayedMinutes) => (totalTimePlayedMinutes ?? 0) >= 250 * 60,
   },
   {
-    id: 'time_played_100_hours',
-    title: 'Time Tracker: 100 Hours',
-    description: 'Accrue 100 hours of playtime based on Time Played badges. Seasoned Veteran!',
+    id: 'time_played_1000_hours',
+    title: 'Time Tracker: 1000 Hours',
+    description: 'Accrue 1000 hours of playtime based on Time Played badges. Seasoned Veteran!',
     icon: Clock,
     category: 'Time',
-    isUnlocked: (_, __, totalTimePlayedMinutes) => (totalTimePlayedMinutes ?? 0) >= 100 * 60,
+    isUnlocked: (_, __, totalTimePlayedMinutes) => (totalTimePlayedMinutes ?? 0) >= 1000 * 60,
   },
   {
-    id: 'time_played_500_hours',
-    title: 'Time Tracker: 500 Hours',
-    description: 'Accrue 500 hours of playtime. Truly a Hero of Overwatch!',
+    id: 'time_played_5000_hours',
+    title: 'Time Tracker: 5000 Hours',
+    description: 'Accrue 5000 hours of playtime. Truly a Hero of Overwatch!',
     icon: Clock,
     category: 'Time',
-    isUnlocked: (_, __, totalTimePlayedMinutes) => (totalTimePlayedMinutes ?? 0) >= 500 * 60,
+    isUnlocked: (_, __, totalTimePlayedMinutes) => (totalTimePlayedMinutes ?? 0) >= 5000 * 60,
   },
   
   // Hero Specific Milestones
@@ -102,7 +102,7 @@ export const achievementsList: Achievement[] = [
   {
     id: 'hero_level_250',
     title: 'Hero Level 250',
-    description: 'Reach Level 250 with any hero. Mastery Achieved!',
+    description: 'Reach Level 250 with any hero.',
     icon: Star,
     category: 'Hero Specific',
     isUnlocked: (heroes) => heroes.some(hero => hero.level >= 250),
@@ -110,7 +110,7 @@ export const achievementsList: Achievement[] = [
   {
     id: 'hero_max_level',
     title: 'Hero Max Level',
-    description: 'Reach Max Level (500) with any hero.',
+    description: 'Reach Max Level 500 with any hero. Mastery Achieved!',
     icon: Award,
     category: 'Hero Specific',
     isUnlocked: (heroes) => heroes.some(hero => hero.level >= 500),
@@ -124,12 +124,12 @@ export const achievementsList: Achievement[] = [
     isUnlocked: (heroes) => heroes.filter(hero => hero.level >= 50).length >= 5,
   },
    {
-    id: 'all_heroes_level_10',
+    id: 'all_heroes_level_100',
     title: 'Jack of All Trades',
-    description: 'Reach Level 10 with all available heroes.',
+    description: 'Reach Level 100 with all available heroes.',
     icon: TrendingUp,
     category: 'Hero Specific',
-    isUnlocked: (heroes) => heroes.length > 0 && heroes.every(hero => hero.level >= 10),
+    isUnlocked: (heroes) => heroes.length > 0 && heroes.every(hero => hero.level >= 50),
   },
 
   // Completion Milestones
@@ -159,11 +159,11 @@ export const achievementsList: Achievement[] = [
   {
     id: 'all_badges_one_hero_max',
     title: 'Badge Collector',
-    description: 'Max out all badges for a single hero (assuming a reasonable max badge level, e.g., 100 for this achievement).',
+    description: 'Max out all badges for a single hero (acquire 2500 per badge).',
     icon: Shield,
     category: 'Completion',
     isUnlocked: (heroes) => {
-      const MAX_BADGE_LEVEL_FOR_ACHIEVEMENT = 100; // Define a "max" for this achievement
+      const MAX_BADGE_LEVEL_FOR_ACHIEVEMENT = 2500; // Define a "max" for this achievement
       return heroes.some(hero => 
         hero.challenges.length > 0 && // Hero must have badges
         hero.challenges.every(challenge => challenge.level >= MAX_BADGE_LEVEL_FOR_ACHIEVEMENT)

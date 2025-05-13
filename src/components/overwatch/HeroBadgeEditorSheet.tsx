@@ -28,7 +28,7 @@ interface HeroBadgeEditorSheetProps {
   onClose: () => void;
 }
 
-const HERO_MAX_LEVEL = 500; 
+const HERO_MAX_LEVEL = 500;
 
 const HeroBadgeEditorSheet: React.FC<HeroBadgeEditorSheetProps> = ({
   isOpen,
@@ -45,25 +45,27 @@ const HeroBadgeEditorSheet: React.FC<HeroBadgeEditorSheetProps> = ({
       if (hero.level >= HERO_MAX_LEVEL) {
         setEstimatedTimeToMax("Max level reached!");
       } else {
-        // Find time badge by its xpPerLevel property directly from hero.challenges
         const timeBadge = hero.challenges.find(
-          (c) => c.xpPerLevel === XP_PER_TIME_TYPE_BADGE_LEVEL
+          (c) => {
+            const badgeDef = getBadgeDefinition(c.badgeId);
+            return badgeDef?.xpPerLevel === XP_PER_TIME_TYPE_BADGE_LEVEL;
+          }
         );
 
         if (timeBadge) {
-          const xpForMaxLevel = calculateXpToReachLevel(HERO_MAX_LEVEL + 1); 
+          const xpForMaxLevel = calculateXpToReachLevel(HERO_MAX_LEVEL + 1);
           const xpRemaining = Math.max(0, xpForMaxLevel - hero.totalXp);
 
           if (xpRemaining > 0 && XP_PER_TIME_TYPE_BADGE_LEVEL > 0) {
             const timeBadgeLevelsNeeded = xpRemaining / XP_PER_TIME_TYPE_BADGE_LEVEL;
-            const totalMinutesNeeded = timeBadgeLevelsNeeded * 20; 
+            const totalMinutesNeeded = timeBadgeLevelsNeeded * 20;
 
             if (totalMinutesNeeded < 1 && totalMinutesNeeded > 0) {
               setEstimatedTimeToMax("~1 min");
             } else {
               const roundedTotalMinutes = Math.round(totalMinutesNeeded);
               if (roundedTotalMinutes === 0) {
-                setEstimatedTimeToMax(totalMinutesNeeded > 0 ? "~1 min" : null); 
+                setEstimatedTimeToMax(totalMinutesNeeded > 0 ? "~1 min" : null);
               } else {
                 const days = Math.floor(roundedTotalMinutes / (60 * 24));
                 const remainingMinutesAfterDaysCalc = roundedTotalMinutes % (60 * 24);
@@ -74,12 +76,12 @@ const HeroBadgeEditorSheet: React.FC<HeroBadgeEditorSheetProps> = ({
                 if (days > 0) timeStringParts.push(`${days}d`);
                 if (hours > 0) timeStringParts.push(`${hours}h`);
                 if (minutes > 0) timeStringParts.push(`${minutes}m`);
-                
+
                 setEstimatedTimeToMax(timeStringParts.length > 0 ? timeStringParts.join(' ') : (roundedTotalMinutes > 0 ? "~1 min" : null) );
               }
             }
-          } else { 
-            setEstimatedTimeToMax(null); 
+          } else {
+            setEstimatedTimeToMax(null);
           }
         } else {
           setEstimatedTimeToMax("No time-based badge found to estimate.");
@@ -92,18 +94,17 @@ const HeroBadgeEditorSheet: React.FC<HeroBadgeEditorSheetProps> = ({
 
         if (hero.totalXp < xpToReachGoal) {
           const xpRemainingForPersonalGoal = xpToReachGoal - hero.totalXp;
-          // Use the default XP_PER_HERO_TYPE_BADGE_LEVEL for calculation
-          if (XP_PER_HERO_TYPE_BADGE_LEVEL > 0) { 
+          if (XP_PER_HERO_TYPE_BADGE_LEVEL > 0) {
             const needed = Math.ceil(xpRemainingForPersonalGoal / XP_PER_HERO_TYPE_BADGE_LEVEL);
             setBadgesNeededForGoal(needed);
           } else {
-            setBadgesNeededForGoal(null); 
+            setBadgesNeededForGoal(null);
           }
         } else {
-          setBadgesNeededForGoal(0); 
+          setBadgesNeededForGoal(0);
         }
       } else {
-        setBadgesNeededForGoal(null); 
+        setBadgesNeededForGoal(null);
         setXpForPersonalGoalLevel(0);
       }
 
@@ -118,9 +119,9 @@ const HeroBadgeEditorSheet: React.FC<HeroBadgeEditorSheetProps> = ({
     return null;
   }
 
-  const rankTitle = `Level ${hero.level} Hero`; 
-  const personalGoalProgress = hero.personalGoalLevel > 0 && xpForPersonalGoalLevel > 0 
-    ? Math.min(100, (hero.totalXp / xpForPersonalGoalLevel) * 100) 
+  const rankTitle = `Level ${hero.level} Hero`;
+  const personalGoalProgress = hero.personalGoalLevel > 0 && xpForPersonalGoalLevel > 0
+    ? Math.min(100, (hero.totalXp / xpForPersonalGoalLevel) * 100)
     : (hero.personalGoalLevel === 0 ? 0 : (hero.totalXp > 0 ? 100 : 0) );
 
 
@@ -143,7 +144,7 @@ const HeroBadgeEditorSheet: React.FC<HeroBadgeEditorSheetProps> = ({
               <SheetTitle className="text-2xl text-primary">{hero.name}</SheetTitle>
               <p className="text-sm text-accent font-semibold uppercase tracking-wider -mt-1">{rankTitle}</p>
               <SheetDescription>
-                Level: {hero.level} ({hero.xpTowardsNextLevel.toLocaleString()} / {hero.xpNeededForNextLevel.toLocaleString()} XP to next)
+                {hero.xpTowardsNextLevel.toLocaleString()} / {hero.xpNeededForNextLevel.toLocaleString()} XP to next
               </SheetDescription>
             </div>
           </div>
@@ -152,7 +153,7 @@ const HeroBadgeEditorSheet: React.FC<HeroBadgeEditorSheetProps> = ({
         <div className="px-6 py-4">
           <h3 className="text-md font-semibold text-foreground/90 mb-1 flex items-center">
             <TargetIcon className="h-4 w-4 mr-2 text-muted-foreground" />
-            Personal Goal Progress (Level {hero.personalGoalLevel > 0 ? hero.personalGoalLevel : 'N/A'})
+            Personal Goal Progress - Level {hero.personalGoalLevel > 0 ? hero.personalGoalLevel : 'N/A'}
           </h3>
           <Progress value={personalGoalProgress} className="h-3 bg-accent/20 [&>div]:bg-accent" />
           <div className="flex justify-between items-center">
@@ -161,14 +162,14 @@ const HeroBadgeEditorSheet: React.FC<HeroBadgeEditorSheetProps> = ({
                 <>No personal goal level set.</>
               )}
               {hero.personalGoalLevel > 0 && badgesNeededForGoal !== null && badgesNeededForGoal > 0 && (
-                <>{badgesNeededForGoal.toLocaleString()} more badge level-ups (avg. {XP_PER_HERO_TYPE_BADGE_LEVEL} XP) to reach Level {hero.personalGoalLevel}</>
+                <>{badgesNeededForGoal.toLocaleString()} more badge level-ups to reach goal!</>
               )}
               {hero.personalGoalLevel > 0 && badgesNeededForGoal === 0 && (
                 <>Goal level {hero.personalGoalLevel} reached!</>
               )}
             </p>
             <p className="text-xs text-muted-foreground mt-1 text-right">
-              {hero.personalGoalLevel > 0 
+              {hero.personalGoalLevel > 0
                 ? `${hero.totalXp.toLocaleString()} / ${xpForPersonalGoalLevel.toLocaleString()} XP (${personalGoalProgress.toFixed(1)}%)`
                 : `${hero.totalXp.toLocaleString()} XP`}
             </p>
@@ -179,7 +180,7 @@ const HeroBadgeEditorSheet: React.FC<HeroBadgeEditorSheetProps> = ({
           <div className="px-6 py-3 border-t border-border">
             <h3 className="text-md font-semibold text-foreground/90 mb-1 flex items-center">
               <ClockIcon className="h-4 w-4 mr-2 text-muted-foreground" />
-              Est. Time to Max Level ({HERO_MAX_LEVEL})
+              Est. Time to Max Level
             </h3>
             <p className="text-sm text-muted-foreground ml-6">
               {estimatedTimeToMax}
@@ -188,7 +189,7 @@ const HeroBadgeEditorSheet: React.FC<HeroBadgeEditorSheetProps> = ({
                 const badgeDef = getBadgeDefinition(c.badgeId);
                 return badgeDef?.xpPerLevel === XP_PER_TIME_TYPE_BADGE_LEVEL;
             }) && !estimatedTimeToMax?.includes("No time-based badge") && !estimatedTimeToMax?.includes("Max level reached!") && (
-                 <p className="text-xs text-muted-foreground/70 ml-6 mt-0.5">(Assuming a time badge level is earned every 20 mins of play)</p>
+                 <p className="text-xs text-muted-foreground/70 ml-6 mt-0.5">(1 Time Badge = 20 mins of play)</p>
             )}
           </div>
         )}

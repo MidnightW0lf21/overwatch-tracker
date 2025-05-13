@@ -810,17 +810,18 @@ export const initialHeroesData: StoredHero[] = [
 
 
 export function hydrateHeroes(storedHeroes: StoredHero[]): Hero[] {
-  return storedHeroes.map(sh => {
+ return storedHeroes.map(sh => {
+    if (!sh) return undefined; // Add a check for undefined storedHero
     const challenges = sh.challenges.map((sc: StoredHeroChallenge) => {
       const badgeDef = getBadgeDefinition(sc.badgeId);
       if (!badgeDef) {
         console.warn(`Badge definition not found for ID: ${sc.badgeId}. Using fallback.`);
         return {
-          id: sc.id, // instance id
+ id: sc.id,
           badgeId: sc.badgeId,
-          title: "Unknown Badge",
-          icon: ShieldQuestion, // Fallback icon component
-          xpPerLevel: 200, // A default XP, consider importing XP_PER_HERO_TYPE_BADGE_LEVEL
+ title: "Unknown Badge", // Fallback title
+ icon: ShieldQuestion, // Fallback icon component
+ xpPerLevel: 0, // Fallback XP
           level: sc.level,
         } as HeroChallenge;
       }
@@ -828,13 +829,14 @@ export function hydrateHeroes(storedHeroes: StoredHero[]): Hero[] {
       const heroChallenge: HeroChallenge = {
         id: sc.id,
         badgeId: sc.badgeId,
-        title: badgeDef.title,
-        icon: badgeDef.icon,
+ title: badgeDef.title || "Unknown Badge", // Use badgeDef title or fallback
+ icon: badgeDef.icon || ShieldQuestion, // Use badgeDef icon or fallback
+ xpPerLevel: badgeDef.xpPerLevel || 0, // Use badgeDef xpPerLevel or fallback
         level: sc.level,
-        xpPerLevel: badgeDef.xpPerLevel,
       };
       return heroChallenge;
     }).filter(Boolean) as HeroChallenge[];
+    if (!challenges.length) return undefined; // Filter out heroes with no valid challenges
 
     return {
       id: sh.id,
@@ -843,12 +845,13 @@ export function hydrateHeroes(storedHeroes: StoredHero[]): Hero[] {
       personalGoalLevel: typeof sh.personalGoalLevel === 'number' ? sh.personalGoalLevel : 0,
       challenges,
     };
-  });
+  }).filter(Boolean) as Hero[]; // Final filter to remove undefined heroes
 }
 
 export function dehydrateHeroes(heroes: Hero[]): StoredHero[] {
   return heroes.map(h => {
-    const challenges: StoredHeroChallenge[] = h.challenges.map(c => ({
+    if (!h) return undefined; // Check for undefined hero
+    const challenges: StoredHeroChallenge[] = h.challenges.map((c: HeroChallenge) => ({
       id: c.id,
       badgeId: c.badgeId,
       level: c.level,
@@ -860,7 +863,7 @@ export function dehydrateHeroes(heroes: Hero[]): StoredHero[] {
       personalGoalLevel: h.personalGoalLevel || 0,
       challenges,
     };
-  });
+  }).filter(Boolean) as StoredHero[]; // Filter out undefined results
 }
 
     

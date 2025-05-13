@@ -4,7 +4,7 @@
 import type React from 'react';
 import { useState, useEffect, useCallback, ChangeEvent } from 'react';
 import type { StoredHero, StoredHeroChallenge, HeroChallenge as RuntimeHeroChallenge } from '@/types/overwatch'; // Use RuntimeHeroChallenge for display
-import { initialHeroesData, XP_PER_HERO_TYPE_BADGE_LEVEL } from '@/lib/overwatch-utils'; // XP_PER_HERO_TYPE_BADGE_LEVEL for default
+import { initialHeroesData } from '@/lib/overwatch-utils'; // XP_PER_HERO_TYPE_BADGE_LEVEL for default
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -48,7 +48,7 @@ export default function ManageBadgesPageClient() {
             ...restOfHero,
             personalGoalLevel: typeof hero.personalGoalLevel === 'number' ? hero.personalGoalLevel : 0,
             challenges: hero.challenges.map(challenge => ({
-              ...challenge,
+              ...challenge, // Spread existing challenge properties
               level: challenge.level ?? 1 
             }))
           } as StoredHero;
