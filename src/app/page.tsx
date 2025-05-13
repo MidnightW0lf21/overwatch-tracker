@@ -18,7 +18,7 @@ import { getBadgeDefinition, XP_PER_HERO_TYPE_BADGE_LEVEL, XP_PER_TIME_TYPE_BADG
 import { Toaster } from '@/components/ui/toaster';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
-import { InfoIcon, SettingsIcon, StarIcon, ClockIcon } from 'lucide-react';
+import { InfoIcon, SettingsIcon, StarIcon, ClockIcon, TrophyIcon as AchievementIcon } from 'lucide-react'; // Added AchievementIcon
 import Link from 'next/link';
 import {
   Tooltip,
@@ -49,10 +49,8 @@ export default function Home() {
       const challengesForXPCalc = hero.challenges.map(hc => {
         const def = getBadgeDefinition(hc.badgeId);
         return {
-          id: hc.id,
-          badgeId: hc.badgeId,
           level: hc.level,
-          xpPerLevel: def ? def.xpPerLevel : 0,
+          xpPerLevel: def ? def.xpPerLevel : 0, // Use 0 if definition not found
         };
       });
       const totalXp = calculateTotalXP(challengesForXPCalc);
@@ -119,8 +117,8 @@ export default function Home() {
 
                 if (storedChallengeMatch) {
                   finalChallengeList.push({
-                    id: storedChallengeMatch.id,
-                    badgeId: defaultChallenge.badgeId,
+                    id: storedChallengeMatch.id, // Use stored instance ID
+                    badgeId: defaultChallenge.badgeId, // Ensure badgeId from master
                     level: Math.max(1, storedChallengeMatch.level || 1),
                   });
                   processedStoredChallengeIds.add(storedChallengeMatch.id);
@@ -133,16 +131,18 @@ export default function Home() {
                 }
               }
 
+              // Add any custom badges that were stored for this hero but not in master defaults
               for (const storedChallenge of storedHero.challenges) {
                 if (!processedStoredChallengeIds.has(storedChallenge.id)) {
+                    // Check if badgeId for custom challenge is valid before adding
                     const storedBadgeDef = getBadgeDefinition(storedChallenge.badgeId);
-                    if(storedBadgeDef){
+                    if(storedBadgeDef){ // Only add if badgeId is valid
                         finalChallengeList.push({
                             id: storedChallenge.id,
                             badgeId: storedChallenge.badgeId,
                             level: Math.max(1, storedChallenge.level || 1),
                         });
-                    }
+                    } // Silently skip if badgeId is invalid to avoid breaking UI
                 }
               }
 
@@ -154,6 +154,7 @@ export default function Home() {
                 challenges: finalChallengeList,
               };
             } else {
+              // Hero is in master defaults but not in storage, add from master
               return {
                 ...defaultHero,
                 portraitUrl: defaultHero.portraitUrl?.trimStart() || '',
@@ -163,16 +164,17 @@ export default function Home() {
             }
           });
 
+          // Add heroes from storage that are not in master defaults (custom heroes)
           const customUserHeroes = sanitizedHeroes.filter(
             sh => !masterDefaults.some(dh => dh.id === sh.id)
-          ).map(hero => ({
+          ).map(hero => ({ // Sanitize custom heroes too
             ...hero,
             portraitUrl: hero.portraitUrl?.trimStart() || '',
             personalGoalLevel: typeof hero.personalGoalLevel === 'number' ? hero.personalGoalLevel : 0,
             challenges: hero.challenges.map(challenge => ({
               ...challenge,
               level: Math.max(1, challenge.level || 1)
-            }))
+            })).filter(c => !!getBadgeDefinition(c.badgeId)) // Ensure custom badges are valid
           }));
 
           const finalHeroesToLoad = [...synchronizedHeroes, ...customUserHeroes];
@@ -194,6 +196,7 @@ export default function Home() {
           localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(exportPayload));
         }
       } else {
+        // No data in localStorage, initialize with master defaults
         const defaultStoredHeroes = masterDefaults.map(hero => ({
             ...hero,
             portraitUrl: hero.portraitUrl?.trimStart() || '',
@@ -206,6 +209,7 @@ export default function Home() {
       }
     } catch (e) {
       console.error('Error during initial data load:', e);
+      // Fallback to defaults if any top-level error occurs
       const defaultStoredHeroes = initialHeroesData.map(hero => ({
             ...hero,
             portraitUrl: hero.portraitUrl?.trimStart() || '',
@@ -230,7 +234,7 @@ export default function Home() {
   };
 
   const handleBadgeLevelChange = (heroId: string, challengeId: string, newLevel: number) => {
-    const finalNewLevel = Math.max(1, newLevel);
+    const finalNewLevel = Math.max(1, newLevel); // Ensure level is at least 1
 
     const updatedHeroesList = heroes.map(h => {
       if (h.id === heroId) {
@@ -238,6 +242,7 @@ export default function Home() {
           c.id === challengeId ? { ...c, level: finalNewLevel } : c
         );
 
+        // Recalculate XP for this hero
         const challengesForXPCalc = updatedChallenges.map(uc => {
           const badgeDef = getBadgeDefinition(uc.badgeId);
           return {
@@ -255,17 +260,21 @@ export default function Home() {
 
     const dehydratedHeroesForStorage = dehydrateHeroes(updatedHeroesList);
 
+    // Sort heroes after updating
     const sortedHeroes = updatedHeroesList.sort((a, b) => b.totalXp - a.totalXp);
     setHeroes(sortedHeroes);
 
+    // Save to localStorage
     const exportPayload: ExportData = { version: "1.0.0", heroes: dehydratedHeroesForStorage };
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(exportPayload));
 
+    // Update editingHero if it's the one being edited
     const updatedHeroInstance = sortedHeroes.find(h => h.id === heroId);
     if (updatedHeroInstance && editingHero && editingHero.id === heroId) {
       setEditingHero(updatedHeroInstance);
     }
 
+    // Toast notification
     const changedHero = updatedHeroesList.find(h=>h.id === heroId);
     const changedChallenge = changedHero?.challenges.find(c=>c.id === challengeId);
 
@@ -276,49 +285,53 @@ export default function Home() {
     });
   };
 
+  // Calculate global progression
   const currentGlobalXp = useMemo(() => {
     return heroes.reduce((sum, hero) => sum + hero.totalXp, 0);
   }, [heroes]);
 
   const globalMaxXpOverall = useMemo(() => {
     if (heroes.length === 0) return 0;
+    // Calculate XP needed for one hero to reach GLOBAL_MAX_LEVEL + 1 to get the total XP for GLOBAL_MAX_LEVEL
     const xpForOneHeroMaxLevel = calculateXpToReachLevel(GLOBAL_MAX_LEVEL + 1);
     return xpForOneHeroMaxLevel * heroes.length;
   }, [heroes.length]);
+
 
   const globalLevelDetails = useMemo(() => {
     return calculateLevelDetails(currentGlobalXp);
   }, [currentGlobalXp]);
 
   const globalProgressPercentage = useMemo(() => {
-    if (globalMaxXpOverall === 0) return 0;
-    return Math.min((currentGlobalXp / globalMaxXpOverall) * 100, 100);
+    if (globalMaxXpOverall === 0) return 0; // Avoid division by zero
+    return Math.min((currentGlobalXp / globalMaxXpOverall) * 100, 100); // Cap at 100%
   }, [currentGlobalXp, globalMaxXpOverall]);
 
   const totalEstimatedTimeToMaxAllHeroesInMinutes = useMemo(() => {
     let totalMinutes = 0;
     heroes.forEach(hero => {
         if (hero.level >= GLOBAL_MAX_LEVEL) {
-            return;
+            return; // Skip already maxed heroes
         }
+        // Find a time-based badge for this hero
         const timeBadgeChallenge = hero.challenges.find(c => {
-            const badgeDef = getBadgeDefinition(c.badgeId);
+            const badgeDef = getBadgeDefinition(c.badgeId); // Use getBadgeDefinition
             return badgeDef?.xpPerLevel === XP_PER_TIME_TYPE_BADGE_LEVEL;
         });
 
         if (!timeBadgeChallenge) {
-            return;
+            return; // Skip if no time badge
         }
         const timeBadgeDef = getBadgeDefinition(timeBadgeChallenge.badgeId);
-        if (!timeBadgeDef) return;
+        if (!timeBadgeDef) return; // Should not happen if found above
 
 
-        const xpForMaxLevel = calculateXpToReachLevel(GLOBAL_MAX_LEVEL + 1);
+        const xpForMaxLevel = calculateXpToReachLevel(GLOBAL_MAX_LEVEL + 1); // XP to START level 501
         const xpRemaining = Math.max(0, xpForMaxLevel - hero.totalXp);
 
-        if (xpRemaining > 0 && XP_PER_TIME_TYPE_BADGE_LEVEL > 0) {
-            const timeBadgeLevelsNeeded = xpRemaining / XP_PER_TIME_TYPE_BADGE_LEVEL;
-            totalMinutes += timeBadgeLevelsNeeded * 20;
+        if (xpRemaining > 0 && timeBadgeDef.xpPerLevel > 0) { // Use timeBadgeDef.xpPerLevel
+            const timeBadgeLevelsNeeded = xpRemaining / timeBadgeDef.xpPerLevel;
+            totalMinutes += timeBadgeLevelsNeeded * 20; // 20 minutes per time badge level
         }
     });
     return totalMinutes;
@@ -328,13 +341,13 @@ export default function Home() {
     if (totalMinutesInput < 0) totalMinutesInput = 0;
 
     if (totalMinutesInput < 1 && totalMinutesInput > 0) return "~1 min";
-    if (Math.round(totalMinutesInput) === 0) return "0m";
+    if (Math.round(totalMinutesInput) === 0) return "0m"; // Or "N/A" if preferred for 0
 
     const totalMinutes = Math.round(totalMinutesInput);
 
     const minutesInHour = 60;
     const hoursInDay = 24;
-    const daysInYear = 365;
+    const daysInYear = 365; // Approximation
 
     const years = Math.floor(totalMinutes / (minutesInHour * hoursInDay * daysInYear));
     let remainingMinutes = totalMinutes % (minutesInHour * hoursInDay * daysInYear);
@@ -351,7 +364,7 @@ export default function Home() {
     if (years > 0) parts.push(`${years}y`);
     if (days > 0) parts.push(`${days}d`);
     if (hours > 0) parts.push(`${hours}h`);
-    if (finalMinutes > 0 || parts.length === 0) parts.push(`${finalMinutes}m`);
+    if (finalMinutes > 0 || parts.length === 0) parts.push(`${finalMinutes}m`); // Show minutes if no other unit or if > 0
 
     return parts.join(' ');
   }, []);
@@ -362,6 +375,7 @@ export default function Home() {
         return "All heroes maxed!";
     }
     if (totalEstimatedTimeToMaxAllHeroesInMinutes === 0) {
+        // Check if it's genuinely 0 or if no time badges are available for unmaxed heroes
         let relevantHeroNeedsTime = false;
         for (const hero of heroes) {
             if (hero.level < GLOBAL_MAX_LEVEL) {
@@ -388,12 +402,27 @@ export default function Home() {
     return formatTotalTimeToMaxAllHeroes(totalEstimatedTimeToMaxAllHeroesInMinutes);
   }, [totalEstimatedTimeToMaxAllHeroesInMinutes, heroes, formatTotalTimeToMaxAllHeroes]);
 
+
   return (
     <div className="min-h-screen bg-background text-foreground p-4 sm:p-6 lg:p-8">
       <header className="mb-6 text-center relative">
         <h1 className="text-4xl sm:text-5xl font-bold text-primary tracking-tight">Overwatch Progression Tracker</h1>
         <p className="text-lg text-muted-foreground mt-2">Track your hero badges, levels, and personal goals.</p>
         <div className="absolute top-0 right-0 flex space-x-2">
+           <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" asChild className="text-muted-foreground hover:text-foreground">
+                  <Link href="/achievements">
+                    <AchievementIcon className="h-6 w-6" />
+                  </Link>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent className="max-w-xs bg-popover text-popover-foreground p-3 rounded-md shadow-lg text-sm" side="bottom" align="end">
+                <p>View Achievements</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
