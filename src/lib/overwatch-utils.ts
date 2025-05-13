@@ -597,6 +597,22 @@ export const initialHeroesData: StoredHero[] = [
     ],
   },
   {
+    id: 'soldier76',
+    name: 'Soldier: 76',
+    portraitUrl: 'https://static.wikia.nocookie.net/overwatch_gamepedia/images/2/2b/Icon-Soldier_76.png',
+    personalGoalLevel: 500,
+    challenges: [
+      { id: 's76_damage_dealt_instance', badgeId: 's76_dmg_dealt', level: 1 },
+      { id: 's76_critical_hits_instance', badgeId: 's76_critical_hits', level: 1 },
+      { id: 's76_helix_direct_instance', badgeId: 's76_helix-direct', level: 1 },
+      { id: 's76_helix_final_blows_instance', badgeId: 's76_helix_final_blows', level: 1 },
+      { id: 's76_biotic_healing_instance', badgeId: 's76_biotic_healing', level: 1 },
+      { id: 's76_visor_kills_instance', badgeId: 's76_visor_kills', level: 1 },
+      { id: 's76_time_played_instance', badgeId: 's76_time_played', level: 1 },
+      { id: 's76_wins_instance', badgeId: 's76_wins', level: 1 },
+    ]
+  }
+  {
     id: 'sigma',
     name: 'Sigma',
     portraitUrl: 'https://static.wikia.nocookie.net/overwatch_gamepedia/images/e/e0/Icon-Sigma.png',
