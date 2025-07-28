@@ -12,27 +12,29 @@ interface HeroConstellationProps {
   hero: Hero;
 }
 
-// Define the shape for Soldier: 76's constellation (approximating a rifle)
+// Define a more abstract, visually appealing shape for Soldier: 76's constellation
 const s76ConstellationLayout: Record<string, { top: string; left: string }> = {
-  s76_wins: { top: '65%', left: '90%' },          // Butt of the stock
-  s76_time_played: { top: '60%', left: '75%' },     // Stock
-  s76_biotic_healing: { top: '55%', left: '60%' },    // Handle/Grip area
-  s76_visor_kills: { top: '40%', left: '55%' },      // Scope on top
-  s76_helix_final_blows: { top: '52%', left: '45%' }, // Main body
-  s76_helix_direct: { top: '52%', left: '30%' },      // Barrel
-  s76_critical_hits: { top: '50%', left: '15%' },     // Muzzle
-  s76_dmg_dealt: { top: '48%', left: '5%' },        // Muzzle Flash
+  s76_wins: { top: '85%', left: '75%' },
+  s76_time_played: { top: '65%', left: '88%' },
+  s76_biotic_healing: { top: '50%', left: '65%' },
+  s76_visor_kills: { top: '25%', left: '70%' },
+  s76_helix_final_blows: { top: '45%', left: '40%' },
+  s76_helix_direct: { top: '68%', left: '25%' },
+  s76_critical_hits: { top: '40%', left: '15%' },
+  s76_dmg_dealt: { top: '20%', left: '30%' },
 };
 
-// Define the explicit order for drawing connecting lines to form the rifle shape
+// Define the explicit order for drawing connecting lines
 const s76ConnectionOrder: string[] = [
-  's76_wins',
-  's76_time_played',
-  's76_biotic_healing',
+  's76_dmg_dealt',
+  's76_critical_hits',
   's76_helix_final_blows',
+  's76_visor_kills',
+  's76_biotic_healing',
+  's76_time_played',
+  's76_wins',
   's76_helix_direct',
   's76_critical_hits',
-  's76_dmg_dealt',
 ];
 
 
@@ -52,7 +54,6 @@ const HeroConstellation: React.FC<HeroConstellationProps> = ({ hero }) => {
     );
   }
   
-  // Create a map of badgeId to its position for easy lookup
   const badgeIdToPositionMap = new Map<string, { top: string; left: string }>();
   hero.challenges.forEach((challenge, index) => {
     const badgeDef = getBadgeDefinition(challenge.badgeId);
@@ -63,14 +64,13 @@ const HeroConstellation: React.FC<HeroConstellationProps> = ({ hero }) => {
     }
   });
   
-  // Build the list of line-segment coordinates based on the defined connection order
   const lineSegments = s76ConnectionOrder.slice(0, -1).map((currentId, index) => {
     const nextId = s76ConnectionOrder[index + 1];
     const startPos = badgeIdToPositionMap.get(currentId);
     const endPos = badgeIdToPositionMap.get(nextId);
     
     if (startPos && endPos) {
-      return { x1: startPos.left, y1: startPos.top, x2: endPos.left, y2: endPos.top };
+      return { x1: startPos.left, y1: startPos.top, x2: endPos.left, y2: endPos.top, key: `line-${currentId}-${nextId}-${index}` };
     }
     return null;
   }).filter(Boolean);
@@ -78,7 +78,6 @@ const HeroConstellation: React.FC<HeroConstellationProps> = ({ hero }) => {
 
   return (
     <div className="w-full h-full bg-background rounded-lg p-4 relative overflow-hidden">
-      {/* Subtle animated background */}
       <motion.div
         className="absolute inset-0 z-0 opacity-50"
         style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%239C92AC\' fill-opacity=\'0.1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")' }}
@@ -95,10 +94,10 @@ const HeroConstellation: React.FC<HeroConstellationProps> = ({ hero }) => {
               <stop offset="100%" stopColor="hsl(var(--primary) / 0.1)" />
               </linearGradient>
           </defs>
-          {lineSegments.map((seg, i) =>
+          {lineSegments.map((seg) =>
               seg && (
               <line
-                  key={`line-${i}`}
+                  key={seg.key}
                   x1={seg.x1}
                   y1={seg.y1}
                   x2={seg.x2}
@@ -117,7 +116,7 @@ const HeroConstellation: React.FC<HeroConstellationProps> = ({ hero }) => {
           if (!badgeDef) return null;
 
           const position = badgeIdToPositionMap.get(badgeDef.id);
-          if (!position) return null; // Don't render a star if it's not in the layout
+          if (!position) return null;
           
           return (
             <TooltipProvider key={challenge.id} delayDuration={100}>
