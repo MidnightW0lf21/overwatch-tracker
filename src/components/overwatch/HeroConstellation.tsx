@@ -28,13 +28,13 @@ const s76ConstellationLayout: Record<string, { top: string; left: string }> = {
 const s76ConnectionOrder: string[] = [
   's76_dmg_dealt',
   's76_critical_hits',
-  's76_helix_final_blows',
+  's76_helix_direct',
+  's76_wins',
+  's76_time_played',
   's76_visor_kills',
   's76_biotic_healing',
-  's76_time_played',
-  's76_wins',
-  's76_helix_direct',
-  's76_critical_hits',
+  's76_helix_final_blows',
+  's76_dmg_dealt',
 ];
 
 
