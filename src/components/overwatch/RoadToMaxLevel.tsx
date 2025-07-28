@@ -99,10 +99,11 @@ const RoadToMaxLevel: React.FC<RoadToMaxLevelProps> = ({ hero, maxLevel }) => {
             <Tooltip>
                 <TooltipTrigger asChild>
                     <div 
-                        className="absolute left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-primary ring-4 ring-primary/30 z-10 transition-all duration-500" 
-                        style={{ top: `calc(${heroPosition}% - 8px)`}}
+                        className="absolute w-full left-0 z-10 transition-all duration-500 group" 
+                        style={{ top: `calc(${heroPosition}% - 2px)`}}
                     >
-                         <TrendingUp className="absolute -right-5 -top-0.5 h-5 w-5 text-primary"/>
+                         <div className="w-full h-1 bg-primary group-hover:bg-primary/80" />
+                         <TrendingUp className="absolute right-0 top-1/2 -translate-y-1/2 h-5 w-5 text-primary -mr-2"/>
                     </div>
                 </TooltipTrigger>
                 <TooltipContent side="right">
