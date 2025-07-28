@@ -4,7 +4,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import type { Hero, HeroChallenge } from '@/types/overwatch';
+import type { Hero } from '@/types/overwatch';
 import { getBadgeDefinition } from '@/lib/badge-definitions';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
@@ -14,18 +14,27 @@ interface HeroConstellationProps {
 
 // Define the shape for Soldier: 76's constellation (approximating a rifle)
 const s76ConstellationLayout: Record<string, { top: string; left: string }> = {
-  s76_dmg_dealt: { top: '50%', left: '10%' }, // Barrel End
-  s76_critical_hits: { top: '50%', left: '30%' },
-  s76_helix_direct: { top: '45%', left: '50%' }, // Main Body
-  s76_helix_final_blows: { top: '55%', left: '50%' },
-  s76_biotic_healing: { top: '60%', left: '70%' }, // Stock
-  s76_visor_kills: { top: '40%', left: '45%' }, // Scope
-  s76_time_played: { top: '65%', left: '85%' },
-  s76_wins: { top: '55%', left: '90%' },
-  // Fallback for any other badges
-  default_1: { top: '20%', left: '20%' },
-  default_2: { top: '80%', left: '80%' },
+  s76_wins: { top: '65%', left: '90%' },          // Butt of the stock
+  s76_time_played: { top: '60%', left: '75%' },     // Stock
+  s76_biotic_healing: { top: '55%', left: '60%' },    // Handle/Grip area
+  s76_visor_kills: { top: '40%', left: '55%' },      // Scope on top
+  s76_helix_final_blows: { top: '52%', left: '45%' }, // Main body
+  s76_helix_direct: { top: '52%', left: '30%' },      // Barrel
+  s76_critical_hits: { top: '50%', left: '15%' },     // Muzzle
+  s76_dmg_dealt: { top: '48%', left: '5%' },        // Muzzle Flash
 };
+
+// Define the explicit order for drawing connecting lines to form the rifle shape
+const s76ConnectionOrder: string[] = [
+  's76_wins',
+  's76_time_played',
+  's76_biotic_healing',
+  's76_helix_final_blows',
+  's76_helix_direct',
+  's76_critical_hits',
+  's76_dmg_dealt',
+];
+
 
 const getStarSizeAndBrightness = (level: number) => {
   if (level >= 251) return { size: 20, opacity: 1, pulse: true, aura: true };
@@ -42,12 +51,29 @@ const HeroConstellation: React.FC<HeroConstellationProps> = ({ hero }) => {
       </div>
     );
   }
-
-  const badgePositions = hero.challenges.map((challenge, index) => {
-      const badgeDef = getBadgeDefinition(challenge.badgeId);
-      const layoutKey = badgeDef?.id || `default_${index + 1}`;
-      return s76ConstellationLayout[layoutKey] || s76ConstellationLayout[`default_${(index % 2) + 1}`];
+  
+  // Create a map of badgeId to its position for easy lookup
+  const badgeIdToPositionMap = new Map<string, { top: string; left: string }>();
+  hero.challenges.forEach((challenge, index) => {
+    const badgeDef = getBadgeDefinition(challenge.badgeId);
+    if (badgeDef) {
+       const layoutKey = badgeDef.id;
+       const position = s76ConstellationLayout[layoutKey] || { top: `${10 + (index * 5)}%`, left: `${10 + (index * 5)}%` };
+       badgeIdToPositionMap.set(layoutKey, position);
+    }
   });
+  
+  // Build the list of line-segment coordinates based on the defined connection order
+  const lineSegments = s76ConnectionOrder.slice(0, -1).map((currentId, index) => {
+    const nextId = s76ConnectionOrder[index + 1];
+    const startPos = badgeIdToPositionMap.get(currentId);
+    const endPos = badgeIdToPositionMap.get(nextId);
+    
+    if (startPos && endPos) {
+      return { x1: startPos.left, y1: startPos.top, x2: endPos.left, y2: endPos.top };
+    }
+    return null;
+  }).filter(Boolean);
 
 
   return (
@@ -69,16 +95,17 @@ const HeroConstellation: React.FC<HeroConstellationProps> = ({ hero }) => {
               <stop offset="100%" stopColor="hsl(var(--primary) / 0.1)" />
               </linearGradient>
           </defs>
-          {badgePositions.map((pos, i) =>
-              i < badgePositions.length - 1 && (
+          {lineSegments.map((seg, i) =>
+              seg && (
               <line
                   key={`line-${i}`}
-                  x1={pos.left}
-                  y1={pos.top}
-                  x2={badgePositions[i + 1].left}
-                  y2={badgePositions[i + 1].top}
+                  x1={seg.x1}
+                  y1={seg.y1}
+                  x2={seg.x2}
+                  y2={seg.y2}
                   stroke="url(#lineGradient)"
-                  strokeWidth="1"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
               />
               )
           )}
@@ -87,7 +114,10 @@ const HeroConstellation: React.FC<HeroConstellationProps> = ({ hero }) => {
         {hero.challenges.map((challenge, index) => {
           const { size, opacity, pulse, aura } = getStarSizeAndBrightness(challenge.level);
           const badgeDef = getBadgeDefinition(challenge.badgeId);
-          const position = badgePositions[index];
+          if (!badgeDef) return null;
+
+          const position = badgeIdToPositionMap.get(badgeDef.id);
+          if (!position) return null; // Don't render a star if it's not in the layout
           
           return (
             <TooltipProvider key={challenge.id} delayDuration={100}>
@@ -110,7 +140,7 @@ const HeroConstellation: React.FC<HeroConstellationProps> = ({ hero }) => {
                   />
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p className="font-bold">{badgeDef?.title || 'Unknown Badge'}</p>
+                  <p className="font-bold">{badgeDef.title}</p>
                   <p>Level: {challenge.level}</p>
                 </TooltipContent>
               </Tooltip>
@@ -123,5 +153,3 @@ const HeroConstellation: React.FC<HeroConstellationProps> = ({ hero }) => {
 };
 
 export default HeroConstellation;
-
-    
