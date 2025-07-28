@@ -5,7 +5,7 @@ import type React from 'react';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import Image from 'next/image';
 import HeroCard from '@/components/overwatch/HeroCard';
-import HeroBadgeEditorSheet from '@/components/overwatch/HeroBadgeEditorSheet';
+import HeroDetailDialog from '@/components/overwatch/HeroBadgeEditorSheet';
 import type { HeroCalculated, StoredHero, StoredHeroChallenge, Hero } from '@/types/overwatch';
 import {
   initialHeroesData,
@@ -401,7 +401,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background text-foreground p-4 sm:p-6 lg:p-8">
       <header className="mb-6 text-center relative">
-        <h1 className="text-4xl sm:text-5xl font-bold text-primary tracking-tight">Overwatch 2 Progression Tracker</h1>
+        <h1 className="text-4xl sm:text-5xl font-bold text-primary tracking-tight">Overwatch Progression Tracker</h1>
         <p className="text-lg text-muted-foreground mt-2">🏆 Track your hero badges, levels, and personal goals. 🔫</p>
         <div className="absolute top-0 right-0 flex space-x-2">
            <TooltipProvider>
@@ -459,7 +459,6 @@ export default function Home() {
       <Card className="mb-6 shadow-lg">
         <CardHeader className="pb-2 pt-4 px-4">
           <CardTitle className="text-xl flex items-center gap-2 text-primary">
-            <StarIcon className="h-5 w-5" />
             Overall Progression
           </CardTitle>
         </CardHeader>
@@ -508,7 +507,7 @@ export default function Home() {
       </div>
 
       {editingHero && (
-        <HeroBadgeEditorSheet
+        <HeroDetailDialog
           isOpen={isSheetOpen}
           hero={editingHero}
           onBadgeLevelChange={handleBadgeLevelChange}
@@ -519,3 +518,5 @@ export default function Home() {
     </div>
   );
 }
+
+    

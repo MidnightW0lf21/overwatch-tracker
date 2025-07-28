@@ -2,26 +2,21 @@
 'use client';
 
 import type React from 'react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
 import type { HeroCalculated } from '@/types/overwatch';
 import HeroChallengeCard from './HeroChallengeCard';
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-  SheetFooter,
-} from "@/components/ui/sheet";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { calculateXpToReachLevel } from '@/lib/overwatch-utils';
 import { getBadgeDefinition, XP_PER_HERO_TYPE_BADGE_LEVEL, XP_PER_TIME_TYPE_BADGE_LEVEL } from '@/lib/badge-definitions';
 import { ClockIcon, StarIcon, TargetIcon } from 'lucide-react';
+import RoadToMaxLevel from './RoadToMaxLevel';
 
-interface HeroBadgeEditorSheetProps {
+
+interface HeroDetailDialogProps {
   isOpen: boolean;
   hero: HeroCalculated | null;
   onBadgeLevelChange: (heroId: string, challengeId: string, newLevel: number) => void;
@@ -30,7 +25,7 @@ interface HeroBadgeEditorSheetProps {
 
 const HERO_MAX_LEVEL = 500;
 
-const HeroBadgeEditorSheet: React.FC<HeroBadgeEditorSheetProps> = ({
+const HeroDetailDialog: React.FC<HeroDetailDialogProps> = ({
   isOpen,
   hero,
   onBadgeLevelChange,
@@ -126,103 +121,97 @@ const HeroBadgeEditorSheet: React.FC<HeroBadgeEditorSheetProps> = ({
 
 
   return (
-    <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <SheetContent className="sm:max-w-2xl w-full flex flex-col" side="right">
-        <SheetHeader className="px-6 pt-6 pb-4 border-b border-border">
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-w-4xl w-[95vw] h-[90vh] flex flex-col p-0">
+        <DialogHeader className="px-6 pt-6 pb-4 border-b border-border">
           <div className="flex items-center space-x-4">
             {hero.portraitUrl && (
               <Image
                 src={hero.portraitUrl.trimStart()}
                 alt={`${hero.name} Portrait`}
-                width={64}
-                height={64}
-                className="rounded-md border-2 border-primary"
+                width={80}
+                height={80}
+                className="rounded-lg border-2 border-primary shadow-lg"
                 data-ai-hint="hero portrait"
               />
             )}
             <div>
-              <SheetTitle className="text-2xl text-primary">{hero.name}</SheetTitle>
-              <p className="text-sm text-accent font-semibold uppercase tracking-wider -mt-1">{rankTitle}</p>
-              <SheetDescription>
-                {hero.xpTowardsNextLevel.toLocaleString()} / {hero.xpNeededForNextLevel.toLocaleString()} XP to next
-              </SheetDescription>
+              <DialogTitle className="text-3xl text-primary">{hero.name}</DialogTitle>
+              <p className="text-lg text-accent font-semibold uppercase tracking-wider -mt-1">{rankTitle}</p>
+              <DialogDescription className="text-base">
+                {hero.xpTowardsNextLevel.toLocaleString()} / {hero.xpNeededForNextLevel.toLocaleString()} XP to next level
+              </DialogDescription>
             </div>
           </div>
-        </SheetHeader>
+        </DialogHeader>
+        
+        <div className="flex-grow grid grid-cols-1 lg:grid-cols-3 gap-4 px-6 py-4 min-h-0">
+          {/* Left Column for stats and badges */}
+          <div className="lg:col-span-2 flex flex-col gap-4 min-h-0">
+            <div className="flex-shrink-0">
+              <h3 className="text-lg font-semibold text-foreground/90 mb-1 flex items-center">
+                <TargetIcon className="h-5 w-5 mr-2 text-muted-foreground" />
+                Personal Goal: Level {hero.personalGoalLevel > 0 ? hero.personalGoalLevel : 'N/A'}
+              </h3>
+              <Progress value={personalGoalProgress} className="h-3 bg-accent/20 [&>div]:bg-accent" />
+              <div className="flex justify-between items-center">
+                <p className="text-xs text-muted-foreground mt-1">
+                  {hero.personalGoalLevel === 0 && (<>No personal goal set.</>)}
+                  {hero.personalGoalLevel > 0 && badgesNeededForGoal !== null && badgesNeededForGoal > 0 && (<>{badgesNeededForGoal.toLocaleString()} more badge level-ups to reach goal!</>)}
+                  {hero.personalGoalLevel > 0 && badgesNeededForGoal === 0 && (<>Goal level {hero.personalGoalLevel} reached!</>)}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1 text-right">
+                  {hero.personalGoalLevel > 0
+                    ? `${hero.totalXp.toLocaleString()} / ${xpForPersonalGoalLevel.toLocaleString()} XP (${personalGoalProgress.toFixed(1)}%)`
+                    : `${hero.totalXp.toLocaleString()} XP`}
+                </p>
+              </div>
+            </div>
 
-        <div className="px-6 py-4">
-          <h3 className="text-md font-semibold text-foreground/90 mb-1 flex items-center">
-            <TargetIcon className="h-4 w-4 mr-2 text-muted-foreground" />
-            Personal Goal Progress - Level {hero.personalGoalLevel > 0 ? hero.personalGoalLevel : 'N/A'}
-          </h3>
-          <Progress value={personalGoalProgress} className="h-3 bg-accent/20 [&>div]:bg-accent" />
-          <div className="flex justify-between items-center">
-            <p className="text-xs text-muted-foreground mt-1">
-              {hero.personalGoalLevel === 0 && (
-                <>No personal goal level set.</>
+            <div className="flex-shrink-0 border-t border-border pt-4">
+                <h3 className="text-lg font-semibold text-foreground/90 mb-2 flex items-center">
+                    <StarIcon className="h-5 w-5 mr-2 text-muted-foreground" />
+                    Hero Badges
+                </h3>
+            </div>
+            
+            <ScrollArea className="flex-grow pr-4 -mr-4">
+              {hero.challenges && hero.challenges.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                  {hero.challenges.map(challenge => (
+                    <HeroChallengeCard
+                      key={challenge.id}
+                      challenge={challenge}
+                      heroId={hero.id}
+                      onLevelChange={onBadgeLevelChange}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center h-full bg-card/50 rounded-md p-4 text-center">
+                  <p className="text-muted-foreground">No badges tracked for {hero.name}.</p>
+                  <p className="text-xs mt-1 text-muted-foreground">You can add badges in the Manage Heroes & Badges page.</p>
+                </div>
               )}
-              {hero.personalGoalLevel > 0 && badgesNeededForGoal !== null && badgesNeededForGoal > 0 && (
-                <>{badgesNeededForGoal.toLocaleString()} more badge level-ups to reach goal!</>
-              )}
-              {hero.personalGoalLevel > 0 && badgesNeededForGoal === 0 && (
-                <>Goal level {hero.personalGoalLevel} reached!</>
-              )}
-            </p>
-            <p className="text-xs text-muted-foreground mt-1 text-right">
-              {hero.personalGoalLevel > 0
-                ? `${hero.totalXp.toLocaleString()} / ${xpForPersonalGoalLevel.toLocaleString()} XP (${personalGoalProgress.toFixed(1)}%)`
-                : `${hero.totalXp.toLocaleString()} XP`}
-            </p>
+            </ScrollArea>
+          </div>
+
+          {/* Right Column for Road to Max Level */}
+          <div className="lg:col-span-1 lg:border-l lg:border-border lg:pl-4 flex flex-col">
+              <h3 className="text-lg font-semibold text-foreground/90 mb-3 flex items-center flex-shrink-0">
+                  <ClockIcon className="h-5 w-5 mr-2 text-muted-foreground" />
+                  Road to Max Level
+              </h3>
+              <RoadToMaxLevel hero={hero} maxLevel={HERO_MAX_LEVEL} />
           </div>
         </div>
 
-        {estimatedTimeToMax && (
-          <div className="px-6 py-3 border-t border-border">
-            <h3 className="text-md font-semibold text-foreground/90 mb-1 flex items-center">
-              <ClockIcon className="h-4 w-4 mr-2 text-muted-foreground" />
-              Est. Time to Max Level
-            </h3>
-            <p className="text-sm text-muted-foreground ml-6">
-              {estimatedTimeToMax}
-            </p>
-            {hero.level < HERO_MAX_LEVEL && hero.challenges.some(c => {
-                const badgeDef = getBadgeDefinition(c.badgeId);
-                return badgeDef?.xpPerLevel === XP_PER_TIME_TYPE_BADGE_LEVEL;
-            }) && !estimatedTimeToMax?.includes("No time-based badge") && !estimatedTimeToMax?.includes("Max level reached!") && (
-                 <p className="text-xs text-muted-foreground/70 ml-6 mt-0.5">(1 Time Badge = 20 mins of play)</p>
-            )}
-          </div>
-        )}
-
-        <h3 className="text-xl font-semibold mb-3 text-foreground/90 px-6 border-t border-border pt-4 flex items-center">
-          <StarIcon className="h-5 w-5 mr-2 text-muted-foreground" />
-          Hero Badges
-        </h3>
-        <ScrollArea className="flex-grow px-6 pb-2">
-          {hero.challenges && hero.challenges.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {hero.challenges.map(challenge => (
-                <HeroChallengeCard
-                  key={challenge.id}
-                  challenge={challenge}
-                  heroId={hero.id}
-                  onLevelChange={onBadgeLevelChange}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center h-32 bg-card/50 rounded-md p-4 text-center">
-              <p className="text-muted-foreground">No badges tracked for {hero.name}.</p>
-              <p className="text-xs mt-1 text-muted-foreground">You can add badges in the Manage Heroes & Badges page.</p>
-            </div>
-          )}
-        </ScrollArea>
-        <SheetFooter className="px-6 py-4 border-t border-border">
+        <DialogFooter className="px-6 py-4 border-t border-border mt-auto">
           <Button onClick={onClose} variant="outline">Close</Button>
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 
-export default HeroBadgeEditorSheet;
+export default HeroDetailDialog;
