@@ -2,18 +2,20 @@
 'use client';
 
 import type React from 'react';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import type { HeroCalculated } from '@/types/overwatch';
 import HeroChallengeCard from './HeroChallengeCard';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { calculateXpToReachLevel } from '@/lib/overwatch-utils';
 import { getBadgeDefinition, XP_PER_HERO_TYPE_BADGE_LEVEL, XP_PER_TIME_TYPE_BADGE_LEVEL } from '@/lib/badge-definitions';
-import { ClockIcon, StarIcon, TargetIcon } from 'lucide-react';
+import { ClockIcon, StarIcon, TargetIcon, SparklesIcon } from 'lucide-react';
 import RoadToMaxLevel from './RoadToMaxLevel';
+import HeroConstellation from './HeroConstellation';
 
 
 interface HeroDetailDialogProps {
@@ -145,10 +147,10 @@ const HeroDetailDialog: React.FC<HeroDetailDialogProps> = ({
           </div>
         </DialogHeader>
         
-        <div className="flex-grow grid grid-cols-1 lg:grid-cols-3 gap-4 px-6 py-4 min-h-0">
-          {/* Left Column for stats and badges */}
+        <Tabs defaultValue="badges" className="flex-grow grid grid-cols-1 lg:grid-cols-3 gap-4 px-6 py-4 min-h-0">
+           {/* Left Column for stats and tabs */}
           <div className="lg:col-span-2 flex flex-col gap-4 min-h-0">
-            <div className="flex-shrink-0">
+             <div className="flex-shrink-0">
               <h3 className="text-lg font-semibold text-foreground/90 mb-1 flex items-center">
                 <TargetIcon className="h-5 w-5 mr-2 text-muted-foreground" />
                 Personal Goal: Level {hero.personalGoalLevel > 0 ? hero.personalGoalLevel : 'N/A'}
@@ -168,32 +170,52 @@ const HeroDetailDialog: React.FC<HeroDetailDialogProps> = ({
               </div>
             </div>
 
-            <div className="flex-shrink-0 border-t border-border pt-4">
-                <h3 className="text-lg font-semibold text-foreground/90 mb-2 flex items-center">
-                    <StarIcon className="h-5 w-5 mr-2 text-muted-foreground" />
-                    Hero Badges
-                </h3>
+            <div className="border-t border-border pt-4">
+              <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="badges">
+                      <StarIcon className="h-4 w-4 mr-2"/>
+                      Badges
+                  </TabsTrigger>
+                  <TabsTrigger value="constellation" disabled={hero.id !== 's76'}>
+                      <SparklesIcon className="h-4 w-4 mr-2"/>
+                      Constellation
+                      {hero.id !== 's76' && <span className="text-xs text-muted-foreground ml-2">(Soon)</span>}
+                  </TabsTrigger>
+              </TabsList>
             </div>
             
-            <ScrollArea className="flex-grow pr-4 -mr-4">
-              {hero.challenges && hero.challenges.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                  {hero.challenges.map(challenge => (
-                    <HeroChallengeCard
-                      key={challenge.id}
-                      challenge={challenge}
-                      heroId={hero.id}
-                      onLevelChange={onBadgeLevelChange}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center h-full bg-card/50 rounded-md p-4 text-center">
-                  <p className="text-muted-foreground">No badges tracked for {hero.name}.</p>
-                  <p className="text-xs mt-1 text-muted-foreground">You can add badges in the Manage Heroes & Badges page.</p>
-                </div>
-              )}
-            </ScrollArea>
+            <TabsContent value="badges" className="flex-grow -mt-2">
+                 <ScrollArea className="h-full pr-4 -mr-4">
+                  {hero.challenges && hero.challenges.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 py-4">
+                      {hero.challenges.map(challenge => (
+                        <HeroChallengeCard
+                          key={challenge.id}
+                          challenge={challenge}
+                          heroId={hero.id}
+                          onLevelChange={onBadgeLevelChange}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center h-full bg-card/50 rounded-md p-4 text-center">
+                      <p className="text-muted-foreground">No badges tracked for {hero.name}.</p>
+                      <p className="text-xs mt-1 text-muted-foreground">You can add badges in the Manage Heroes & Badges page.</p>
+                    </div>
+                  )}
+                </ScrollArea>
+            </TabsContent>
+
+             <TabsContent value="constellation" className="flex-grow -mt-2">
+                {hero.id === 's76' ? (
+                  <HeroConstellation hero={hero} />
+                ) : (
+                   <div className="flex flex-col items-center justify-center h-full bg-card/50 rounded-md p-4 text-center">
+                      <p className="text-muted-foreground">Constellation view is not yet available for {hero.name}.</p>
+                   </div>
+                )}
+            </TabsContent>
+
           </div>
 
           {/* Right Column for Road to Max Level */}
@@ -211,7 +233,7 @@ const HeroDetailDialog: React.FC<HeroDetailDialogProps> = ({
               )}
               <RoadToMaxLevel hero={hero} maxLevel={HERO_MAX_LEVEL} />
           </div>
-        </div>
+        </Tabs>
 
         <DialogFooter className="px-6 py-4 border-t border-border mt-auto">
           <Button onClick={onClose} variant="outline">Close</Button>
@@ -222,3 +244,5 @@ const HeroDetailDialog: React.FC<HeroDetailDialogProps> = ({
 };
 
 export default HeroDetailDialog;
+
+    

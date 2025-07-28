@@ -1,5 +1,7 @@
 
 import type React from 'react';
+import type { MotionProps } from 'framer-motion';
+
 // BadgeDefinition is no longer directly imported here, as HeroChallenge will get its properties from badge-definitions.ts via badgeId
 
 export interface StoredHeroChallenge {
@@ -43,3 +45,5 @@ export interface LevelDetails {
 }
 
 export interface HeroCalculated extends Hero, LevelDetails {}
+
+    
