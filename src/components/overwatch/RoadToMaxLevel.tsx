@@ -103,7 +103,7 @@ const RoadToMaxLevel: React.FC<RoadToMaxLevelProps> = ({ hero, maxLevel }) => {
                         style={{ top: `calc(${heroPosition}%)`}}
                     >
                          <div className="w-6 h-px bg-primary group-hover:bg-primary/80 absolute left-1/2 -translate-x-1/2" />
-                         <ArrowRight className="absolute left-1/2 top-1/2 -translate-y-1/2 h-4 w-4 text-primary ml-4"/>
+                         <ArrowRight className="absolute left-1/2 -translate-y-1/2 h-4 w-4 text-primary ml-4"/>
                     </div>
                 </TooltipTrigger>
                 <TooltipContent side="right">
