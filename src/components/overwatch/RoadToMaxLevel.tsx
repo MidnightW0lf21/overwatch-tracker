@@ -5,7 +5,7 @@ import React, { useMemo } from 'react';
 import type { HeroCalculated } from '@/types/overwatch';
 import { calculateXpToReachLevel } from '@/lib/overwatch-utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Award, Star, CheckCircle2, ArrowRight } from 'lucide-react';
+import { Award, Star, CheckCircle2, ArrowLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { XP_PER_WIN_TYPE_BADGE_LEVEL, XP_PER_TIME_TYPE_BADGE_LEVEL } from '@/lib/badge-definitions';
@@ -103,7 +103,7 @@ const RoadToMaxLevel: React.FC<RoadToMaxLevelProps> = ({ hero, maxLevel }) => {
                         style={{ top: `calc(${heroPosition}%)`}}
                     >
                          <div className="w-6 h-px bg-primary group-hover:bg-primary/80 absolute left-1/2 -translate-x-1/2" />
-                         <ArrowRight className="absolute left-1/2 -translate-y-1/2 h-4 w-4 text-primary ml-4"/>
+                         <ArrowLeft className="absolute left-1/2 -translate-y-1/2 h-4 w-4 text-primary ml-4"/>
                     </div>
                 </TooltipTrigger>
                 <TooltipContent side="right">
