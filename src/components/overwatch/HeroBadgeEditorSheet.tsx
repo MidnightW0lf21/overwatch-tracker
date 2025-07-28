@@ -198,10 +198,20 @@ const HeroDetailDialog: React.FC<HeroDetailDialogProps> = ({
 
           {/* Right Column for Road to Max Level */}
           <div className="lg:col-span-1 lg:border-l lg:border-border lg:pl-4 flex flex-col">
-              <h3 className="text-lg font-semibold text-foreground/90 mb-3 flex items-center flex-shrink-0">
+              <h3 className="text-lg font-semibold text-foreground/90 mb-1 flex items-center flex-shrink-0">
                   <ClockIcon className="h-5 w-5 mr-2 text-muted-foreground" />
                   Road to Max Level
               </h3>
+               {estimatedTimeToMax && (
+                <div className="mb-3 pl-7">
+                  <p className="text-sm text-muted-foreground">
+                    Est. time to max: <span className="font-semibold text-foreground">{estimatedTimeToMax}</span>
+                  </p>
+                   {estimatedTimeToMax && !estimatedTimeToMax.includes("Max level") && !estimatedTimeToMax.includes("No time-based") && (
+                     <p className="text-xs text-muted-foreground/80">(based on 20 min/level for time badge)</p>
+                   )}
+                </div>
+              )}
               <RoadToMaxLevel hero={hero} maxLevel={HERO_MAX_LEVEL} />
           </div>
         </div>
