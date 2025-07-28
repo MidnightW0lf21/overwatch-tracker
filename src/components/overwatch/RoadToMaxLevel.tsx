@@ -7,6 +7,7 @@ import { calculateXpToReachLevel } from '@/lib/overwatch-utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Award, Star, CheckCircle2, TrendingUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
 
 interface RoadToMaxLevelProps {
   hero: HeroCalculated;
@@ -14,6 +15,15 @@ interface RoadToMaxLevelProps {
 }
 
 const RoadToMaxLevel: React.FC<RoadToMaxLevelProps> = ({ hero, maxLevel }) => {
+  const { toast } = useToast();
+
+  const handleMilestoneClick = (level: number, xpForLevel: number) => {
+    toast({
+      title: `Milestone: Level ${level}`,
+      description: `Total XP required to reach this level: ${xpForLevel.toLocaleString()}`,
+    });
+  };
+  
   const levelMilestones = useMemo(() => {
     const milestones = [1, 5, 10, 25, 50, 75, 100, 150, 200, 250, 300, 400, maxLevel];
     if (hero.personalGoalLevel > 0 && !milestones.includes(hero.personalGoalLevel)) {
@@ -94,9 +104,12 @@ const RoadToMaxLevel: React.FC<RoadToMaxLevelProps> = ({ hero, maxLevel }) => {
             <TooltipProvider key={level}>
                 <Tooltip>
                     <TooltipTrigger asChild>
-                        <div 
-                            className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2" 
+                        <button 
+                            type="button"
+                            onClick={() => handleMilestoneClick(level, xpForLevel)}
+                            className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 p-0 bg-transparent border-none cursor-pointer" 
                             style={{ top: `${position}%` }}
+                            aria-label={`Milestone Level ${level}`}
                         >
                              <div className={cn(
                                  "w-6 h-6 rounded-full flex items-center justify-center transition-colors duration-300",
@@ -104,7 +117,7 @@ const RoadToMaxLevel: React.FC<RoadToMaxLevelProps> = ({ hero, maxLevel }) => {
                              )}>
                                 <Icon className={cn("h-4 w-4", isCompleted ? "text-accent-foreground" : "text-muted-foreground")} />
                              </div>
-                        </div>
+                        </button>
                     </TooltipTrigger>
                     <TooltipContent side="left">
                         <p className="font-bold">Level {level} {level === hero.personalGoalLevel && "(Goal)"}</p>
