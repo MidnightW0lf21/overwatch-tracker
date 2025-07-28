@@ -114,33 +114,46 @@ const RoadToMaxLevel: React.FC<RoadToMaxLevelProps> = ({ hero, maxLevel }) => {
 
         {/* Milestone Markers */}
         <div className="absolute w-full h-full">
-            {levelMilestones.map(({ level, position, isCompleted, Icon, xpForLevel }) => (
-            <TooltipProvider key={level}>
-                <Tooltip>
-                    <TooltipTrigger asChild>
-                        <button 
-                            type="button"
-                            onClick={() => handleMilestoneClick(level, xpForLevel)}
-                            className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 p-0 bg-transparent border-none cursor-pointer" 
-                            style={{ top: `${position}%` }}
-                            aria-label={`Milestone Level ${level}`}
-                        >
-                             <div className={cn(
-                                 "w-6 h-6 rounded-full flex items-center justify-center transition-colors duration-300",
-                                 isCompleted ? "bg-accent text-accent-foreground" : "bg-card border-2 border-border"
-                             )}>
-                                <Icon className={cn("h-4 w-4", isCompleted ? "text-accent-foreground" : "text-muted-foreground")} />
-                             </div>
-                        </button>
-                    </TooltipTrigger>
-                    <TooltipContent side="left">
-                        <p className="font-bold">Level {level} {level === hero.personalGoalLevel && "(Goal)"}</p>
-                        <p>{xpForLevel.toLocaleString()} XP required</p>
-                        {hero.totalXp < xpForLevel && <p className="text-xs text-muted-foreground">({(xpForLevel - hero.totalXp).toLocaleString()} XP to go)</p>}
-                    </TooltipContent>
-                </Tooltip>
-            </TooltipProvider>
-            ))}
+            {levelMilestones.map(({ level, position, isCompleted, Icon, xpForLevel }) => {
+                const xpToGo = xpForLevel - hero.totalXp;
+                const winsNeeded = xpToGo > 0 ? Math.ceil(xpToGo / XP_PER_WIN_TYPE_BADGE_LEVEL) : 0;
+                const timeBadgesNeeded = xpToGo > 0 ? Math.ceil(xpToGo / XP_PER_TIME_TYPE_BADGE_LEVEL) : 0;
+                return (
+                    <TooltipProvider key={level}>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <button 
+                                    type="button"
+                                    onClick={() => handleMilestoneClick(level, xpForLevel)}
+                                    className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 p-0 bg-transparent border-none cursor-pointer" 
+                                    style={{ top: `${position}%` }}
+                                    aria-label={`Milestone Level ${level}`}
+                                >
+                                    <div className={cn(
+                                        "w-6 h-6 rounded-full flex items-center justify-center transition-colors duration-300",
+                                        isCompleted ? "bg-accent text-accent-foreground" : "bg-card border-2 border-border"
+                                    )}>
+                                        <Icon className={cn("h-4 w-4", isCompleted ? "text-accent-foreground" : "text-muted-foreground")} />
+                                    </div>
+                                </button>
+                            </TooltipTrigger>
+                            <TooltipContent side="left">
+                                <p className="font-bold">Level {level} {level === hero.personalGoalLevel && "(Goal)"}</p>
+                                <p>{xpForLevel.toLocaleString()} XP required</p>
+                                {xpToGo > 0 && (
+                                    <>
+                                        <p className="text-xs text-muted-foreground">({xpToGo.toLocaleString()} XP to go)</p>
+                                        <div className="mt-2 pt-2 border-t border-border/50 text-xs text-muted-foreground">
+                                            <p>~{winsNeeded} 'Win' Badges</p>
+                                            <p>~{timeBadgesNeeded} 'Time' Badges</p>
+                                        </div>
+                                    </>
+                                )}
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
+                )
+            })}
         </div>
       </div>
     </div>
