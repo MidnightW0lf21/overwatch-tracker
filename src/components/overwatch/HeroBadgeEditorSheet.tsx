@@ -207,9 +207,6 @@ const HeroDetailDialog: React.FC<HeroDetailDialogProps> = ({
                   <p className="text-sm text-muted-foreground">
                     Est. time to max: <span className="font-semibold text-foreground">{estimatedTimeToMax}</span>
                   </p>
-                   {estimatedTimeToMax && !estimatedTimeToMax.includes("Max level") && !estimatedTimeToMax.includes("No time-based") && (
-                     <p className="text-xs text-muted-foreground/80">(based on 20 min/level for time badge)</p>
-                   )}
                 </div>
               )}
               <RoadToMaxLevel hero={hero} maxLevel={HERO_MAX_LEVEL} />
