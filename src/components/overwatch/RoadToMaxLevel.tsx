@@ -8,6 +8,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Award, Star, CheckCircle2, TrendingUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import { XP_PER_WIN_TYPE_BADGE_LEVEL, XP_PER_TIME_TYPE_BADGE_LEVEL } from '@/lib/badge-definitions';
+
 
 interface RoadToMaxLevelProps {
   hero: HeroCalculated;
@@ -18,9 +20,21 @@ const RoadToMaxLevel: React.FC<RoadToMaxLevelProps> = ({ hero, maxLevel }) => {
   const { toast } = useToast();
 
   const handleMilestoneClick = (level: number, xpForLevel: number) => {
+    const xpToGo = xpForLevel - hero.totalXp;
+
+    let description = `Total XP required: ${xpForLevel.toLocaleString()}.`;
+
+    if (xpToGo > 0) {
+      const winsNeeded = Math.ceil(xpToGo / XP_PER_WIN_TYPE_BADGE_LEVEL);
+      const timeBadgesNeeded = Math.ceil(xpToGo / XP_PER_TIME_TYPE_BADGE_LEVEL);
+      
+      description += ` You need ${xpToGo.toLocaleString()} more XP. That's about ${winsNeeded} 'Win' badge levels or ${timeBadgesNeeded} 'Time Played' badge levels.`;
+    }
+
+
     toast({
       title: `Milestone: Level ${level}`,
-      description: `Total XP required to reach this level: ${xpForLevel.toLocaleString()}`,
+      description: description,
     });
   };
   
