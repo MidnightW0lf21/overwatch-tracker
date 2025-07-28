@@ -5,7 +5,7 @@ import React, { useMemo } from 'react';
 import type { HeroCalculated } from '@/types/overwatch';
 import { calculateXpToReachLevel } from '@/lib/overwatch-utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Award, Star, CheckCircle2, TrendingUp } from 'lucide-react';
+import { Award, Star, CheckCircle2, ArrowLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { XP_PER_WIN_TYPE_BADGE_LEVEL, XP_PER_TIME_TYPE_BADGE_LEVEL } from '@/lib/badge-definitions';
@@ -103,7 +103,7 @@ const RoadToMaxLevel: React.FC<RoadToMaxLevelProps> = ({ hero, maxLevel }) => {
                         style={{ top: `calc(${heroPosition}%)`}}
                     >
                          <div className="w-6 h-px bg-primary group-hover:bg-primary/80 absolute left-1/2 -translate-x-1/2" />
-                         <TrendingUp className="absolute left-1/2 top-1/2 -translate-y-1/2 h-4 w-4 text-primary ml-2"/>
+                         <ArrowLeft className="absolute left-1/2 top-1/2 -translate-y-1/2 h-4 w-4 text-primary -ml-8"/>
                     </div>
                 </TooltipTrigger>
                 <TooltipContent side="right">
@@ -115,7 +115,7 @@ const RoadToMaxLevel: React.FC<RoadToMaxLevelProps> = ({ hero, maxLevel }) => {
 
         {/* Milestone Markers */}
         <div className="absolute w-full h-full">
-            {levelMilestones.map(({ level, position, isCompleted, Icon, xpForLevel }) => {
+            {levelMilestones.map(({ level, position, isCompleted, isPersonalGoal, Icon, xpForLevel }) => {
                 const xpToGo = xpForLevel - hero.totalXp;
                 const winsNeeded = xpToGo > 0 ? Math.ceil(xpToGo / XP_PER_WIN_TYPE_BADGE_LEVEL) : 0;
                 const timeBadgesNeeded = xpToGo > 0 ? Math.ceil(xpToGo / XP_PER_TIME_TYPE_BADGE_LEVEL) : 0;
@@ -131,10 +131,10 @@ const RoadToMaxLevel: React.FC<RoadToMaxLevelProps> = ({ hero, maxLevel }) => {
                                     aria-label={`Milestone Level ${level}`}
                                 >
                                     <div className={cn(
-                                        "w-6 h-6 rounded-full flex items-center justify-center transition-colors duration-300",
+                                        "w-6 h-6 rounded-full flex items-center justify-center transition-colors duration-300 z-10",
                                         isCompleted ? "bg-accent text-accent-foreground" : "bg-card border-2 border-border"
                                     )}>
-                                        <Icon className={cn("h-4 w-4", isCompleted ? "text-accent-foreground" : "text-muted-foreground")} />
+                                        <Icon className={cn("h-4 w-4", isCompleted ? "text-accent-foreground" : "text-muted-foreground", isPersonalGoal && "text-green-400")} />
                                     </div>
                                 </button>
                             </TooltipTrigger>
