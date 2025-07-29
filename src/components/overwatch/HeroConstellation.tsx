@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import type { Hero } from '@/types/overwatch';
 import { getBadgeDefinition } from '@/lib/badge-definitions';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -12,12 +12,12 @@ interface HeroConstellationProps {
 }
 
 const s76ConstellationLayout: Record<string, { top: string; left: string }> = {
+  s76_dmg_dealt: { top: '20%', left: '30%' },
+  s76_critical_hits: { top: '40%', left: '15%' },
+  s76_helix_direct: { top: '68%', left: '25%' },
+  s76_helix_final_blows: { top: '45%', left: '40%' },
   s76_biotic_healing: { top: '50%', left: '65%' },
   s76_visor_kills: { top: '25%', left: '70%' },
-  s76_helix_final_blows: { top: '45%', left: '40%' },
-  s76_helix_direct: { top: '68%', left: '25%' },
-  s76_critical_hits: { top: '40%', left: '15%' },
-  s76_dmg_dealt: { top: '20%', left: '30%' },
 };
 
 const s76ConnectionOrder: string[] = [
@@ -59,7 +59,6 @@ const HeroConstellation: React.FC<HeroConstellationProps> = ({ hero }) => {
   const filteredChallenges = useMemo(() => hero.challenges.filter(c => {
     const badgeDef = getBadgeDefinition(c.badgeId);
     if (!badgeDef) return false;
-    // Exclude wins and time played from this specific visualization
     const isExcluded = badgeDef.id === 's76_wins' || badgeDef.id === 's76_time_played';
     return !isExcluded;
   }), [hero.challenges]);
@@ -69,7 +68,7 @@ const HeroConstellation: React.FC<HeroConstellationProps> = ({ hero }) => {
     const levels = filteredChallenges.map(c => c.level);
     const min = Math.min(...levels);
     const max = Math.max(...levels);
-    return { minLevel: min, maxLevel: max };
+    return { minLevel: min > 0 ? min : 1, maxLevel: max > min ? max : min + 1 };
   }, [filteredChallenges]);
 
   const badgeIdToPositionMap = useMemo(() => {
@@ -91,7 +90,7 @@ const HeroConstellation: React.FC<HeroConstellationProps> = ({ hero }) => {
     const segments = [];
     const validConnectionOrder = s76ConnectionOrder.filter(id => badgeIdToPositionMap.has(id));
 
-    for (let i = 0; i < validConnectionOrder.length -1; i++) {
+    for (let i = 0; i < validConnectionOrder.length - 1; i++) {
         const currentId = validConnectionOrder[i];
         const nextId = validConnectionOrder[i+1];
         const startPos = badgeIdToPositionMap.get(currentId);
@@ -100,9 +99,9 @@ const HeroConstellation: React.FC<HeroConstellationProps> = ({ hero }) => {
         if (startPos && endPos) {
             segments.push({
                 path: `M ${startPos.left} ${startPos.top} L ${endPos.left} ${endPos.top}`,
-                key: `line-${currentId}-${nextId}-${i}`,
-                duration: 2, // Duration for the runner animation
-                delay: i * 2, // Delay to chain animations
+                key: `line-${currentId}-${nextId}`,
+                duration: 2,
+                delay: i * 2, 
             });
         }
     }
@@ -125,7 +124,7 @@ const HeroConstellation: React.FC<HeroConstellationProps> = ({ hero }) => {
                     <path
                         key={`path-def-${seg.key}`}
                         id={`path-${seg.key}`}
-                        d={seg.path.replace(/,/g, ' ')} // Use space separator for d attribute
+                        d={seg.path}
                         fill="none"
                     />
                 ))}
@@ -135,41 +134,37 @@ const HeroConstellation: React.FC<HeroConstellationProps> = ({ hero }) => {
             {lineSegments.map((seg) => (
                 <path
                     key={`static-${seg.key}`}
-                    d={seg.path.replace(/,/g, ' ')}
+                    d={seg.path}
                     stroke="hsl(var(--primary) / 0.2)"
                     strokeWidth="1"
                 />
             ))}
             
-            {/* The animated "runner" */}
-            <AnimatePresence>
-              {lineSegments.map((seg) => (
-                  <motion.circle
-                      key={`runner-${seg.key}`}
-                      r="4"
-                      fill="hsl(var(--primary))"
-                      cx="0"
-                      cy="0"
-                      style={{
-                          boxShadow: '0 0 10px 2px hsl(var(--primary))',
-                          filter: 'blur(1px)'
-                      }}
-                  >
-                      <animateMotion
-                          dur={`${seg.duration}s`}
-                          begin={`${seg.delay}s`}
-                          repeatCount="indefinite"
-                          rotate="auto"
-                          fill="freeze"
-                      >
-                          <mpath href={`#path-${seg.key}`} />
-                      </animateMotion>
-                  </motion.circle>
-              ))}
-            </AnimatePresence>
+            {/* The animated "runner" element */}
+            {lineSegments.map((seg) => (
+              <g key={`runner-group-${seg.key}`}>
+                <circle
+                    r="4"
+                    fill="hsl(var(--primary))"
+                    style={{
+                        boxShadow: '0 0 10px 2px hsl(var(--primary))',
+                        filter: 'blur(1px)'
+                    }}
+                >
+                    <animateMotion
+                        dur={`${seg.duration}s`}
+                        begin={`${seg.delay}s`}
+                        repeatCount="indefinite"
+                        rotate="auto"
+                    >
+                        <mpath href={`#path-${seg.key}`} />
+                    </animateMotion>
+                </circle>
+              </g>
+            ))}
         </svg>
 
-        {filteredChallenges.map((challenge, index) => {
+        {filteredChallenges.map((challenge) => {
           const { size, opacity, pulse, aura } = getStarSizeAndBrightness(challenge.level, minLevel, maxLevel);
           const badgeDef = getBadgeDefinition(challenge.badgeId);
           if (!badgeDef) return null;
