@@ -100,8 +100,6 @@ const HeroConstellation: React.FC<HeroConstellationProps> = ({ hero }) => {
             segments.push({
                 path: `M ${startPos.left} ${startPos.top} L ${endPos.left} ${endPos.top}`,
                 key: `line-${currentId}-${nextId}`,
-                duration: 2,
-                delay: i * 2, 
             });
         }
     }
@@ -119,48 +117,14 @@ const HeroConstellation: React.FC<HeroConstellationProps> = ({ hero }) => {
       
       <div className="relative w-full h-full z-10">
         <svg className="absolute top-0 left-0 w-full h-full" style={{ zIndex: 1, overflow: 'visible' }}>
-            <defs>
-                {lineSegments.map((seg) => (
-                    <path
-                        key={`path-def-${seg.key}`}
-                        id={`path-${seg.key}`}
-                        d={seg.path}
-                        fill="none"
-                    />
-                ))}
-            </defs>
-
-            {/* Static lines underneath the runner */}
             {lineSegments.map((seg) => (
                 <path
-                    key={`static-${seg.key}`}
+                    key={seg.key}
                     d={seg.path}
-                    stroke="hsl(var(--primary) / 0.2)"
-                    strokeWidth="1"
+                    stroke="hsl(var(--primary) / 0.3)"
+                    strokeWidth="1.5"
+                    strokeDasharray="4 4"
                 />
-            ))}
-            
-            {/* The animated "runner" element */}
-            {lineSegments.map((seg) => (
-              <g key={`runner-group-${seg.key}`}>
-                <circle
-                    r="4"
-                    fill="hsl(var(--primary))"
-                    style={{
-                        boxShadow: '0 0 10px 2px hsl(var(--primary))',
-                        filter: 'blur(1px)'
-                    }}
-                >
-                    <animateMotion
-                        dur={`${seg.duration}s`}
-                        begin={`${seg.delay}s`}
-                        repeatCount="indefinite"
-                        rotate="auto"
-                    >
-                        <mpath href={`#path-${seg.key}`} />
-                    </animateMotion>
-                </circle>
-              </g>
             ))}
         </svg>
 
