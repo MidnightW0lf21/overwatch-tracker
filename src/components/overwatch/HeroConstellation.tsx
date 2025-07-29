@@ -1,9 +1,8 @@
 
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { cn } from '@/lib/utils';
 import type { Hero } from '@/types/overwatch';
 import { getBadgeDefinition } from '@/lib/badge-definitions';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -12,10 +11,7 @@ interface HeroConstellationProps {
   hero: Hero;
 }
 
-// Define a more abstract, visually appealing shape for Soldier: 76's constellation
 const s76ConstellationLayout: Record<string, { top: string; left: string }> = {
-  s76_wins: { top: '85%', left: '75%' },
-  s76_time_played: { top: '65%', left: '88%' },
   s76_biotic_healing: { top: '50%', left: '65%' },
   s76_visor_kills: { top: '25%', left: '70%' },
   s76_helix_final_blows: { top: '45%', left: '40%' },
@@ -24,25 +20,30 @@ const s76ConstellationLayout: Record<string, { top: string; left: string }> = {
   s76_dmg_dealt: { top: '20%', left: '30%' },
 };
 
-// Define the explicit order for drawing connecting lines
 const s76ConnectionOrder: string[] = [
   's76_dmg_dealt',
   's76_critical_hits',
   's76_helix_direct',
-  's76_wins',
-  's76_time_played',
-  's76_visor_kills',
-  's76_biotic_healing',
   's76_helix_final_blows',
-  's76_dmg_dealt',
+  's76_biotic_healing',
+  's76_visor_kills',
+  's76_dmg_dealt', // loop back to start
 ];
 
 
-const getStarSizeAndBrightness = (level: number) => {
-  if (level >= 251) return { size: 20, opacity: 1, pulse: true, aura: true };
-  if (level >= 101) return { size: 16, opacity: 0.95, pulse: true, aura: false };
-  if (level >= 26) return { size: 12, opacity: 0.85, pulse: false, aura: false };
-  return { size: 8, opacity: 0.7, pulse: false, aura: false };
+const getStarSizeAndBrightness = (level: number, minLevel: number, maxLevel: number) => {
+  const minSize = 8;
+  const maxSize = 24;
+
+  if (maxLevel === minLevel) return { size: (minSize + maxSize) / 2, opacity: 1, pulse: level > 100, aura: level > 250 };
+
+  const levelRange = maxLevel - minLevel;
+  const sizeRange = maxSize - minSize;
+  const levelFraction = (level - minLevel) / levelRange;
+  const size = minSize + (levelFraction * sizeRange);
+  const opacity = 0.7 + (levelFraction * 0.3);
+
+  return { size, opacity, pulse: level > 100, aura: level > 250 };
 };
 
 const HeroConstellation: React.FC<HeroConstellationProps> = ({ hero }) => {
@@ -54,27 +55,57 @@ const HeroConstellation: React.FC<HeroConstellationProps> = ({ hero }) => {
     );
   }
   
-  const badgeIdToPositionMap = new Map<string, { top: string; left: string }>();
-  hero.challenges.forEach((challenge, index) => {
-    const badgeDef = getBadgeDefinition(challenge.badgeId);
-    if (badgeDef) {
-       const layoutKey = badgeDef.id;
-       const position = s76ConstellationLayout[layoutKey] || { top: `${10 + (index * 5)}%`, left: `${10 + (index * 5)}%` };
-       badgeIdToPositionMap.set(layoutKey, position);
-    }
-  });
-  
-  const lineSegments = s76ConnectionOrder.slice(0, -1).map((currentId, index) => {
-    const nextId = s76ConnectionOrder[index + 1];
-    const startPos = badgeIdToPositionMap.get(currentId);
-    const endPos = badgeIdToPositionMap.get(nextId);
-    
-    if (startPos && endPos) {
-      return { x1: startPos.left, y1: startPos.top, x2: endPos.left, y2: endPos.top, key: `line-${currentId}-${nextId}-${index}` };
-    }
-    return null;
-  }).filter(Boolean);
+  const filteredChallenges = useMemo(() => hero.challenges.filter(c => {
+    const badgeDef = getBadgeDefinition(c.badgeId);
+    if (!badgeDef) return false;
+    const isExcluded = badgeDef.id === 's76_wins' || badgeDef.id === 's76_time_played';
+    return !isExcluded;
+  }), [hero.challenges]);
 
+  const { minLevel, maxLevel } = useMemo(() => {
+    if (filteredChallenges.length === 0) return { minLevel: 1, maxLevel: 1 };
+    const levels = filteredChallenges.map(c => c.level);
+    return {
+        minLevel: Math.min(...levels),
+        maxLevel: Math.max(...levels),
+    };
+  }, [filteredChallenges]);
+
+  const badgeIdToPositionMap = useMemo(() => {
+      const map = new Map<string, { top: string; left: string }>();
+      filteredChallenges.forEach((challenge) => {
+          const badgeDef = getBadgeDefinition(challenge.badgeId);
+          if (badgeDef) {
+              const layoutKey = badgeDef.id;
+              const position = s76ConstellationLayout[layoutKey];
+              if (position) {
+                  map.set(layoutKey, position);
+              }
+          }
+      });
+      return map;
+  }, [filteredChallenges]);
+  
+  const lineSegments = useMemo(() => {
+    const segments = [];
+    const validConnectionOrder = s76ConnectionOrder.filter(id => badgeIdToPositionMap.has(id));
+
+    for (let i = 0; i < validConnectionOrder.length -1; i++) {
+        const currentId = validConnectionOrder[i];
+        const nextId = validConnectionOrder[i + 1];
+        const startPos = badgeIdToPositionMap.get(currentId);
+        const endPos = badgeIdToPositionMap.get(nextId);
+
+        if (startPos && endPos) {
+            segments.push({
+                path: `M ${startPos.left},${startPos.top} L ${endPos.left},${endPos.top}`,
+                key: `line-${currentId}-${nextId}-${i}`,
+                delay: i * 0.5, // Stagger animation start
+            });
+        }
+    }
+    return segments;
+  }, [badgeIdToPositionMap]);
 
   return (
     <div className="w-full h-full bg-background rounded-lg p-4 relative overflow-hidden">
@@ -86,32 +117,25 @@ const HeroConstellation: React.FC<HeroConstellationProps> = ({ hero }) => {
       />
       
       <div className="relative w-full h-full z-10">
-        <svg className="absolute top-0 left-0 w-full h-full" style={{ zIndex: 1 }}>
-          <defs>
-              <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="hsl(var(--primary) / 0.1)" />
-              <stop offset="50%" stopColor="hsl(var(--primary) / 0.5)" />
-              <stop offset="100%" stopColor="hsl(var(--primary) / 0.1)" />
-              </linearGradient>
-          </defs>
+        <svg className="absolute top-0 left-0 w-full h-full" style={{ zIndex: 1, overflow: 'visible' }}>
           {lineSegments.map((seg) =>
               seg && (
-              <line
+              <motion.path
                   key={seg.key}
-                  x1={seg.x1}
-                  y1={seg.y1}
-                  x2={seg.x2}
-                  y2={seg.y2}
-                  stroke="url(#lineGradient)"
+                  d={seg.path}
+                  stroke="hsl(var(--primary) / 0.5)"
                   strokeWidth="1.5"
                   strokeLinecap="round"
+                  initial={{ pathLength: 0 }}
+                  animate={{ pathLength: 1 }}
+                  transition={{ duration: 0.5, ease: "easeInOut", delay: seg.delay }}
               />
               )
           )}
         </svg>
 
-        {hero.challenges.map((challenge, index) => {
-          const { size, opacity, pulse, aura } = getStarSizeAndBrightness(challenge.level);
+        {filteredChallenges.map((challenge, index) => {
+          const { size, opacity, pulse, aura } = getStarSizeAndBrightness(challenge.level, minLevel, maxLevel);
           const badgeDef = getBadgeDefinition(challenge.badgeId);
           if (!badgeDef) return null;
 
