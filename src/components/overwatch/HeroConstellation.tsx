@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useMemo } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import type { Hero } from '@/types/overwatch';
 import { getBadgeDefinition } from '@/lib/badge-definitions';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -27,15 +27,15 @@ const s76ConnectionOrder: string[] = [
   's76_helix_final_blows',
   's76_biotic_healing',
   's76_visor_kills',
-  's76_dmg_dealt', // loop back to start
 ];
-
 
 const getStarSizeAndBrightness = (level: number, minLevel: number, maxLevel: number) => {
   const minSize = 8;
   const maxSize = 24;
 
-  if (maxLevel === minLevel) return { size: (minSize + maxSize) / 2, opacity: 1, pulse: level > 100, aura: level > 250 };
+  if (maxLevel === minLevel || level <= minLevel) return { size: minSize, opacity: 0.7, pulse: false, aura: false };
+  if (level >= maxLevel) return { size: maxSize, opacity: 1, pulse: level > 100, aura: level > 250 };
+
 
   const levelRange = maxLevel - minLevel;
   const sizeRange = maxSize - minSize;
@@ -45,6 +45,7 @@ const getStarSizeAndBrightness = (level: number, minLevel: number, maxLevel: num
 
   return { size, opacity, pulse: level > 100, aura: level > 250 };
 };
+
 
 const HeroConstellation: React.FC<HeroConstellationProps> = ({ hero }) => {
   if (hero.id !== 's76') {
@@ -58,6 +59,7 @@ const HeroConstellation: React.FC<HeroConstellationProps> = ({ hero }) => {
   const filteredChallenges = useMemo(() => hero.challenges.filter(c => {
     const badgeDef = getBadgeDefinition(c.badgeId);
     if (!badgeDef) return false;
+    // Exclude wins and time played from this specific visualization
     const isExcluded = badgeDef.id === 's76_wins' || badgeDef.id === 's76_time_played';
     return !isExcluded;
   }), [hero.challenges]);
@@ -65,10 +67,9 @@ const HeroConstellation: React.FC<HeroConstellationProps> = ({ hero }) => {
   const { minLevel, maxLevel } = useMemo(() => {
     if (filteredChallenges.length === 0) return { minLevel: 1, maxLevel: 1 };
     const levels = filteredChallenges.map(c => c.level);
-    return {
-        minLevel: Math.min(...levels),
-        maxLevel: Math.max(...levels),
-    };
+    const min = Math.min(...levels);
+    const max = Math.max(...levels);
+    return { minLevel: min, maxLevel: max };
   }, [filteredChallenges]);
 
   const badgeIdToPositionMap = useMemo(() => {
@@ -92,15 +93,16 @@ const HeroConstellation: React.FC<HeroConstellationProps> = ({ hero }) => {
 
     for (let i = 0; i < validConnectionOrder.length -1; i++) {
         const currentId = validConnectionOrder[i];
-        const nextId = validConnectionOrder[i + 1];
+        const nextId = validConnectionOrder[i+1];
         const startPos = badgeIdToPositionMap.get(currentId);
         const endPos = badgeIdToPositionMap.get(nextId);
 
         if (startPos && endPos) {
             segments.push({
-                path: `M ${startPos.left},${startPos.top} L ${endPos.left},${endPos.top}`,
+                path: `M ${startPos.left} ${startPos.top} L ${endPos.left} ${endPos.top}`,
                 key: `line-${currentId}-${nextId}-${i}`,
-                delay: i * 0.5, // Stagger animation start
+                duration: 2, // Duration for the runner animation
+                delay: i * 2, // Delay to chain animations
             });
         }
     }
@@ -118,20 +120,53 @@ const HeroConstellation: React.FC<HeroConstellationProps> = ({ hero }) => {
       
       <div className="relative w-full h-full z-10">
         <svg className="absolute top-0 left-0 w-full h-full" style={{ zIndex: 1, overflow: 'visible' }}>
-          {lineSegments.map((seg) =>
-              seg && (
-              <motion.path
-                  key={seg.key}
-                  d={seg.path}
-                  stroke="hsl(var(--primary) / 0.5)"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  initial={{ pathLength: 0 }}
-                  animate={{ pathLength: 1 }}
-                  transition={{ duration: 0.5, ease: "easeInOut", delay: seg.delay }}
-              />
-              )
-          )}
+            <defs>
+                {lineSegments.map((seg) => (
+                    <path
+                        key={`path-def-${seg.key}`}
+                        id={`path-${seg.key}`}
+                        d={seg.path.replace(/,/g, ' ')} // Use space separator for d attribute
+                        fill="none"
+                    />
+                ))}
+            </defs>
+
+            {/* Static lines underneath the runner */}
+            {lineSegments.map((seg) => (
+                <path
+                    key={`static-${seg.key}`}
+                    d={seg.path.replace(/,/g, ' ')}
+                    stroke="hsl(var(--primary) / 0.2)"
+                    strokeWidth="1"
+                />
+            ))}
+            
+            {/* The animated "runner" */}
+            <AnimatePresence>
+              {lineSegments.map((seg) => (
+                  <motion.circle
+                      key={`runner-${seg.key}`}
+                      r="4"
+                      fill="hsl(var(--primary))"
+                      cx="0"
+                      cy="0"
+                      style={{
+                          boxShadow: '0 0 10px 2px hsl(var(--primary))',
+                          filter: 'blur(1px)'
+                      }}
+                  >
+                      <animateMotion
+                          dur={`${seg.duration}s`}
+                          begin={`${seg.delay}s`}
+                          repeatCount="indefinite"
+                          rotate="auto"
+                          fill="freeze"
+                      >
+                          <mpath href={`#path-${seg.key}`} />
+                      </animateMotion>
+                  </motion.circle>
+              ))}
+            </AnimatePresence>
         </svg>
 
         {filteredChallenges.map((challenge, index) => {
