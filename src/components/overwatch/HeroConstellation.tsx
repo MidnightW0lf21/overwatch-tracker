@@ -27,7 +27,9 @@ const s76ConnectionOrder: string[] = [
   's76_helix_final_blows',
   's76_biotic_healing',
   's76_visor_kills',
+  's76_dmg_dealt' // Optional: connect back to start
 ];
+
 
 const getStarSizeAndBrightness = (level: number, minLevel: number, maxLevel: number) => {
   const minSize = 8;
