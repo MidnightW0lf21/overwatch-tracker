@@ -9,15 +9,21 @@ import { ArrowLeftIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import type { HeroCalculated, LevelDetails, StoredHero } from '@/types/overwatch';
+import type { HeroCalculated, LevelDetails, StoredHero, StoredHeroChallenge } from '@/types/overwatch';
 import { achievementsList, calculateTotalTimePlayedMinutes } from '@/lib/achievement-utils';
-import { calculateLevelDetails, calculateTotalXP, hydrateHeroes, initialHeroesData, calculateXpToReachLevel } from '@/lib/overwatch-utils';
+import { calculateLevelDetails, calculateTotalXP, hydrateHeroes, initialHeroesData } from '@/lib/overwatch-utils';
 import { getBadgeDefinition } from '@/lib/badge-definitions';
 
 // No static metadata here as it's a client component primarily
 // export const metadata: Metadata = { ... }; 
 
 const LOCAL_STORAGE_KEY = 'overwatchProgressionData_v3';
+
+interface ExportData {
+  version: string;
+  heroes: StoredHero[];
+}
+
 
 export default function AchievementsPage() {
   const [heroes, setHeroes] = useState<HeroCalculated[]>([]);
@@ -30,11 +36,11 @@ export default function AchievementsPage() {
 
       if (storedDataString) {
         try {
-          const parsedJson = JSON.parse(storedDataString);
-          if (typeof parsedJson === 'object' && parsedJson !== null && 'version' in parsedJson && 'heroes' in parsedJson && Array.isArray(parsedJson.heroes)) {
-            storedHeroesData = parsedJson.heroes;
-          } else if (Array.isArray(parsedJson)) {
-            storedHeroesData = parsedJson; // Legacy format
+          const parsedJson: ExportData | StoredHero[] = JSON.parse(storedDataString);
+           if (typeof parsedJson === 'object' && parsedJson !== null && 'version' in parsedJson && 'heroes' in parsedJson && Array.isArray((parsedJson as ExportData).heroes)) {
+             storedHeroesData = (parsedJson as ExportData).heroes;
+           } else if (Array.isArray(parsedJson)) {
+            storedHeroesData = parsedJson as StoredHero[]; // Legacy format
           } else {
             throw new Error("Invalid data structure");
           }
@@ -84,7 +90,8 @@ export default function AchievementsPage() {
   const globalLevelDetails: LevelDetails | undefined = useMemo(() => {
     if (isLoading || heroes.length === 0) return undefined;
     const totalGlobalXp = heroes.reduce((sum, hero) => sum + hero.totalXp, 0);
-    return calculateLevelDetails(totalGlobalXp);
+    const details = calculateLevelDetails(totalGlobalXp);
+    return { ...details, totalXp: totalGlobalXp };
   }, [heroes, isLoading]);
 
   const totalTimePlayedMinutes = useMemo(() => {

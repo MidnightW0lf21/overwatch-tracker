@@ -1,7 +1,6 @@
 
 import type { Achievement, HeroCalculated, LevelDetails } from '@/types/achievements';
 import { Medal, Star, Clock, Zap, Trophy, Shield, Swords, Users, TrendingUp, Award } from 'lucide-react';
-import { calculateXpToReachLevel } from '@/lib/overwatch-utils';
 import { getBadgeDefinition, XP_PER_TIME_TYPE_BADGE_LEVEL } from '@/lib/badge-definitions';
 
 
@@ -129,7 +128,7 @@ export const achievementsList: Achievement[] = [
     description: 'Reach Level 100 with all available heroes.',
     icon: TrendingUp,
     category: 'Hero Specific',
-    isUnlocked: (heroes) => heroes.length > 0 && heroes.every(hero => hero.level >= 50),
+    isUnlocked: (heroes) => heroes.length > 0 && heroes.every(hero => hero.level >= 100),
   },
 
   // Completion Milestones
@@ -149,17 +148,13 @@ export const achievementsList: Achievement[] = [
     category: 'Global',
     isUnlocked: (_, globalLevelDetails) => {
         if (!globalLevelDetails) return false;
-        // Total XP for global level 500 is the XP to reach level 501.
-        const xpForGlobal500 = calculateXpToReachLevel(500 + 1); 
-        // This achievement is for earning 1M XP BEYOND what's needed for Global Level 500.
-        // Or just 1M total if that's more intuitive. Let's go with 1M total.
         return globalLevelDetails.totalXp >= 1000000;
     },
   },
   {
     id: 'all_badges_one_hero_max',
     title: 'Badge Collector',
-    description: 'Max out all badges for a single hero (acquire 2500 per badge).',
+    description: 'Max out all badges for a single hero (acquire level 2500 for each badge).',
     icon: Shield,
     category: 'Completion',
     isUnlocked: (heroes) => {
