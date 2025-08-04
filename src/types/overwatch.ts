@@ -3,6 +3,7 @@ import type React from 'react';
 import type { MotionProps } from 'framer-motion';
 
 // BadgeDefinition is no longer directly imported here, as HeroChallenge will get its properties from badge-definitions.ts via badgeId
+export type Role = 'Tank' | 'Damage' | 'Support';
 
 export interface StoredHeroChallenge {
   id: string; // Unique ID for this specific badge instance on a hero
@@ -25,6 +26,7 @@ export interface Hero {
   portraitUrl: string;
   personalGoalLevel: number;
   challenges: HeroChallenge[];
+  role?: Role;
 }
 
 export interface StoredHero {
@@ -45,5 +47,3 @@ export interface LevelDetails {
 }
 
 export interface HeroCalculated extends Hero, LevelDetails {}
-
-    

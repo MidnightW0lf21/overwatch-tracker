@@ -6,7 +6,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import Image from 'next/image';
 import HeroCard from '@/components/overwatch/HeroCard';
 import HeroDetailDialog from '@/components/overwatch/HeroBadgeEditorSheet';
-import type { HeroCalculated, StoredHero, StoredHeroChallenge, Hero } from '@/types/overwatch';
+import type { HeroCalculated, StoredHero, StoredHeroChallenge, Hero, Role } from '@/types/overwatch';
 import {
   initialHeroesData,
   calculateTotalXP,
@@ -19,7 +19,7 @@ import { getBadgeDefinition, XP_PER_HERO_TYPE_BADGE_LEVEL, XP_PER_TIME_TYPE_BADG
 import { Toaster } from '@/components/ui/toaster';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
-import { InfoIcon, SettingsIcon, StarIcon, ClockIcon, TrophyIcon as AchievementIcon } from 'lucide-react';
+import { InfoIcon, SettingsIcon, StarIcon, ClockIcon, TrophyIcon as AchievementIcon, Shield, Swords, HeartPulse } from 'lucide-react';
 import Link from 'next/link';
 import {
   Tooltip,
@@ -29,6 +29,8 @@ import {
 } from "@/components/ui/tooltip";
 import { Progress } from '@/components/ui/progress';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { getHeroRole } from '@/lib/hero-roles';
+import { cn } from '@/lib/utils';
 
 
 const LOCAL_STORAGE_KEY = 'overwatchProgressionData_v3';
@@ -56,7 +58,8 @@ export default function Home() {
       });
       const totalXp = calculateTotalXP(challengesForXPCalc);
       const levelDetails = calculateLevelDetails(totalXp);
-      return { ...hero, totalXp, ...levelDetails };
+      const role = getHeroRole(hero.id);
+      return { ...hero, totalXp, ...levelDetails, role };
     });
     setHeroes(calculatedHeroes.sort((a, b) => b.totalXp - a.totalXp));
   }, []);
@@ -254,7 +257,8 @@ export default function Home() {
 
         const totalXp = calculateTotalXP(challengesForXPCalc);
         const levelDetails = calculateLevelDetails(totalXp);
-        return { ...h, challenges: updatedChallenges, totalXp, ...levelDetails };
+        const role = getHeroRole(h.id);
+        return { ...h, challenges: updatedChallenges, totalXp, ...levelDetails, role };
       }
       return h;
     });
@@ -397,6 +401,59 @@ export default function Home() {
     return formatTotalTimeToMaxAllHeroes(totalEstimatedTimeToMaxAllHeroesInMinutes);
   }, [totalEstimatedTimeToMaxAllHeroesInMinutes, heroes, formatTotalTimeToMaxAllHeroes]);
 
+  const roleProgress = useMemo(() => {
+    const roles: Role[] = ['Tank', 'Damage', 'Support'];
+    const progress: Record<Role, { heroCount: number; totalLevels: number; avgLevel: number; progressPercent: number }> = {
+      Tank: { heroCount: 0, totalLevels: 0, avgLevel: 0, progressPercent: 0 },
+      Damage: { heroCount: 0, totalLevels: 0, avgLevel: 0, progressPercent: 0 },
+      Support: { heroCount: 0, totalLevels: 0, avgLevel: 0, progressPercent: 0 },
+    };
+
+    heroes.forEach(hero => {
+      const role = getHeroRole(hero.id);
+      if (role && progress[role]) {
+        progress[role].heroCount++;
+        progress[role].totalLevels += hero.level;
+      }
+    });
+
+    roles.forEach(role => {
+      if (progress[role].heroCount > 0) {
+        const avg = progress[role].totalLevels / progress[role].heroCount;
+        progress[role].avgLevel = avg;
+        progress[role].progressPercent = Math.min((avg / 100) * 100, 100); // Target level 100
+      }
+    });
+
+    return progress;
+  }, [heroes]);
+
+
+  const RoleProgressCard = ({ role, icon: Icon, colorClass }: { role: Role; icon: React.ElementType; colorClass: string }) => {
+    const data = roleProgress[role];
+    return (
+      <Card className="shadow-md">
+        <CardHeader className="pb-2 pt-4 px-4">
+          <CardTitle className={cn("text-lg flex items-center gap-2", colorClass)}>
+            <Icon className="h-5 w-5" />
+            {role} Progress
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="px-4 pb-4">
+          <div className="mb-1 flex justify-between items-baseline">
+            <span className="text-sm text-muted-foreground">
+              Avg. Level: <strong className="text-foreground">{data.avgLevel.toFixed(1)}</strong>
+            </span>
+            <span className="text-xs text-muted-foreground">
+              {data.progressPercent.toFixed(1)}% to Lvl 100
+            </span>
+          </div>
+          <Progress value={data.progressPercent} className={cn("h-2.5 w-full bg-accent/20", colorClass)} />
+        </CardContent>
+      </Card>
+    );
+  };
+
 
   return (
     <div className="min-h-screen bg-background text-foreground p-4 sm:p-6 lg:p-8">
@@ -489,6 +546,13 @@ export default function Home() {
           </div>
         </CardContent>
       </Card>
+      
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <RoleProgressCard role="Tank" icon={Shield} colorClass="text-blue-400" />
+        <RoleProgressCard role="Damage" icon={Swords} colorClass="text-red-400" />
+        <RoleProgressCard role="Support" icon={HeartPulse} colorClass="text-green-400" />
+      </div>
+
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 2xl:grid-cols-8 3xl:grid-cols-10 gap-4">
         {heroes.length === 0 ? (
@@ -518,5 +582,3 @@ export default function Home() {
     </div>
   );
 }
-
-    

@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import type { HeroCalculated } from '@/types/overwatch';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
+import { getHeroRole } from '@/lib/hero-roles';
 
 
 interface HeroCardProps {
@@ -15,19 +16,39 @@ interface HeroCardProps {
 const HeroCard: React.FC<HeroCardProps> = ({ hero, onEditHeroBadges }) => {
   const levelProgressPercentage = hero.xpNeededForNextLevel > 0 ? (hero.xpTowardsNextLevel / hero.xpNeededForNextLevel) * 100 : 0;
   
-  const displayTitle = `Level ${hero.level}`; 
+  const displayTitle = `Level ${hero.level}`;
+  
+  const role = getHeroRole(hero.id);
+
+  const roleColorClasses = {
+    Tank: 'from-blue-500/50',
+    Damage: 'from-red-500/50',
+    Support: 'from-green-500/50',
+  };
+  
+  const roleBorderColorClasses = {
+    Tank: 'hover:ring-blue-500',
+    Damage: 'hover:ring-red-500',
+    Support: 'hover:ring-green-500',
+  };
+
+  const fadeClass = role ? roleColorClasses[role] : 'from-transparent';
+  const ringClass = role ? roleBorderColorClasses[role] : 'hover:ring-primary';
+
 
   return (
     <Card 
       className={cn(
         "bg-card text-card-foreground shadow-md rounded-lg overflow-hidden transition-all duration-200 ease-in-out cursor-pointer",
-        "hover:shadow-2xl hover:scale-[1.02] hover:bg-card/80", // Enhanced shadow, slight scale, and bg adjustment
-        "ring-1 ring-transparent hover:ring-primary hover:ring-2 flex flex-col" // Added more prominent ring on hover
+        "hover:shadow-2xl hover:scale-[1.02] hover:bg-card/80",
+        "ring-1 ring-transparent hover:ring-2 flex flex-col relative",
+        ringClass
       )}
       data-testid={`hero-card-${hero.id}`}
       onClick={() => onEditHeroBadges(hero)}
     >
-      <CardContent className="p-4 flex flex-col items-center text-center space-y-3 flex-grow">
+      <div className={cn("absolute top-0 left-0 right-0 h-1/3 bg-gradient-to-b to-transparent pointer-events-none z-10", fadeClass)} />
+      <CardContent className="p-4 flex flex-col items-center text-center space-y-3 flex-grow z-0">
         {/* Image Container: Make it responsive, similar to progress bar container */}
         <div className="w-full max-w-[90%] aspect-square relative">
           <Image
@@ -62,4 +83,3 @@ const HeroCard: React.FC<HeroCardProps> = ({ hero, onEditHeroBadges }) => {
 };
 
 export default HeroCard;
-
