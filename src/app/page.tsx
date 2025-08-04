@@ -31,10 +31,13 @@ import { Progress } from '@/components/ui/progress';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { getHeroRole } from '@/lib/hero-roles';
 import { cn } from '@/lib/utils';
+import TutorialDialog from '@/components/overwatch/TutorialDialog';
 
 
 const LOCAL_STORAGE_KEY = 'overwatchProgressionData_v3';
 const GLOBAL_MAX_LEVEL = 500;
+const TUTORIAL_DISMISSED_KEY = 'overwatchTutorialDismissed_v1';
+
 interface ExportData {
   version: string;
   heroes: StoredHero[];
@@ -45,6 +48,19 @@ export default function Home() {
   const [editingHero, setEditingHero] = useState<HeroCalculated | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const { toast } = useToast();
+  const [isTutorialOpen, setIsTutorialOpen] = useState(false);
+
+  useEffect(() => {
+    const tutorialDismissed = localStorage.getItem(TUTORIAL_DISMISSED_KEY);
+    if (!tutorialDismissed) {
+      setIsTutorialOpen(true);
+    }
+  }, []);
+
+  const handleCloseTutorial = () => {
+    localStorage.setItem(TUTORIAL_DISMISSED_KEY, 'true');
+    setIsTutorialOpen(false);
+  };
 
   const sortHeroes = (heroesToSort: HeroCalculated[]) => {
     return heroesToSort.sort((a, b) => {
@@ -525,6 +541,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background text-foreground p-4 sm:p-6 lg:p-8">
+       <TutorialDialog isOpen={isTutorialOpen} onClose={handleCloseTutorial} />
       <header className="mb-6 text-center relative">
         <h1 className="text-4xl sm:text-5xl font-bold text-primary tracking-tight">Overwatch Progression Tracker</h1>
         <p className="text-lg text-muted-foreground mt-2">🏆 Track your hero badges, levels, and personal goals. 🔫</p>
