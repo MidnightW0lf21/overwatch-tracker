@@ -34,6 +34,7 @@ export interface Hero {
   portraitUrl: string;
   personalGoalLevel: number;
   challenges: HeroChallenge[];
+  isPinned?: boolean;
 }
 
 export interface LevelDetails {

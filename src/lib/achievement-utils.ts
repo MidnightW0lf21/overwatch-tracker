@@ -1,7 +1,8 @@
 
 import type { Achievement, HeroCalculated, LevelDetails } from '@/types/achievements';
-import { Medal, Star, Clock, Zap, Trophy, Shield, Swords, Users, TrendingUp, Award } from 'lucide-react';
+import { Medal, Star, Clock, Zap, Trophy, Shield, Swords, Users, TrendingUp, Award, ShieldCheck, Heart, CrosshairIcon } from 'lucide-react';
 import { getBadgeDefinition, XP_PER_TIME_TYPE_BADGE_LEVEL } from '@/lib/badge-definitions';
+import { getHeroRole } from './hero-roles';
 
 
 export const achievementsList: Achievement[] = [
@@ -46,6 +47,17 @@ export const achievementsList: Achievement[] = [
     category: 'Global',
     isUnlocked: (_, globalLevelDetails) => (globalLevelDetails?.level ?? 0) >= 2500,
   },
+  {
+    id: 'one_million_global_xp',
+    title: 'XP Millionaire',
+    description: 'Accumulate 1,000,000 Global XP.',
+    icon: Zap,
+    category: 'Global',
+    isUnlocked: (_, globalLevelDetails) => {
+        if (!globalLevelDetails) return false;
+        return globalLevelDetails.totalXp >= 1000000;
+    },
+  },
 
   // Time Played Milestones
   {
@@ -67,7 +79,7 @@ export const achievementsList: Achievement[] = [
   {
     id: 'time_played_1000_hours',
     title: 'Time Tracker: 1000 Hours',
-    description: 'Accrue 1000 hours of playtime based on Time Played badges. Seasoned Veteran!',
+    description: 'Accrue 1000 hours of playtime. Seasoned Veteran!',
     icon: Clock,
     category: 'Time',
     isUnlocked: (_, __, totalTimePlayedMinutes) => (totalTimePlayedMinutes ?? 0) >= 1000 * 60,
@@ -122,6 +134,14 @@ export const achievementsList: Achievement[] = [
     category: 'Hero Specific',
     isUnlocked: (heroes) => heroes.filter(hero => hero.level >= 50).length >= 5,
   },
+  {
+    id: 'ten_heroes_level_100',
+    title: 'Tenacious Ten',
+    description: 'Reach Level 100 with at least 10 different heroes.',
+    icon: Users,
+    category: 'Hero Specific',
+    isUnlocked: (heroes) => heroes.filter(hero => hero.level >= 100).length >= 10,
+  },
    {
     id: 'all_heroes_level_100',
     title: 'Jack of All Trades',
@@ -131,25 +151,63 @@ export const achievementsList: Achievement[] = [
     isUnlocked: (heroes) => heroes.length > 0 && heroes.every(hero => hero.level >= 100),
   },
 
+  // Role Specific Achievements
+  {
+    id: 'tank_mastery',
+    title: 'Tank Mastery',
+    description: 'Reach Level 50 with all Tank heroes.',
+    icon: ShieldCheck,
+    category: 'Hero Specific',
+    isUnlocked: (heroes) => {
+      const tankHeroes = heroes.filter(hero => getHeroRole(hero.id) === 'Tank');
+      return tankHeroes.length > 0 && tankHeroes.every(hero => hero.level >= 50);
+    },
+  },
+  {
+    id: 'damage_mastery',
+    title: 'Damage Mastery',
+    description: 'Reach Level 50 with all Damage heroes.',
+    icon: CrosshairIcon,
+    category: 'Hero Specific',
+    isUnlocked: (heroes) => {
+      const damageHeroes = heroes.filter(hero => getHeroRole(hero.id) === 'Damage');
+      return damageHeroes.length > 0 && damageHeroes.every(hero => hero.level >= 50);
+    },
+  },
+  {
+    id: 'support_mastery',
+    title: 'Support Mastery',
+    description: 'Reach Level 50 with all Support heroes.',
+    icon: Heart,
+    category: 'Hero Specific',
+    isUnlocked: (heroes) => {
+      const supportHeroes = heroes.filter(hero => getHeroRole(hero.id) === 'Support');
+      return supportHeroes.length > 0 && supportHeroes.every(hero => hero.level >= 50);
+    },
+  },
+  {
+    id: 'role_specialist',
+    title: 'Role Specialist',
+    description: 'Reach Level 100 on at least one Tank, one Damage, and one Support hero.',
+    icon: Swords,
+    category: 'Hero Specific',
+    isUnlocked: (heroes) => {
+      const hasTank = heroes.some(hero => getHeroRole(hero.id) === 'Tank' && hero.level >= 100);
+      const hasDamage = heroes.some(hero => getHeroRole(hero.id) === 'Damage' && hero.level >= 100);
+      const hasSupport = heroes.some(hero => getHeroRole(hero.id) === 'Support' && hero.level >= 100);
+      return hasTank && hasDamage && hasSupport;
+    },
+  },
+
+
   // Completion Milestones
   {
     id: 'all_heroes_max_level',
     title: 'Grand Master Tracker',
     description: 'Reach Max Level (500) with ALL heroes. Legendary!',
-    icon: Swords, // Using Swords for a more epic feel
+    icon: Award,
     category: 'Completion',
     isUnlocked: (heroes) => heroes.length > 0 && heroes.every(hero => hero.level >= 500),
-  },
-  {
-    id: 'one_million_global_xp',
-    title: 'XP Millionaire',
-    description: 'Accumulate 1,000,000 Global XP.',
-    icon: Zap,
-    category: 'Global',
-    isUnlocked: (_, globalLevelDetails) => {
-        if (!globalLevelDetails) return false;
-        return globalLevelDetails.totalXp >= 1000000;
-    },
   },
   {
     id: 'all_badges_one_hero_max',
