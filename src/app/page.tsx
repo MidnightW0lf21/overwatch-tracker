@@ -265,6 +265,7 @@ export default function Home() {
         title: "Pin limit reached",
         description: "You can only pin up to 3 heroes.",
         variant: "destructive",
+        duration: 1000,
       });
       return;
     }
@@ -286,6 +287,7 @@ export default function Home() {
     toast({
       title: heroToPin.isPinned ? "Hero Unpinned" : "Hero Pinned",
       description: `${heroToPin.name} has been ${heroToPin.isPinned ? 'unpinned' : 'pinned'}.`,
+      duration: 1000,
     });
   };
 
@@ -336,6 +338,7 @@ export default function Home() {
       title: "Badge Updated",
       description: `${changedHero?.name}'s "${badgeDef?.title || changedChallengeDef?.title}" badge level set to ${finalNewLevel}.`,
       variant: "default",
+      duration: 1000,
     });
   };
 
