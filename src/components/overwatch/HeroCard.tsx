@@ -6,14 +6,18 @@ import type { HeroCalculated } from '@/types/overwatch';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 import { getHeroRole } from '@/lib/hero-roles';
+import { Pin, PinOff } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 
 
 interface HeroCardProps {
   hero: HeroCalculated;
   onEditHeroBadges: (hero: HeroCalculated) => void;
+  onTogglePin: (heroId: string) => void;
 }
 
-const HeroCard: React.FC<HeroCardProps> = ({ hero, onEditHeroBadges }) => {
+const HeroCard: React.FC<HeroCardProps> = ({ hero, onEditHeroBadges, onTogglePin }) => {
   const levelProgressPercentage = hero.xpNeededForNextLevel > 0 ? (hero.xpTowardsNextLevel / hero.xpNeededForNextLevel) * 100 : 0;
   
   const displayTitle = `Level ${hero.level}`;
@@ -35,6 +39,11 @@ const HeroCard: React.FC<HeroCardProps> = ({ hero, onEditHeroBadges }) => {
   const fadeClass = role ? roleColorClasses[role] : 'from-transparent';
   const ringClass = role ? roleBorderColorClasses[role] : 'hover:ring-primary';
 
+  const handlePinClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent the card's onClick from firing
+    onTogglePin(hero.id);
+  };
+
 
   return (
     <Card 
@@ -42,15 +51,37 @@ const HeroCard: React.FC<HeroCardProps> = ({ hero, onEditHeroBadges }) => {
         "bg-card text-card-foreground shadow-md rounded-lg overflow-hidden transition-all duration-200 ease-in-out cursor-pointer",
         "hover:shadow-2xl hover:scale-[1.02] hover:bg-card/80",
         "ring-1 ring-transparent hover:ring-2 flex flex-col relative",
-        ringClass
+        ringClass,
+        hero.isPinned && "ring-2 ring-primary"
       )}
       data-testid={`hero-card-${hero.id}`}
       onClick={() => onEditHeroBadges(hero)}
     >
       <div className={cn("absolute top-0 left-0 right-0 h-1/3 bg-gradient-to-b to-transparent pointer-events-none z-0", fadeClass)} />
+       <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+             <Button
+                variant="ghost"
+                size="icon"
+                className={cn(
+                  "absolute top-1 right-1 z-20 h-7 w-7 rounded-full bg-black/20 text-white/70 backdrop-blur-sm hover:bg-black/40 hover:text-white",
+                  hero.isPinned && "text-primary hover:text-primary/80"
+                )}
+                onClick={handlePinClick}
+              >
+                {hero.isPinned ? <PinOff className="h-4 w-4" /> : <Pin className="h-4 w-4" />}
+              </Button>
+          </TooltipTrigger>
+          <TooltipContent side="top">
+            <p>{hero.isPinned ? 'Unpin Hero' : 'Pin Hero'}</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+
       <CardContent className="p-4 flex flex-col items-center text-center space-y-3 flex-grow z-10">
         {/* Image Container: Make it responsive, similar to progress bar container */}
-        <div className="w-full max-w-[90%] aspect-square relative">
+        <div className="w-full max-w-[90%] aspect-square relative mt-4">
           <Image
             src={hero.portraitUrl}
             alt={`${hero.name} Portrait`}
@@ -83,4 +114,3 @@ const HeroCard: React.FC<HeroCardProps> = ({ hero, onEditHeroBadges }) => {
 };
 
 export default HeroCard;
-

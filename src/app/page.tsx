@@ -46,6 +46,14 @@ export default function Home() {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const { toast } = useToast();
 
+  const sortHeroes = (heroesToSort: HeroCalculated[]) => {
+    return heroesToSort.sort((a, b) => {
+      if (a.isPinned && !b.isPinned) return -1;
+      if (!a.isPinned && b.isPinned) return 1;
+      return b.totalXp - a.totalXp;
+    });
+  };
+
   const calculateAndSetHeroes = useCallback((storedHeroesData: StoredHero[]) => {
     const hydratedHeroesData = hydrateHeroes(storedHeroesData);
     const calculatedHeroes = hydratedHeroesData.map(hero => {
@@ -59,9 +67,9 @@ export default function Home() {
       const totalXp = calculateTotalXP(challengesForXPCalc);
       const levelDetails = calculateLevelDetails(totalXp);
       const role = getHeroRole(hero.id);
-      return { ...hero, totalXp, ...levelDetails, role };
+      return { ...hero, totalXp, ...levelDetails, role, isPinned: hero.isPinned || false };
     });
-    setHeroes(calculatedHeroes.sort((a, b) => b.totalXp - a.totalXp));
+    setHeroes(sortHeroes(calculatedHeroes));
   }, []);
 
   useEffect(() => {
@@ -94,7 +102,8 @@ export default function Home() {
               ...hero,
               portraitUrl: hero.portraitUrl?.trimStart() || '',
               personalGoalLevel: hero.personalGoalLevel ?? 0,
-              challenges: hero.challenges.map(challenge => ({ ...challenge, level: challenge.level ?? 1 }))
+              challenges: hero.challenges.map(challenge => ({ ...challenge, level: challenge.level ?? 1 })),
+              isPinned: hero.isPinned || false,
             }));
           } else if (Array.isArray(parsedJson)) {
              // Legacy format support
@@ -102,7 +111,8 @@ export default function Home() {
                 ...hero,
                 portraitUrl: hero.portraitUrl?.trimStart() || '',
                 personalGoalLevel: hero.personalGoalLevel ?? 0,
-                challenges: hero.challenges.map(challenge => ({ ...challenge, level: challenge.level ?? 1}))
+                challenges: hero.challenges.map(challenge => ({ ...challenge, level: challenge.level ?? 1})),
+                isPinned: hero.isPinned || false,
             }));
           } else {
             console.warn("Invalid data structure in localStorage, resetting to default.");
@@ -157,6 +167,7 @@ export default function Home() {
                 portraitUrl: storedHero.portraitUrl?.trimStart() || defaultHero.portraitUrl.trimStart(),
                 personalGoalLevel: storedHero.personalGoalLevel,
                 challenges: finalChallengeList,
+                isPinned: storedHero.isPinned || false,
               };
             } else {
               
@@ -165,6 +176,7 @@ export default function Home() {
                 portraitUrl: defaultHero.portraitUrl?.trimStart() || '',
                 personalGoalLevel: defaultHero.personalGoalLevel || 0,
                 challenges: defaultHero.challenges.map(c => ({ ...c, level: Math.max(1, c.level || 1) })),
+                isPinned: false,
               };
             }
           });
@@ -194,7 +206,8 @@ export default function Home() {
             ...hero,
             portraitUrl: hero.portraitUrl?.trimStart() || '',
             personalGoalLevel: hero.personalGoalLevel ?? 0,
-            challenges: hero.challenges.map(challenge => ({ ...challenge, level: challenge.level ?? 1}))
+            challenges: hero.challenges.map(challenge => ({ ...challenge, level: challenge.level ?? 1})),
+            isPinned: false,
           }));
           calculateAndSetHeroes(defaultStoredHeroes);
           const exportPayload: ExportData = { version: "1.0.0", heroes: defaultStoredHeroes };
@@ -206,7 +219,8 @@ export default function Home() {
             ...hero,
             portraitUrl: hero.portraitUrl?.trimStart() || '',
             personalGoalLevel: hero.personalGoalLevel ?? 0,
-            challenges: hero.challenges.map(challenge => ({ ...challenge, level: challenge.level ?? 1}))
+            challenges: hero.challenges.map(challenge => ({ ...challenge, level: challenge.level ?? 1})),
+            isPinned: false,
           }));
         calculateAndSetHeroes(defaultStoredHeroes);
         const exportPayload: ExportData = { version: "1.0.0", heroes: defaultStoredHeroes };
@@ -219,7 +233,8 @@ export default function Home() {
             ...hero,
             portraitUrl: hero.portraitUrl?.trimStart() || '',
             personalGoalLevel: hero.personalGoalLevel ?? 0,
-            challenges: hero.challenges.map(challenge => ({ ...challenge, level: challenge.level ?? 1}))
+            challenges: hero.challenges.map(challenge => ({ ...challenge, level: challenge.level ?? 1})),
+            isPinned: false,
           }));
       calculateAndSetHeroes(defaultStoredHeroes);
       const exportPayload: ExportData = { version: "1.0.0", heroes: defaultStoredHeroes };
@@ -237,6 +252,43 @@ export default function Home() {
   const handleSheetClose = () => {
     setIsSheetOpen(false);
   };
+  
+  const handleTogglePin = (heroId: string) => {
+    let updatedHeroesList: HeroCalculated[] = [];
+    const heroToPin = heroes.find(h => h.id === heroId);
+    if (!heroToPin) return;
+
+    const currentlyPinnedCount = heroes.filter(h => h.isPinned).length;
+
+    if (!heroToPin.isPinned && currentlyPinnedCount >= 3) {
+      toast({
+        title: "Pin limit reached",
+        description: "You can only pin up to 3 heroes.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    updatedHeroesList = heroes.map(h => {
+      if (h.id === heroId) {
+        return { ...h, isPinned: !h.isPinned };
+      }
+      return h;
+    });
+
+    const sortedHeroes = sortHeroes(updatedHeroesList);
+    setHeroes(sortedHeroes);
+    
+    const dehydratedHeroesForStorage = dehydrateHeroes(sortedHeroes);
+    const exportPayload: ExportData = { version: "1.0.0", heroes: dehydratedHeroesForStorage };
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(exportPayload));
+    
+    toast({
+      title: heroToPin.isPinned ? "Hero Unpinned" : "Hero Pinned",
+      description: `${heroToPin.name} has been ${heroToPin.isPinned ? 'unpinned' : 'pinned'}.`,
+    });
+  };
+
 
   const handleBadgeLevelChange = (heroId: string, challengeId: string, newLevel: number) => {
     const finalNewLevel = Math.max(1, newLevel);
@@ -264,7 +316,7 @@ export default function Home() {
     });
 
     const dehydratedHeroesForStorage = dehydrateHeroes(updatedHeroesList);
-    const sortedHeroes = updatedHeroesList.sort((a, b) => b.totalXp - a.totalXp);
+    const sortedHeroes = sortHeroes(updatedHeroesList);
     setHeroes(sortedHeroes);
 
     const exportPayload: ExportData = { version: "1.0.0", heroes: dehydratedHeroesForStorage };
@@ -578,6 +630,7 @@ export default function Home() {
               key={hero.id}
               hero={hero}
               onEditHeroBadges={handleEditHeroBadges}
+              onTogglePin={handleTogglePin}
             />
           ))
         )}
@@ -595,4 +648,3 @@ export default function Home() {
     </div>
   );
 }
-

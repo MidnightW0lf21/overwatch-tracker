@@ -124,6 +124,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'ana_time_instance', badgeId: 'ana_time_played', level: 1 },
       { id: 'ana_wins_instance', badgeId: 'ana_wins', level: 1 },
     ],
+    isPinned: false,
   },
   {
     id: 'ashe',
@@ -140,6 +141,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'ashe_time_instance', badgeId: 'ashe_time_played', level: 1 },
       { id: 'ashe_wins_instance', badgeId: 'ashe_wins', level: 1 },
     ],
+    isPinned: false,
   },
   {
     id: 'baptiste',
@@ -157,6 +159,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'baptiste_time_instance', badgeId: 'baptiste_time_played', level: 1 },
       { id: 'baptiste_wins_instance', badgeId: 'baptiste_wins', level: 1 },
     ],
+    isPinned: false,
   },
   {
     id: 'bastion',
@@ -173,6 +176,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'bastion_time_instance', badgeId: 'bastion_time_played', level: 1 },
       { id: 'bastion_wins_instance', badgeId: 'bastion_wins', level: 1 },
     ],
+    isPinned: false,
   },
   {
     id: 'brigitte',
@@ -189,6 +193,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'brigitte_time_instance', badgeId: 'brigitte_time_played', level: 1 },
       { id: 'brigitte_wins_instance', badgeId: 'brigitte_wins', level: 1 },
     ],
+    isPinned: false,
   },
   {
     id: 'cassidy',
@@ -205,6 +210,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'cassidy_time_instance', badgeId: 'cassidy_time_played', level: 1 },
       { id: 'cassidy_wins_instance', badgeId: 'cassidy_wins', level: 1 },
     ],
+    isPinned: false,
   },
   {
     id: 'dva',
@@ -221,6 +227,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'dva_time_instance', badgeId: 'dva_time_played', level: 1 },
       { id: 'dva_wins_instance', badgeId: 'dva_wins', level: 1 },
     ],
+    isPinned: false,
   },
   {
     id: 'doomfist',
@@ -237,6 +244,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'doomfist_time_instance', badgeId: 'doomfist_time_played', level: 1 },
       { id: 'doomfist_wins_instance', badgeId: 'doomfist_wins', level: 1 },
     ],
+    isPinned: false,
   },
   {
     id: 'echo',
@@ -253,6 +261,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'echo_time_instance', badgeId: 'echo_time_played', level: 1 },
       { id: 'echo_wins_instance', badgeId: 'echo_wins', level: 1 },
     ],
+    isPinned: false,
   },
   {
     id: 'freja',
@@ -268,6 +277,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'freja_time_instance', badgeId: 'freja_time_played', level: 1 },
       { id: 'freja_wins_instance', badgeId: 'freja_wins', level: 1 },
     ],
+    isPinned: false,
   },
   {
     id: 'genji',
@@ -284,6 +294,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'genji_time_instance', badgeId: 'genji_time_played', level: 1 },
       { id: 'genji_wins_instance', badgeId: 'genji_wins', level: 1 },
     ],
+    isPinned: false,
   },
   {
     id: 'hanzo',
@@ -300,6 +311,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'hanzo_time_instance', badgeId: 'hanzo_time_played', level: 1 },
       { id: 'hanzo_wins_instance', badgeId: 'hanzo_wins', level: 1 },
     ],
+    isPinned: false,
   },
   {
     id: 'hazard',
@@ -315,6 +327,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'hazard_time_instance', badgeId: 'hazard_time_played', level: 1 },
       { id: 'hazard_wins_instance', badgeId: 'hazard_wins', level: 1 },
     ],
+    isPinned: false,
   },
   {
     id: 'illari',
@@ -331,6 +344,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'illari_time_instance', badgeId: 'illari_time_played', level: 1 },
       { id: 'illari_wins_instance', badgeId: 'illari_wins', level: 1 },
     ],
+    isPinned: false,
   },
   {
     id: 'junker_queen',
@@ -347,6 +361,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'junker_queen_time_instance', badgeId: 'junker_queen_time_played', level: 1 },
       { id: 'junker_queen_wins_instance', badgeId: 'junker_queen_wins', level: 1 },
     ],
+    isPinned: false,
   },
   {
     id: 'junkrat',
@@ -363,6 +378,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'junkrat_time_instance', badgeId: 'junkrat_time_played', level: 1 },
       { id: 'junkrat_wins_instance', badgeId: 'junkrat_wins', level: 1 },
     ],
+    isPinned: false,
   },
   {
     id: 'juno',
@@ -379,6 +395,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'juno_time_instance', badgeId: 'juno_time_played', level: 1 },
       { id: 'juno_wins_instance', badgeId: 'juno_wins', level: 1 },
     ],
+    isPinned: false,
   },
   {
     id: 'kiriko',
@@ -396,6 +413,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'kiriko_time_instance', badgeId: 'kiriko_time_played', level: 1 },
       { id: 'kiriko_wins_instance', badgeId: 'kiriko_wins', level: 1 },
     ],
+    isPinned: false,
   },
   {
     id: 'lifeweaver',
@@ -412,6 +430,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'lifeweaver_time_instance', badgeId: 'lifeweaver_time_played', level: 1 },
       { id: 'lifeweaver_wins_instance', badgeId: 'lifeweaver_wins', level: 1 },
     ],
+    isPinned: false,
   },
   {
     id: 'lucio',
@@ -428,6 +447,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'lucio_time_instance', badgeId: 'lucio_time_played', level: 1 },
       { id: 'lucio_wins_instance', badgeId: 'lucio_wins', level: 1 },
     ],
+    isPinned: false,
   },
   {
     id: 'mauga',
@@ -445,6 +465,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'mauga_time_instance', badgeId: 'mauga_time_played', level: 1 },
       { id: 'mauga_wins_instance', badgeId: 'mauga_wins', level: 1 },
     ],
+    isPinned: false,
   },
   {
     id: 'mei',
@@ -461,6 +482,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'mei_time_instance', badgeId: 'mei_time_played', level: 1 },
       { id: 'mei_wins_instance', badgeId: 'mei_wins', level: 1 },
     ],
+    isPinned: false,
   },
   {
     id: 'mercy',
@@ -477,6 +499,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'mercy_time_instance', badgeId: 'mercy_time_played', level: 1 },
       { id: 'mercy_wins_instance', badgeId: 'mercy_wins', level: 1 },
     ],
+    isPinned: false,
   },
   {
     id: 'moira',
@@ -493,6 +516,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'moira_time_instance', badgeId: 'moira_time_played', level: 1 },
       { id: 'moira_wins_instance', badgeId: 'moira_wins', level: 1 },
     ],
+    isPinned: false,
   },
   {
     id: 'orisa',
@@ -509,6 +533,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'orisa_time_instance', badgeId: 'orisa_time_played', level: 1 },
       { id: 'orisa_wins_instance', badgeId: 'orisa_wins', level: 1 },
     ],
+    isPinned: false,
   },
   {
     id: 'pharah',
@@ -526,6 +551,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'pharah_time_instance', badgeId: 'pharah_time_played', level: 1 },
       { id: 'pharah_wins_instance', badgeId: 'pharah_wins', level: 1 },
     ],
+    isPinned: false,
   },
   {
     id: 'ramattra',
@@ -543,6 +569,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'ramattra_time_instance', badgeId: 'ramattra_time_played', level: 1 },
       { id: 'ramattra_wins_instance', badgeId: 'ramattra_wins', level: 1 },
     ],
+    isPinned: false,
   },
   {
     id: 'reaper',
@@ -559,6 +586,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'reaper_time_instance', badgeId: 'reaper_time_played', level: 1 },
       { id: 'reaper_wins_instance', badgeId: 'reaper_wins', level: 1 },
     ],
+    isPinned: false,
   },
   {
     id: 'reinhardt',
@@ -576,6 +604,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'reinhardt_time_instance', badgeId: 'rein_time_played', level: 1 },
       { id: 'reinhardt_wins_instance', badgeId: 'rein_wins', level: 1 },
     ],
+    isPinned: false,
   },
   {
     id: 'roadhog',
@@ -593,6 +622,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'roadhog_time_instance', badgeId: 'roadhog_time_played', level: 1 },
       { id: 'roadhog_wins_instance', badgeId: 'roadhog_wins', level: 1 },
     ],
+    isPinned: false,
   },
   {
     id: 's76', // Corrected to match common usage for Soldier: 76
@@ -609,6 +639,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 's76_time_played_instance', badgeId: 's76_time_played', level: 1 },
       { id: 's76_wins_instance', badgeId: 's76_wins', level: 1 },
     ],
+    isPinned: false,
   },
   {
     id: 'sigma',
@@ -625,6 +656,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'sigma_time_instance', badgeId: 'sigma_time_played', level: 1 },
       { id: 'sigma_wins_instance', badgeId: 'sigma_wins', level: 1 },
     ],
+    isPinned: false,
   },
   {
     id: 'sojourn',
@@ -641,6 +673,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'sojourn_time_instance', badgeId: 'sojourn_time_played', level: 1 },
       { id: 'sojourn_wins_instance', badgeId: 'sojourn_wins', level: 1 },
     ],
+    isPinned: false,
   },
   {
     id: 'sombra',
@@ -658,6 +691,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'sombra_time_instance', badgeId: 'sombra_time_played', level: 1 },
       { id: 'sombra_wins_instance', badgeId: 'sombra_wins', level: 1 },
     ],
+    isPinned: false,
   },
   {
     id: 'symmetra',
@@ -674,6 +708,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'symmetra_time_instance', badgeId: 'symmetra_time_played', level: 1 },
       { id: 'symmetra_wins_instance', badgeId: 'symmetra_wins', level: 1 },
     ],
+    isPinned: false,
   },
   {
     id: 'torbjorn',
@@ -690,6 +725,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'torbjorn_time_instance', badgeId: 'torbjorn_time_played', level: 1 },
       { id: 'torbjorn_wins_instance', badgeId: 'torbjorn_wins', level: 1 },
     ],
+    isPinned: false,
   },
   {
     id: 'tracer',
@@ -706,6 +742,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'tracer_time_instance', badgeId: 'tracer_time_played', level: 1 },
       { id: 'tracer_wins_instance', badgeId: 'tracer_wins', level: 1 },
     ],
+    isPinned: false,
   },
   {
     id: 'venture',
@@ -722,6 +759,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'venture_time_instance', badgeId: 'venture_time_played', level: 1 },
       { id: 'venture_wins_instance', badgeId: 'venture_wins', level: 1 },
     ],
+    isPinned: false,
   },
   {
     id: 'widowmaker',
@@ -738,6 +776,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'widowmaker_time_instance', badgeId: 'widowmaker_time_played', level: 1 },
       { id: 'widowmaker_wins_instance', badgeId: 'widowmaker_wins', level: 1 },
     ],
+    isPinned: false,
   },
   {
     id: 'winston',
@@ -754,6 +793,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'winston_time_instance', badgeId: 'winston_time_played', level: 1 },
       { id: 'winston_wins_instance', badgeId: 'winston_wins', level: 1 },
     ],
+    isPinned: false,
   },
   {
     id: 'wrecking_ball',
@@ -770,6 +810,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'wrecking_ball_time_instance', badgeId: 'wrecking_ball_time_played', level: 1 },
       { id: 'wrecking_ball_wins_instance', badgeId: 'wrecking_ball_wins', level: 1 },
     ],
+    isPinned: false,
   },
   {
     id: 'zarya',
@@ -786,6 +827,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'zarya_time_instance', badgeId: 'zarya_time_played', level: 1 },
       { id: 'zarya_wins_instance', badgeId: 'zarya_wins', level: 1 },
     ],
+    isPinned: false,
   },
   {
     id: 'zenyatta',
@@ -803,6 +845,7 @@ export const initialHeroesData: StoredHero[] = [
       { id: 'zenyatta_time_instance', badgeId: 'zenyatta_time_played', level: 1 },
       { id: 'zenyatta_wins_instance', badgeId: 'zenyatta_wins', level: 1 },
     ],
+    isPinned: false,
   },
 ];
 
@@ -848,6 +891,7 @@ export function hydrateHeroes(storedHeroes: StoredHero[]): Hero[] {
       portraitUrl: (sh.portraitUrl || '').trimStart(), // Ensure portraitUrl is a string and trimmed
       personalGoalLevel: typeof sh.personalGoalLevel === 'number' ? sh.personalGoalLevel : 0,
       challenges,
+      isPinned: sh.isPinned || false,
     };
   }).filter(Boolean) as Hero[]; 
 }
@@ -866,8 +910,7 @@ export function dehydrateHeroes(heroes: Hero[]): StoredHero[] {
       portraitUrl: h.portraitUrl,
       personalGoalLevel: h.personalGoalLevel || 0,
       challenges,
+      isPinned: h.isPinned || false,
     };
   }).filter(Boolean) as StoredHero[];
 }
-
-    

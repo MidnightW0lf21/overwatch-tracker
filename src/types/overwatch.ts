@@ -27,6 +27,7 @@ export interface Hero {
   personalGoalLevel: number;
   challenges: HeroChallenge[];
   role?: Role;
+  isPinned?: boolean;
 }
 
 export interface StoredHero {
@@ -35,6 +36,7 @@ export interface StoredHero {
   portraitUrl: string;
   personalGoalLevel: number;
   challenges: StoredHeroChallenge[];
+  isPinned?: boolean;
 }
 
 export interface LevelDetails {
