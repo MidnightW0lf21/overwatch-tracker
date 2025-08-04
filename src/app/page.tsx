@@ -6,7 +6,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import Image from 'next/image';
 import HeroCard from '@/components/overwatch/HeroCard';
 import HeroDetailDialog from '@/components/overwatch/HeroBadgeEditorSheet';
-import type { HeroCalculated, StoredHero, StoredHeroChallenge, Hero, Role } from '@/types/overwatch';
+import type { HeroCalculated, StoredHero, StoredHeroChallenge, Hero, Role, LevelDetails } from '@/types/overwatch';
 import {
   initialHeroesData,
   calculateTotalXP,
@@ -403,25 +403,33 @@ export default function Home() {
 
   const roleProgress = useMemo(() => {
     const roles: Role[] = ['Tank', 'Damage', 'Support'];
-    const progress: Record<Role, { heroCount: number; totalLevels: number; avgLevel: number; progressPercent: number }> = {
-      Tank: { heroCount: 0, totalLevels: 0, avgLevel: 0, progressPercent: 0 },
-      Damage: { heroCount: 0, totalLevels: 0, avgLevel: 0, progressPercent: 0 },
-      Support: { heroCount: 0, totalLevels: 0, avgLevel: 0, progressPercent: 0 },
+    const progress: Record<Role, { 
+      levelDetails: Omit<LevelDetails, 'totalXp'>;
+      currentXp: number;
+      maxXp: number;
+      progressPercent: number;
+      heroCount: number;
+    }> = {
+      Tank: { levelDetails: calculateLevelDetails(0), currentXp: 0, maxXp: 0, progressPercent: 0, heroCount: 0 },
+      Damage: { levelDetails: calculateLevelDetails(0), currentXp: 0, maxXp: 0, progressPercent: 0, heroCount: 0 },
+      Support: { levelDetails: calculateLevelDetails(0), currentXp: 0, maxXp: 0, progressPercent: 0, heroCount: 0 },
     };
+
+    const xpForOneHeroMaxLevel = calculateXpToReachLevel(GLOBAL_MAX_LEVEL + 1);
 
     heroes.forEach(hero => {
       const role = getHeroRole(hero.id);
       if (role && progress[role]) {
         progress[role].heroCount++;
-        progress[role].totalLevels += hero.level;
+        progress[role].currentXp += hero.totalXp;
       }
     });
 
     roles.forEach(role => {
       if (progress[role].heroCount > 0) {
-        const avg = progress[role].totalLevels / progress[role].heroCount;
-        progress[role].avgLevel = avg;
-        progress[role].progressPercent = Math.min((avg / 100) * 100, 100); // Target level 100
+        progress[role].levelDetails = calculateLevelDetails(progress[role].currentXp);
+        progress[role].maxXp = xpForOneHeroMaxLevel * progress[role].heroCount;
+        progress[role].progressPercent = Math.min((progress[role].currentXp / progress[role].maxXp) * 100, 100);
       }
     });
 
@@ -431,6 +439,8 @@ export default function Home() {
 
   const RoleProgressCard = ({ role, icon: Icon, colorClass }: { role: Role; icon: React.ElementType; colorClass: string }) => {
     const data = roleProgress[role];
+    if (data.heroCount === 0) return null;
+
     return (
       <Card className="shadow-md">
         <CardHeader className="pb-2 pt-4 px-4">
@@ -442,13 +452,16 @@ export default function Home() {
         <CardContent className="px-4 pb-4">
           <div className="mb-1 flex justify-between items-baseline">
             <span className="text-sm text-muted-foreground">
-              Avg. Level: <strong className="text-foreground">{data.avgLevel.toFixed(1)}</strong>
+              {role} Level: <strong className="text-foreground">{data.levelDetails.level}</strong>
             </span>
-            <span className="text-xs text-muted-foreground">
-              {data.progressPercent.toFixed(1)}% to Lvl 100
+             <span className="text-xs text-muted-foreground">
+              {data.currentXp.toLocaleString()} / {data.maxXp.toLocaleString()} XP
             </span>
           </div>
           <Progress value={data.progressPercent} className={cn("h-2.5 w-full bg-accent/20", colorClass)} />
+           <p className="text-xs text-muted-foreground mt-1 text-right">
+            {data.progressPercent.toFixed(2)}% towards all {role} heroes maxed
+          </p>
         </CardContent>
       </Card>
     );
@@ -582,3 +595,4 @@ export default function Home() {
     </div>
   );
 }
+

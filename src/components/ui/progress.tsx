@@ -19,7 +19,12 @@ const Progress = React.forwardRef<
     {...props}
   >
     <ProgressPrimitive.Indicator
-      className={cn("h-full w-full flex-1 bg-primary transition-all", props.className?.includes('text-red-400') && 'bg-red-400', props.className?.includes('text-green-400') && 'bg-green-400', props.className?.includes('text-blue-400') && 'bg-blue-400')}
+      className={cn("h-full w-full flex-1 bg-primary transition-all", 
+                   className?.includes('text-red-400') ? 'bg-red-400' :
+                   className?.includes('text-green-400') ? 'bg-green-400' :
+                   className?.includes('text-blue-400') ? 'bg-blue-400' :
+                   'bg-primary'
+      )}
       style={{ transform: `translateX(-${100 - (value || 0)}%)` }}
     />
   </ProgressPrimitive.Root>
