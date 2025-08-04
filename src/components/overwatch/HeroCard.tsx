@@ -47,8 +47,8 @@ const HeroCard: React.FC<HeroCardProps> = ({ hero, onEditHeroBadges }) => {
       data-testid={`hero-card-${hero.id}`}
       onClick={() => onEditHeroBadges(hero)}
     >
-      <div className={cn("absolute top-0 left-0 right-0 h-1/3 bg-gradient-to-b to-transparent pointer-events-none z-10", fadeClass)} />
-      <CardContent className="p-4 flex flex-col items-center text-center space-y-3 flex-grow z-0">
+      <div className={cn("absolute top-0 left-0 right-0 h-1/3 bg-gradient-to-b to-transparent pointer-events-none z-0", fadeClass)} />
+      <CardContent className="p-4 flex flex-col items-center text-center space-y-3 flex-grow z-10">
         {/* Image Container: Make it responsive, similar to progress bar container */}
         <div className="w-full max-w-[90%] aspect-square relative">
           <Image
@@ -83,3 +83,4 @@ const HeroCard: React.FC<HeroCardProps> = ({ hero, onEditHeroBadges }) => {
 };
 
 export default HeroCard;
+
